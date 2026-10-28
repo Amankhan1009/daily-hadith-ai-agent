@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 01 (Task 1.6)
+> *Last Updated:* Milestone 01 Verified (Commit 67ab4ea)
 
 ---
 
@@ -75,25 +75,29 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 01 — Project Foundation and Documentation
-- **Active Task:** Milestone 01 Completion & Initial Git Commit
+- **Active Milestone:** Milestone 02 — Source Validation Specification
+- **Active Task:** Task 2.1 — Inspect and Document Official HadeethEnc API Endpoints
 
 ---
 
 ## 7. Completed and Verified Work
-- [x] **Task 1.1:** Workspace inspection — macOS 27.0.1 (arm64), zsh, Python 3.14.6, Git 2.54.0.
-- [x] **Task 1.2:** Git repository initialized on branch `main`.
-- [x] **Task 1.3:** `.gitignore` configured to exclude secrets, virtual environments, caches, logs, and database files.
-- [x] **Task 1.4:** Directory scaffolding created (`docs/`, `src/`, `tests/`) with `.gitkeep` markers.
-- [x] **Task 1.5:** `docs/PROJECT_ROADMAP.md` created with 20 milestones and tracked acceptance criteria.
-- [x] **Task 1.6:** `docs/PROJECT_CONTEXT.md` established.
-- [x] **Task 1.7:** `README.md` created.
+- [x] **Milestone 01 Verified:** Project foundation established and committed (`67ab4ea`).
+  - [x] Workspace inspected (macOS arm64, zsh, Python 3.14.6, Git 2.54.0).
+  - [x] Git repository initialized on `main`.
+  - [x] `.gitignore` configured and active.
+  - [x] Directory scaffolding (`docs/`, `src/`, `tests/`) tracked with `.gitkeep`.
+  - [x] 20-milestone roadmap (`docs/PROJECT_ROADMAP.md`) published.
+  - [x] Developer context handover (`docs/PROJECT_CONTEXT.md`) established.
+  - [x] Public documentation (`README.md`) published.
 
 ---
 
 ## 8. Work in Progress
-- Task 1.8: Perform initial baseline Git commit.
-- Task 1.9: Milestone 01 acceptance sign-off.
+- Milestone 02: Source Validation Specification.
+  - Task 2.1: Audit official HadeethEnc API documentation and current GET endpoints.
+  - Task 2.2: Specify English/Arabic ID and record cross-matching contract.
+  - Task 2.3: Define reference verification rules for Sahih al-Bukhari and Sahih Muslim.
+  - Task 2.4: Specify record rejection criteria and create `docs/API_CONTRACTS.md`.
 
 ---
 
@@ -119,13 +123,13 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Perform baseline Git commit (Task 1.8) to track the foundation.
+Begin Milestone 02: Audit HadeethEnc API contracts and create `docs/API_CONTRACTS.md`.
 
 ---
 
 ## 13. Latest Verification Evidence
-- `git status` verifies `.gitignore`, `docs/`, `src/`, and `tests/` tracked.
-- `docs/PROJECT_ROADMAP.md` contains 330 lines of tracked specifications.
+- Milestone 01 committed cleanly under Git commit `67ab4ea`.
+- Repository tree verified with `git status` clean.
 
 ---
 
