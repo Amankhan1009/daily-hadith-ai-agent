@@ -1,0 +1,4 @@
+# Milestone 03 Dependencies: Configuration, Settings, Testing
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+pytest>=8.0.0

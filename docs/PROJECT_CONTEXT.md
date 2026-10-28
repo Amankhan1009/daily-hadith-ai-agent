@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 02 Verified
+> *Last Updated:* Milestone 03 Verified
 
 ---
 
@@ -75,28 +75,33 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 03 — Configuration and Secrets
-- **Active Task:** Task 3.1 — Setup Virtual Environment and Pydantic Settings
+- **Active Milestone:** Milestone 04 — Database Foundation
+- **Active Task:** Task 4.1 — Database Architecture and Schema Design (SQLite & Neon PostgreSQL)
 
 ---
 
 ## 7. Completed and Verified Work
 - [x] **Milestone 01 Verified:** Project foundation, Git setup, directories, roadmap, context, and README committed (`67ab4ea`, `8162470`).
-- [x] **Milestone 02 Verified:** Source Validation Specification.
+- [x] **Milestone 02 Verified:** Source Validation Specification (`58b7256`).
   - Live empirical audit of HadeethEnc endpoints.
-  - Discovered English `reference` omission and solved via Arabic record cross-matching.
   - Invariant defined: `en.hadeeth_ar == ar.hadeeth`.
-  - Deterministic regex grammar specified for Bukhari and Muslim.
+  - Deterministic regex grammar specified for Bukhari and Muslim citations.
   - Rejection matrix and test cases formalized in `docs/API_CONTRACTS.md`.
+- [x] **Milestone 03 Verified:** Configuration and Secrets.
+  - Virtual environment `.venv` configured on Python 3.14.6 arm64.
+  - `requirements.txt` and `pyproject.toml` established.
+  - `.env.example` created with strict zero-secret placeholders.
+  - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
+  - `tests/test_config.py` automated unit test suite passing 6/6 tests.
 
 ---
 
 ## 8. Work in Progress
-- Milestone 03: Configuration and Secrets.
-  - Task 3.1: Python virtual environment setup and dependency verification.
-  - Task 3.2: Create `.env.example` with strict placeholder schemas.
-  - Task 3.3: Implement Pydantic Settings configuration model with fail-fast validation.
-  - Task 3.4: Automated unit tests for configuration loading.
+- Milestone 04: Database Foundation.
+  - Task 4.1: Design schema for candidate tracking, execution history, and delivery idempotency.
+  - Task 4.2: Setup database abstraction compatible with SQLite locally and Neon PostgreSQL in cloud.
+  - Task 4.3: Implement persistence repositories and transaction management.
+  - Task 4.4: Automated database persistence and idempotency tests.
 
 ---
 
