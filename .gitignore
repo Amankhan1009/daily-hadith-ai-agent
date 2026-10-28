@@ -1,0 +1,65 @@
+# ============================================================
+# Daily Hadith AI Agent — .gitignore
+# ============================================================
+
+# ---------------------- Secrets & Config --------------------
+# NEVER commit .env files containing real credentials
+.env
+.env.local
+.env.production
+.env.staging
+# .env.example is tracked intentionally (contains placeholders only)
+
+# ---------------------- Python ------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# ---------------------- Testing -----------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+
+# ---------------------- Ruff / Linting ----------------------
+.ruff_cache/
+
+# ---------------------- IDE / Editor ------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ---------------------- Database ----------------------------
+# Local SQLite database files
+*.db
+*.sqlite3
+
+# ---------------------- Docker ------------------------------
+# Docker environment overrides (if used)
+docker-compose.override.yml
+
+# ---------------------- OS ----------------------------------
+Thumbs.db
+.DS_Store
+
+# ---------------------- Misc --------------------------------
+*.log
+tmp/
+temp/

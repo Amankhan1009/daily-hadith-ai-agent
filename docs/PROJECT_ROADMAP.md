@@ -1,0 +1,330 @@
+# Project Roadmap: Daily Hadith AI Agent
+
+A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent.
+
+---
+
+## Status Legend
+- **`Not Started`**: Scope defined, prerequisite work pending.
+- **`In Progress`**: Active milestone under active implementation or review.
+- **`Blocked`**: A technical or informational blocker prevents forward progress.
+- **`Verified`**: Acceptance criteria fully met with recorded terminal/test evidence.
+
+---
+
+## Milestones Summary
+
+| Milestone | Title | Status |
+|---|---|---|
+| 01 | Project Foundation and Documentation | In Progress |
+| 02 | Source Validation Specification | Not Started |
+| 03 | Configuration and Secrets | Not Started |
+| 04 | Database Foundation | Not Started |
+| 05 | HadeethEnc Integration | Not Started |
+| 06 | Source Catalogue Audit | Not Started |
+| 07 | Deterministic Validation | Not Started |
+| 08 | LangGraph Workflow | Not Started |
+| 09 | Groq Integration | Not Started |
+| 10 | Guardrails AI | Not Started |
+| 11 | Final Content Validation | Not Started |
+| 12 | Telegram Integration | Not Started |
+| 13 | Scheduling | Not Started |
+| 14 | History and Idempotency | Not Started |
+| 15 | Failure Handling | Not Started |
+| 16 | Automated Testing | Not Started |
+| 17 | Docker Containerization | Not Started |
+| 18 | Cloud Deployment | Not Started |
+| 19 | Production Readiness | Not Started |
+| 20 | Future FCM Support (Evaluation) | Not Started |
+
+---
+
+## Milestone 01 — Project Foundation and Documentation
+- **Goal:** Establish a clean development environment, Git version control, core directory layout, and foundational repository documentation.
+- **Scope:** Workspace inspection, Git setup, `.gitignore`, directory scaffolding (`docs/`, `src/`, `tests/`), `PROJECT_ROADMAP.md`, `PROJECT_CONTEXT.md`, and initial `README.md`. No application code.
+- **Dependencies:** None.
+- **Acceptance Criteria:**
+  - Workspace environment (OS, shell, Python version, Git) audited and documented.
+  - `.gitignore` ignores virtual environments, secrets (`.env*`), caches, logs, and database files.
+  - Base directory structure established and tracked in Git.
+  - Roadmap, project context, and README committed to repository.
+- **Current Status:** `In Progress`
+- **Verification Evidence:**
+  - Environment inspection confirmed: macOS 27.0.1 (arm64), zsh, Python 3.14.6, Git 2.54.0.
+  - Git initialized on `main` branch.
+  - `.gitignore` created and verified with `git status`.
+  - Directories `docs/`, `src/`, `tests/` created with tracked `.gitkeep` markers.
+- **Known Blockers:** None.
+- **Next Action:** Create `docs/PROJECT_CONTEXT.md` and `README.md`, then execute initial Git commit.
+
+---
+
+## Milestone 02 — Source Validation Specification
+- **Goal:** Analyze the official HadeethEnc API contract and specify deterministic verification rules before writing any integration code.
+- **Scope:** Document endpoints, response schemas, Arabic/English record correlation, reference validation, attribution policies, and rejection criteria.
+- **Dependencies:** Milestone 01.
+- **Acceptance Criteria:**
+  - Detailed API contract in `docs/API_CONTRACTS.md`.
+  - Deterministic reference matching rules defined.
+  - Rejection policy established for incomplete or unverified records.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await completion of Milestone 01.
+
+---
+
+## Milestone 03 — Configuration and Secrets
+- **Goal:** Build a robust, type-safe settings management layer with strict secret protection.
+- **Scope:** Pydantic Settings implementation, `.env.example`, environment validation, and unit tests for configuration parsing.
+- **Dependencies:** Milestone 02.
+- **Acceptance Criteria:**
+  - Settings load strictly from environment or `.env`.
+  - Missing mandatory secrets fail fast with clear errors.
+  - No secret values exposed in logs or defaults.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 02.
+
+---
+
+## Milestone 04 — Database Foundation
+- **Goal:** Set up local persistence (SQLite) and design migration-ready schemas compatible with Neon PostgreSQL.
+- **Scope:** ORM/persistence layer, migration strategy, schema design for execution logs, delivery attempts, candidate status, and deduplication records.
+- **Dependencies:** Milestone 03.
+- **Acceptance Criteria:**
+  - Schema migrations run cleanly.
+  - Candidate deduplication tables support idempotent lookups.
+  - Local SQLite works seamlessly with abstraction ready for Neon PostgreSQL.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 03.
+
+---
+
+## Milestone 05 — HadeethEnc Integration
+- **Goal:** Implement an HTTP client to fetch records from the official HadeethEnc API.
+- **Scope:** English retrieval, Arabic counterpart pairing, error handling, rate limiting, and network timeout handling.
+- **Dependencies:** Milestone 02, Milestone 03.
+- **Acceptance Criteria:**
+  - Client retrieves approved collection candidates without web scraping.
+  - HTTP failure modes handled cleanly.
+  - Raw payloads structured into typed internal representations.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 04.
+
+---
+
+## Milestone 06 — Source Catalogue Audit
+- **Goal:** Audit candidate records across Sahih al-Bukhari and Sahih Muslim available via HadeethEnc.
+- **Scope:** Check field completeness, translation versions, and reference consistency across candidate datasets.
+- **Dependencies:** Milestone 05.
+- **Acceptance Criteria:**
+  - Representative records audited and documented.
+  - Inconsistent or ambiguous records flagged for automatic rejection.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 05.
+
+---
+
+## Milestone 07 — Deterministic Validation
+- **Goal:** Build the strict deterministic gatekeeper ensuring only 100% verified Hadith can proceed.
+- **Scope:** Pydantic validation models, collection verification, reference checks, translation invariance checks, and fail-closed logic.
+- **Dependencies:** Milestone 06.
+- **Acceptance Criteria:**
+  - Malformed or missing English records rejected immediately.
+  - Ambiguous references rejected with structured error codes.
+  - 100% test coverage over validation rules.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 06.
+
+---
+
+## Milestone 08 — LangGraph Workflow
+- **Goal:** Orchestrate the end-to-end processing pipeline using LangGraph state graphs.
+- **Scope:** Define state schema, candidate fetching node, validation node, deduplication node, commentary generation node, and persistence node.
+- **Dependencies:** Milestone 04, Milestone 07.
+- **Acceptance Criteria:**
+  - Conditional edges route failures to safe abort states.
+  - State graph fully typed and unit tested with mock inputs.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 07.
+
+---
+
+## Milestone 09 — Groq Integration
+- **Goal:** Integrate Groq LLM API to generate educational reflections/commentary.
+- **Scope:** Groq API client, prompt design enforcing strict separation of commentary from original Hadith, and fallback behavior on LLM unavailability.
+- **Dependencies:** Milestone 08.
+- **Acceptance Criteria:**
+  - Model never alters the original Hadith translation.
+  - AI reflection clearly demarcated as non-source material.
+  - LLM outages gracefully default to delivering verified Hadith alone (or fail closed based on policy).
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 08.
+
+---
+
+## Milestone 10 — Guardrails AI
+- **Goal:** Layer structural and content validation over LLM-generated reflection.
+- **Scope:** Guardrails AI validators verifying commentary does not claim unverified theological rulings or fabricate citations.
+- **Dependencies:** Milestone 09.
+- **Acceptance Criteria:**
+  - Guardrail failures trigger fallback or safe omission of commentary.
+  - System performance and latency remain acceptable.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 09.
+
+---
+
+## Milestone 11 — Final Content Validation
+- **Goal:** End-to-end verification of assembled notification payloads before delivery adapter implementation.
+- **Scope:** Combined audit of Hadith source text, citation metadata, URL links, version tag, and AI reflection formatting.
+- **Dependencies:** Milestone 08, Milestone 10.
+- **Acceptance Criteria:**
+  - Assembled messages verified against source integrity guidelines.
+  - Zero hallucination or unverified reference leakage.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 10.
+
+---
+
+## Milestone 12 — Telegram Integration
+- **Goal:** Deliver formatted daily notifications via official Telegram Bot API.
+- **Scope:** Telegram bot adapter, HTML/Markdown formatting, message length safeguards, rate limit handling, and secure credential handling.
+- **Dependencies:** Milestone 03, Milestone 11.
+- **Acceptance Criteria:**
+  - Manually triggered test message delivers cleanly to Telegram chat.
+  - Source links, attribution, and AI disclaimer render legibly.
+  - Network and API failures handled with retry/backoff.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 11.
+
+---
+
+## Milestone 13 — Scheduling
+- **Goal:** Implement scheduled execution triggering daily notifications at 10:00 AM Asia/Kolkata.
+- **Scope:** Scheduler architecture (APScheduler / cron trigger / cloud trigger), timezone handling, misfire protection, and restart recovery.
+- **Dependencies:** Milestone 12.
+- **Acceptance Criteria:**
+  - Job correctly fires according to `Asia/Kolkata` wall-clock time.
+  - Misfire grace times and restart scenarios tested and documented.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 12.
+
+---
+
+## Milestone 14 — History and Idempotency
+- **Goal:** Prevent duplicate daily sends under retries, restarts, or scheduler hiccups.
+- **Scope:** Database unique constraints, execution lock records, and delivery attempt logging.
+- **Dependencies:** Milestone 04, Milestone 13.
+- **Acceptance Criteria:**
+  - Re-running the scheduler within the same calendar day safely skips delivery.
+  - Delivery outcome and latency recorded for every trigger.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 13.
+
+---
+
+## Milestone 15 — Failure Handling
+- **Goal:** Stress-test system resilience across all external dependencies.
+- **Scope:** Test scenarios: HadeethEnc API down, Groq rate limited, Telegram timeout, database connection loss, invalid source data.
+- **Dependencies:** Milestones 04 through 14.
+- **Acceptance Criteria:**
+  - System fails closed without corrupting database state or sending garbled messages.
+  - Operational errors logged with actionable diagnostic context.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 14.
+
+---
+
+## Milestone 16 — Automated Testing
+- **Goal:** Implement comprehensive test suite with automated linting and formatting.
+- **Scope:** Unit tests, integration tests with mocks, Ruff linting/formatting checks, and test coverage reporting.
+- **Dependencies:** Milestone 15.
+- **Acceptance Criteria:**
+  - `pytest` passes 100% of tests.
+  - `ruff check` and `ruff format` pass without warnings.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 15.
+
+---
+
+## Milestone 17 — Docker Containerization
+- **Goal:** Package the application into an immutable, secure Docker container.
+- **Scope:** Multi-stage `Dockerfile`, non-root user execution, lightweight base image, `.dockerignore`, container health check.
+- **Dependencies:** Milestone 16.
+- **Acceptance Criteria:**
+  - Container builds reproducibly without embedded secrets.
+  - Container runs and passes internal health checks.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 16.
+
+---
+
+## Milestone 18 — Cloud Deployment
+- **Goal:** Deploy the FastAPI service and scheduler to cloud hosting (e.g., Render) backed by Neon PostgreSQL.
+- **Scope:** Production environment configuration, database migration on deploy, scheduler verification, secure secret management.
+- **Dependencies:** Milestone 17.
+- **Acceptance Criteria:**
+  - Application deployed and connected to Neon PostgreSQL.
+  - Scheduled run triggers successfully in production environment.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 17.
+
+---
+
+## Milestone 19 — Production Readiness
+- **Goal:** Final system audit against all non-functional requirements and portfolio presentation.
+- **Scope:** Full runbook verification, architecture documentation review, license and attribution compliance, security posture check.
+- **Dependencies:** Milestone 18.
+- **Acceptance Criteria:**
+  - All 20 Definition of Done criteria verified with concrete proof.
+  - Runbook verified through dry-run operation.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Await Milestone 18.
+
+---
+
+## Milestone 20 — Future FCM Support (Evaluation)
+- **Goal:** Architectural evaluation and technical spike for Firebase Cloud Messaging mobile push notifications.
+- **Scope:** Feasibility analysis, payload schemas, and migration path from Telegram-only to multi-channel notifications.
+- **Dependencies:** Milestone 19.
+- **Acceptance Criteria:**
+  - Technical design document outlining FCM integration strategy.
+- **Current Status:** `Not Started`
+- **Verification Evidence:** None.
+- **Known Blockers:** Deferred to post-V1.
+- **Next Action:** Await Milestone 19.
