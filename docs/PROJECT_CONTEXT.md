@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 01 Verified (Commit 67ab4ea)
+> *Last Updated:* Milestone 02 Verified
 
 ---
 
@@ -75,29 +75,28 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 02 — Source Validation Specification
-- **Active Task:** Task 2.1 — Inspect and Document Official HadeethEnc API Endpoints
+- **Active Milestone:** Milestone 03 — Configuration and Secrets
+- **Active Task:** Task 3.1 — Setup Virtual Environment and Pydantic Settings
 
 ---
 
 ## 7. Completed and Verified Work
-- [x] **Milestone 01 Verified:** Project foundation established and committed (`67ab4ea`).
-  - [x] Workspace inspected (macOS arm64, zsh, Python 3.14.6, Git 2.54.0).
-  - [x] Git repository initialized on `main`.
-  - [x] `.gitignore` configured and active.
-  - [x] Directory scaffolding (`docs/`, `src/`, `tests/`) tracked with `.gitkeep`.
-  - [x] 20-milestone roadmap (`docs/PROJECT_ROADMAP.md`) published.
-  - [x] Developer context handover (`docs/PROJECT_CONTEXT.md`) established.
-  - [x] Public documentation (`README.md`) published.
+- [x] **Milestone 01 Verified:** Project foundation, Git setup, directories, roadmap, context, and README committed (`67ab4ea`, `8162470`).
+- [x] **Milestone 02 Verified:** Source Validation Specification.
+  - Live empirical audit of HadeethEnc endpoints.
+  - Discovered English `reference` omission and solved via Arabic record cross-matching.
+  - Invariant defined: `en.hadeeth_ar == ar.hadeeth`.
+  - Deterministic regex grammar specified for Bukhari and Muslim.
+  - Rejection matrix and test cases formalized in `docs/API_CONTRACTS.md`.
 
 ---
 
 ## 8. Work in Progress
-- Milestone 02: Source Validation Specification.
-  - Task 2.1: Audit official HadeethEnc API documentation and current GET endpoints.
-  - Task 2.2: Specify English/Arabic ID and record cross-matching contract.
-  - Task 2.3: Define reference verification rules for Sahih al-Bukhari and Sahih Muslim.
-  - Task 2.4: Specify record rejection criteria and create `docs/API_CONTRACTS.md`.
+- Milestone 03: Configuration and Secrets.
+  - Task 3.1: Python virtual environment setup and dependency verification.
+  - Task 3.2: Create `.env.example` with strict placeholder schemas.
+  - Task 3.3: Implement Pydantic Settings configuration model with fail-fast validation.
+  - Task 3.4: Automated unit tests for configuration loading.
 
 ---
 

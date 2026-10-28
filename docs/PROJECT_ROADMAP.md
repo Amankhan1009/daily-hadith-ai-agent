@@ -17,7 +17,7 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | Milestone | Title | Status |
 |---|---|---|
 | 01 | Project Foundation and Documentation | Verified |
-| 02 | Source Validation Specification | Not Started |
+| 02 | Source Validation Specification | Verified |
 | 03 | Configuration and Secrets | Not Started |
 | 04 | Database Foundation | Not Started |
 | 05 | HadeethEnc Integration | Not Started |
@@ -68,10 +68,15 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Detailed API contract in `docs/API_CONTRACTS.md`.
   - Deterministic reference matching rules defined.
   - Rejection policy established for incomplete or unverified records.
-- **Current Status:** `Not Started`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Empirical audit of live HadeethEnc REST endpoints (`/hadeeths/list/`, `/hadeeths/one/`, `/categories/list/`).
+  - Discovered critical API contract detail: English payload omits `reference` key; Arabic payload contains canonical citation.
+  - Specified two-step cross-verification invariant (`en.hadeeth_ar == ar.hadeeth`).
+  - Defined deterministic regex parsing for Sahih al-Bukhari and Sahih Muslim reference numbers.
+  - Comprehensive specification committed in `docs/API_CONTRACTS.md`.
 - **Known Blockers:** None.
-- **Next Action:** Await completion of Milestone 01.
+- **Next Action:** Proceed to Milestone 03 — Configuration and Secrets.
 
 ---
 
