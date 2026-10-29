@@ -1,4 +1,11 @@
-# Milestone 03 Dependencies: Configuration, Settings, Testing
+# Milestone 03: Configuration & Validation
 pydantic>=2.10.0
 pydantic-settings>=2.7.0
+
+# Milestone 04: Database Persistence & Migrations
+sqlalchemy>=2.0.30
+psycopg[binary]>=3.2.0
+alembic>=1.14.0
+
+# Testing & Quality
 pytest>=8.0.0

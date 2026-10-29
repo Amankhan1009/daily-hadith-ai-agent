@@ -19,7 +19,7 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | 01 | Project Foundation and Documentation | Verified |
 | 02 | Source Validation Specification | Verified |
 | 03 | Configuration and Secrets | Verified |
-| 04 | Database Foundation | Not Started |
+| 04 | Database Foundation | Verified |
 | 05 | HadeethEnc Integration | Not Started |
 | 06 | Source Catalogue Audit | Not Started |
 | 07 | Deterministic Validation | Not Started |
@@ -101,17 +101,24 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 ---
 
 ## Milestone 04 — Database Foundation
-- **Goal:** Set up local persistence (SQLite) and design migration-ready schemas compatible with Neon PostgreSQL.
-- **Scope:** ORM/persistence layer, migration strategy, schema design for execution logs, delivery attempts, candidate status, and deduplication records.
+- **Goal:** Set up persistence and migration-ready schemas connected directly to Neon PostgreSQL.
+- **Scope:** ORM persistence layer, Alembic migration strategy, schemas for candidate status, execution history, and delivery idempotency.
 - **Dependencies:** Milestone 03.
 - **Acceptance Criteria:**
-  - Schema migrations run cleanly.
-  - Candidate deduplication tables support idempotent lookups.
-  - Local SQLite works seamlessly with abstraction ready for Neon PostgreSQL.
-- **Current Status:** `Not Started`
-- **Verification Evidence:** None.
+  - Database connected to Neon PostgreSQL over SSL pooler.
+  - Schema migrations with Alembic run cleanly.
+  - Candidate deduplication and idempotency queries verified.
+  - 100% automated test pass rate for database operations.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Connected live to Neon PostgreSQL (PostgreSQL 18.6) over SSL pooler via `psycopg`.
+  - Refactored persistence into modular `src/database/` package (`session.py`, `models.py`, `repository.py`).
+  - Generated and stamped Alembic initial migration (`f02e818f721d_initial_schema.py`).
+  - Database unique constraint on `DailyDeliveryLog.scheduled_date` enforces daily idempotency.
+  - Repository layer implemented for candidate deduplication and delivery history.
+  - 11/11 automated unit tests passing across `tests/test_database.py` and `tests/test_config.py`.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 03.
+- **Next Action:** Proceed to Milestone 05 — HadeethEnc Integration.
 
 ---
 

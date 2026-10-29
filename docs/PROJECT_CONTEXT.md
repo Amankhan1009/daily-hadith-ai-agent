@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 03 Verified
+> *Last Updated:* Milestone 04 Verified
 
 ---
 
@@ -75,8 +75,8 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 04 — Database Foundation
-- **Active Task:** Task 4.1 — Database Architecture and Schema Design (SQLite & Neon PostgreSQL)
+- **Active Milestone:** Milestone 05 — HadeethEnc Integration
+- **Active Task:** Task 5.1 — HadeethEnc HTTP Client Implementation
 
 ---
 
@@ -87,21 +87,28 @@ flowchart TD
   - Invariant defined: `en.hadeeth_ar == ar.hadeeth`.
   - Deterministic regex grammar specified for Bukhari and Muslim citations.
   - Rejection matrix and test cases formalized in `docs/API_CONTRACTS.md`.
-- [x] **Milestone 03 Verified:** Configuration and Secrets.
+- [x] **Milestone 03 Verified:** Configuration and Secrets (`e848cf0`).
   - Virtual environment `.venv` configured on Python 3.14.6 arm64.
   - `requirements.txt` and `pyproject.toml` established.
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 04 Verified:** Database Foundation & Neon PostgreSQL.
+  - Connected directly to Neon PostgreSQL (PostgreSQL 18.6) over SSL pooler using modern `psycopg` driver.
+  - Refactored persistence into modular `src/database/` package (`session.py`, `models.py`, `repository.py`).
+  - Generated and stamped Alembic initial migration (`f02e818f721d_initial_schema.py`).
+  - Database unique constraint on `DailyDeliveryLog.scheduled_date` enforces daily idempotency.
+  - Repository layer implemented for candidate deduplication and delivery history.
+  - 11/11 automated unit tests passing across `tests/test_database.py` and `tests/test_config.py`.
 
 ---
 
 ## 8. Work in Progress
-- Milestone 04: Database Foundation.
-  - Task 4.1: Design schema for candidate tracking, execution history, and delivery idempotency.
-  - Task 4.2: Setup database abstraction compatible with SQLite locally and Neon PostgreSQL in cloud.
-  - Task 4.3: Implement persistence repositories and transaction management.
-  - Task 4.4: Automated database persistence and idempotency tests.
+- Milestone 05: HadeethEnc Integration.
+  - Task 5.1: Build typed HTTP client for HadeethEnc API (`GET /hadeeths/one/` and `/hadeeths/list/`).
+  - Task 5.2: Implement English retrieval with Arabic metadata cross-matching.
+  - Task 5.3: Implement deterministic reference verification for Bukhari and Muslim.
+  - Task 5.4: Comprehensive integration and contract tests with mock fixtures.
 
 ---
 

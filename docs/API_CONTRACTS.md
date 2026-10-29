@@ -213,3 +213,4 @@ Every delivered message must include verified source provenance according to Had
 | `TC-02` | `5907` | Sahih Muslim / Agreed Upon | `791` | **PASS (Valid)** |
 | `TC-03` | `999999999` | None (Non-existent) | None | **REJECT (`ERR_RECORD_NOT_FOUND`)** |
 | `TC-04` | Non-canonical record (e.g. Tirmidhi-only) | Jami` at-Tirmidhi | N/A | **REJECT (`ERR_UNAPPROVED_COLLECTION`)** |
+
