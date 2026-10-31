@@ -130,10 +130,15 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Client retrieves approved collection candidates without web scraping.
   - HTTP failure modes handled cleanly.
   - Raw payloads structured into typed internal representations.
-- **Current Status:** `Not Started`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented typed Pydantic models in `src/hadeethenc/schemas.py` (`HadeethEncListResponse`, `HadeethEncEnglishDetail`, `HadeethEncArabicDetail`, `HadeethEncCandidatePair`).
+  - Implemented resilient HTTP client in `src/hadeethenc/client.py` using `httpx` with timeout management, retry support, and typed custom domain exceptions (`HadeethEncNotFoundError`, `HadeethEncNetworkError`, etc.).
+  - Implemented deterministic invariant verifier in `src/hadeethenc/verifier.py` enforcing `en.hadeeth_ar == ar.hadeeth`, approved attribution validation, and canonical reference regex extraction.
+  - Comprehensive unit and contract tests in `tests/test_hadeethenc.py` with 14 mocked test scenarios. Full test suite passing 100% (25/25 tests passing in 0.27s).
+  - Empirical live integration test executed against HadeethEnc production API validating end-to-end fetching, Arabic pairing, and reference parsing for real Hadiths (IDs: 5907, 5913).
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 04.
+- **Next Action:** Proceed to Milestone 06 — Source Catalogue Audit.
 
 ---
 
@@ -144,10 +149,10 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Representative records audited and documented.
   - Inconsistent or ambiguous records flagged for automatic rejection.
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 05.
+- **Next Action:** Execute empirical audit across candidate categories in HadeethEnc.
 
 ---
 

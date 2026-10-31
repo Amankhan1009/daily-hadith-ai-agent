@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 04 Verified
+> *Last Updated:* Milestone 05 Verified
 
 ---
 
@@ -75,8 +75,8 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 05 — HadeethEnc Integration
-- **Active Task:** Task 5.1 — HadeethEnc HTTP Client Implementation
+- **Active Milestone:** Milestone 06 — Source Catalogue Audit
+- **Active Task:** Task 6.1 — Catalogue Exploration & Ingestion Audit
 
 ---
 
@@ -93,6 +93,12 @@ flowchart TD
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 05 Verified:** HadeethEnc Integration & Deterministic Verifier.
+  - Implemented typed Pydantic v2 schemas (`src/hadeethenc/schemas.py`) for list responses, English/Arabic detail payloads, and paired candidate structures.
+  - Created robust `HadeethEncClient` (`src/hadeethenc/client.py`) with timeout controls, retries, and typed domain exceptions (`HadeethEncNotFoundError`, `HadeethEncNetworkError`, `HadeethEncResponseError`).
+  - Implemented deterministic cross-verifier (`src/hadeethenc/verifier.py`) enforcing cross-payload Arabic text identity (`en.hadeeth_ar == ar.hadeeth`), collection attribution validation, and regex canonical citation extraction.
+  - Added 14 comprehensive unit and contract tests in `tests/test_hadeethenc.py` using `httpx.MockTransport`. Full test suite achieves 25/25 passing in 0.27s.
+  - Verified live against HadeethEnc production API with real Hadith records (`5907`, `5913`).
 - [x] **Milestone 04 Verified:** Database Foundation & Neon PostgreSQL.
   - Connected directly to Neon PostgreSQL (PostgreSQL 18.6) over SSL pooler using modern `psycopg` driver.
   - Refactored persistence into modular `src/database/` package (`session.py`, `models.py`, `repository.py`).

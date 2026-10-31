@@ -2,6 +2,7 @@
 Automated Unit Tests for Database Repositories and Idempotency Invariants.
 """
 
+from collections.abc import Generator
 from datetime import date, timedelta
 import pytest
 from sqlalchemy import create_engine
@@ -20,7 +21,7 @@ from src.database.session import Base
 
 
 @pytest.fixture
-def db_session() -> Session:
+def db_session() -> Generator[Session, None, None]:
     """
     Provides an isolated in-memory SQLite database session for unit tests.
     Ensures zero pollution of cloud database and instant sub-second execution.
@@ -35,7 +36,6 @@ def db_session() -> Session:
     finally:
         session.close()
         Base.metadata.drop_all(engine)
-
 
 def test_save_and_retrieve_candidate(db_session: Session):
     """Verify storing a new Hadith candidate and looking it up by source_id."""
