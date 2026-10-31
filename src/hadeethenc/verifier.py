@@ -61,13 +61,14 @@ def extract_collection_and_reference(
             num = muslim_match.group(1)
         return "Agreed Upon (Al-Bukhari & Muslim)", num, None
 
-    if bukhari_match or "البخاري" in attribution_ar:
-        num = bukhari_match.group(1) if bukhari_match else None
-        return "Sahih al-Bukhari", num, None
+    if bukhari_match:
+        return "Sahih al-Bukhari", bukhari_match.group(1), None
 
-    if muslim_match or "مسلم" in attribution_ar:
-        num = muslim_match.group(1) if muslim_match else None
-        return "Sahih Muslim", num, None
+    if muslim_match:
+        return "Sahih Muslim", muslim_match.group(1), None
+
+    if "البخاري" in attribution_ar or "مسلم" in attribution_ar:
+        return None, None, "ERR_AMBIGUOUS_CITATION: Attribution mentions approved collection but citation lacks canonical Hadith number"
 
     # If it cites neither Bukhari nor Muslim, reject for V1
     return None, None, "ERR_UNAPPROVED_COLLECTION: Candidate does not cite Sahih al-Bukhari or Sahih Muslim"

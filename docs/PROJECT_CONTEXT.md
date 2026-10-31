@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 05 Verified
+> *Last Updated:* Milestone 06 Verified
 
 ---
 
@@ -75,8 +75,8 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 06 — Source Catalogue Audit
-- **Active Task:** Task 6.1 — Catalogue Exploration & Ingestion Audit
+- **Active Milestone:** Milestone 07 — Deterministic Validation Engine
+- **Active Task:** Task 7.1 — Domain Candidate Ingestion Engine
 
 ---
 
@@ -93,6 +93,12 @@ flowchart TD
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 06 Verified:** Source Catalogue Audit & Acceptance Policy.
+  - Audited HadeethEnc root taxonomy (7 root categories, 452 subcategories, 2,776+ Hadiths).
+  - Sampled Tier-1 categories (Virtues & Manners, Noble Qur’an) demonstrating 60–75% empirical pass rates.
+  - Discovered and addressed bibliographic-only citations; hardened verifier to reject records lacking explicit Hadith numbers fail-closed.
+  - Established sustainable candidate pool sizing (~913 verified Hadiths, supporting 2.5 years of non-repeating delivery).
+  - Formalized audit findings and acceptance rules in `docs/SOURCE_CATALOGUE_AUDIT.md`.
 - [x] **Milestone 05 Verified:** HadeethEnc Integration & Deterministic Verifier.
   - Implemented typed Pydantic v2 schemas (`src/hadeethenc/schemas.py`) for list responses, English/Arabic detail payloads, and paired candidate structures.
   - Created robust `HadeethEncClient` (`src/hadeethenc/client.py`) with timeout controls, retries, and typed domain exceptions (`HadeethEncNotFoundError`, `HadeethEncNetworkError`, `HadeethEncResponseError`).
@@ -110,11 +116,10 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- Milestone 05: HadeethEnc Integration.
-  - Task 5.1: Build typed HTTP client for HadeethEnc API (`GET /hadeeths/one/` and `/hadeeths/list/`).
-  - Task 5.2: Implement English retrieval with Arabic metadata cross-matching.
-  - Task 5.3: Implement deterministic reference verification for Bukhari and Muslim.
-  - Task 5.4: Comprehensive integration and contract tests with mock fixtures.
+- Milestone 07: Deterministic Validation Engine.
+  - Task 7.1: Build domain candidate ingestion service connecting HadeethEnc to database persistence.
+  - Task 7.2: Implement batch candidate loader and verification runner.
+  - Task 7.3: Comprehensive integration tests for end-to-end candidate ingestion and deduplication.
 
 ---
 
@@ -140,7 +145,7 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 02: Audit HadeethEnc API contracts and create `docs/API_CONTRACTS.md`.
+Begin Milestone 07: Implement candidate ingestion service in `src/ingestion/` connecting HadeethEnc client, verifier, and database repository.
 
 ---
 

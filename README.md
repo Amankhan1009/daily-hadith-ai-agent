@@ -184,7 +184,7 @@ For detailed milestone breakdowns, see [docs/PROJECT_ROADMAP.md](docs/PROJECT_RO
 
 ### Cloning the Repository
 ```bash
-git clone https://github.com/<your-username>/daily-hadith-ai-agent.git
+git clone https://github.com/Amankhan1009/daily-hadith-ai-agent.git
 cd daily-hadith-ai-agent
 ```
 

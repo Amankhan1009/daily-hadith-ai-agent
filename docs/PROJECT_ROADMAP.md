@@ -149,25 +149,31 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Representative records audited and documented.
   - Inconsistent or ambiguous records flagged for automatic rejection.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Empirical audit of HadeethEnc taxonomy (7 root categories, 452 subcategories, 2,776+ total Hadiths).
+  - Executed empirical sampling across Tier-1 categories (Category 5: Virtues & Manners, Category 1: The Noble Qur’an).
+  - Discovered structural distinction between precision citations (with volume/page/Hadith number) and bibliographic-only citations.
+  - Hardened `verify_candidate_pair` in `src/hadeethenc/verifier.py` to reject records without an explicit Hadith number fail-closed (`ERR_AMBIGUOUS_CITATION`).
+  - Added unit test `test_verifier_bibliographic_citation_without_number_fails` in `tests/test_hadeethenc.py` (26/26 tests passing).
+  - Formalized comprehensive findings, candidate capacity analysis (~913 verified Hadiths / 2.5 years of daily delivery), and catalogue policy in `docs/SOURCE_CATALOGUE_AUDIT.md`.
 - **Known Blockers:** None.
-- **Next Action:** Execute empirical audit across candidate categories in HadeethEnc.
+- **Next Action:** Proceed to Milestone 07 — Deterministic Validation Engine.
 
 ---
 
-## Milestone 07 — Deterministic Validation
-- **Goal:** Build the strict deterministic gatekeeper ensuring only 100% verified Hadith can proceed.
-- **Scope:** Pydantic validation models, collection verification, reference checks, translation invariance checks, and fail-closed logic.
-- **Dependencies:** Milestone 06.
+## Milestone 07 — Deterministic Validation Engine
+- **Goal:** Build the strict deterministic gatekeeper domain pipeline ensuring only 100% verified Hadith can proceed.
+- **Scope:** Typed domain validation models, candidate ingestion pipeline, database persistence integration, and fail-closed error handling.
+- **Dependencies:** Milestone 04, Milestone 05, Milestone 06.
 - **Acceptance Criteria:**
-  - Malformed or missing English records rejected immediately.
-  - Ambiguous references rejected with structured error codes.
-  - 100% test coverage over validation rules.
-- **Current Status:** `Not Started`
+  - Malformed or unverified records rejected immediately with structured error codes.
+  - Verified candidate pairs stored in Neon PostgreSQL candidate table.
+  - 100% automated test coverage across domain validation rules.
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 06.
+- **Next Action:** Define domain ingestion models and pipeline in `src/ingestion/`.
 
 ---
 

@@ -281,3 +281,29 @@ def test_verifier_missing_reference_fails():
 
     assert result.is_valid is False
     assert "ERR_MISSING_REFERENCE" in str(result.rejection_reason)
+def test_verifier_bibliographic_citation_without_number_fails():
+    """Verify that a record citing Bukhari/Muslim without an exact Hadith number is rejected fail-closed."""
+    en = HadeethEncEnglishDetail(
+        id="10112",
+        title="Greatest Surah",
+        hadeeth="Shall I teach you...",
+        attribution="Narrated by Bukhari",
+        grade="Authentic",
+        hadeeth_ar="ألا أعلمك أعظم سورة",
+        attribution_ar="رواه البخاري",
+        grade_ar="صحيح",
+    )
+    ar = HadeethEncArabicDetail(
+        id="10112",
+        title="أعظم سورة",
+        hadeeth="ألا أعلمك أعظم سورة",
+        attribution="رواه البخاري",
+        grade="صحيح",
+        reference="صحيح البخاري –الجامع الصحيح- دار طوق النجاة، 1422هـ",  # Bibliographic only
+    )
+    pair = HadeethEncCandidatePair(
+        source_id="10112", english=en, arabic=ar, canonical_url="url"
+    )
+    res = verify_candidate_pair(pair)
+    assert not res.is_valid
+    assert "ERR_AMBIGUOUS_CITATION" in res.rejection_reason
