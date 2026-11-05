@@ -52,16 +52,18 @@ flowchart TD
 
 ## Repository Structure & Package Guides
 
-Every directory in this codebase includes its own dedicated documentation:
+Every folder in this codebase includes its own dedicated README guide:
 
 | Directory | Package / Component | Documentation Guide |
 |---|---|---|
-| **[](docs/)** | Technical Specifications & Handover Records | **[](docs/README.md)** |
-| **[](src/database/)** | Neon PostgreSQL Persistence, Models & Migrations | **[](src/database/README.md)** |
-| **[](src/hadeethenc/)** | HadeethEnc API Client, Schemas & Verifier | **[](src/hadeethenc/README.md)** |
-| **[](src/ingestion/)** | Candidate Ingestion Service & Deduplication | **[](src/ingestion/README.md)** |
-| **[](src/workflow/)** | LangGraph StateGraph Orchestration & Routing | **[](src/workflow/README.md)** |
-| **[](tests/)** | Automated Test Suite (34 unit & integration tests) | **[](tests/README.md)** |
+| **[`docs/`](docs/)** | Technical Specifications & Handover Records | **[`docs/README.md`](docs/README.md)** |
+| **[`src/`](src/)** | Application Source Root & Architecture Overview | **[`src/README.md`](src/README.md)** |
+| **[`src/database/`](src/database/)** | Neon PostgreSQL Persistence, Models & Migrations | **[`src/database/README.md`](src/database/README.md)** |
+| **[`src/hadeethenc/`](src/hadeethenc/)** | HadeethEnc API Client, Schemas & Invariant Verifier | **[`src/hadeethenc/README.md`](src/hadeethenc/README.md)** |
+| **[`src/ingestion/`](src/ingestion/)** | Candidate Ingestion Service & Deduplication | **[`src/ingestion/README.md`](src/ingestion/README.md)** |
+| **[`src/workflow/`](src/workflow/)** | LangGraph StateGraph Orchestration & Routing | **[`src/workflow/README.md`](src/workflow/README.md)** |
+| **[`tests/`](tests/)** | Automated Test Suite (34 unit & integration tests) | **[`tests/README.md`](tests/README.md)** |
+| **[`alembic/`](alembic/)** | Database Schema Migration Versions | **[`alembic/README.md`](alembic/README.md)** |
 
 ---
 
@@ -82,18 +84,18 @@ The project is actively developed following a 20-milestone engineering roadmap:
 
 | Milestone | Status | Key Deliverable |
 |---|---|---|
-| **01 — Project Foundation** |  | Git repo, environment audit, documentation scaffolding |
-| **02 — Source Validation Spec** |  | HadeethEnc API contracts & Arabic reference regex grammar |
-| **03 — Configuration & Secrets** |  | Pydantic Settings, secret masking, timezone validation |
-| **04 — Database Foundation** |  | Neon PostgreSQL connection, SQLAlchemy models, Alembic migrations |
-| **05 — HadeethEnc Integration** |  | Typed HTTP client, Pydantic schemas, invariant verifier |
-| **06 — Source Catalogue Audit** |  | Empirical audit of 2,776+ Hadiths, acceptance policy |
-| **07 — Deterministic Engine** |  | Ingestion service, queue persistence, live cloud verification |
-| **08 — LangGraph Workflow** |  | StateGraph state machine with conditional routing & live idempotency |
-| **09 — Groq Integration** |  | LLM reflection generation with strict segregation |
-| **10 — Guardrails AI** |  | Content validation & hallucination boundary enforcement |
+| **01 — Project Foundation** | `Verified` | Git repo, environment audit, documentation scaffolding |
+| **02 — Source Validation Spec** | `Verified` | HadeethEnc API contracts & Arabic reference regex grammar |
+| **03 — Configuration & Secrets** | `Verified` | Pydantic Settings, secret masking, timezone validation |
+| **04 — Database Foundation** | `Verified` | Neon PostgreSQL connection, SQLAlchemy models, Alembic migrations |
+| **05 — HadeethEnc Integration** | `Verified` | Typed HTTP client, Pydantic schemas, invariant verifier |
+| **06 — Source Catalogue Audit** | `Verified` | Empirical audit of 2,776+ Hadiths, acceptance policy |
+| **07 — Deterministic Engine** | `Verified` | Ingestion service, queue persistence, live cloud verification |
+| **08 — LangGraph Workflow** | `Verified` | StateGraph state machine with conditional routing & live idempotency |
+| **09 — Groq Integration** | `In Progress` | LLM reflection generation with strict segregation |
+| **10 — Guardrails AI** | `Not Started` | Content validation & hallucination boundary enforcement |
 
-For the complete 20-milestone breakdown, see **[](docs/PROJECT_ROADMAP.md)**.
+For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 
 ---
 
