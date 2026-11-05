@@ -170,10 +170,16 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Malformed or unverified records rejected immediately with structured error codes.
   - Verified candidate pairs stored in Neon PostgreSQL candidate table.
   - 100% automated test coverage across domain validation rules.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented domain candidate ingestion service in `src/ingestion/service.py` and exported facade in `src/ingestion/__init__.py`.
+  - Connected dual HadeethEnc retrieval, invariant cross-verification, and Neon PostgreSQL database persistence.
+  - Added 4 comprehensive unit and integration tests in `tests/test_ingestion.py` (verified persistence, rejection auditability, deduplication idempotency, and batch metrics).
+  - All 30 automated tests passing 100% in 0.22s across config, database, hadeethenc, and ingestion test suites.
+  - Executed live empirical batch ingestion against Neon PostgreSQL populating candidate queue (9 verified, 1 rejected).
+  - Verified candidate queue retrieval via `get_next_verified_candidate()` returning Hadith ID 66511 (Agreed Upon #6953).
 - **Known Blockers:** None.
-- **Next Action:** Define domain ingestion models and pipeline in `src/ingestion/`.
+- **Next Action:** Proceed to Milestone 08 — LangGraph Workflow.
 
 ---
 
@@ -184,10 +190,10 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Conditional edges route failures to safe abort states.
   - State graph fully typed and unit tested with mock inputs.
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 07.
+- **Next Action:** Define LangGraph workflow state schema and core pipeline nodes in `src/workflow/`.
 
 ---
 

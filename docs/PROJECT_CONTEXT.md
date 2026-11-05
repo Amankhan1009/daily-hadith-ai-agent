@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 06 Verified
+> *Last Updated:* Milestone 07 Verified
 
 ---
 
@@ -75,8 +75,8 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 07 — Deterministic Validation Engine
-- **Active Task:** Task 7.1 — Domain Candidate Ingestion Engine
+- **Active Milestone:** Milestone 08 — LangGraph Workflow
+- **Active Task:** Task 8.1 — State Schema & Pipeline Node Design
 
 ---
 
@@ -93,6 +93,13 @@ flowchart TD
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 07 Verified:** Deterministic Validation Engine & Candidate Ingestion.
+  - Implemented `CandidateIngestionService` and `ingest_candidate_pair` in `src/ingestion/service.py`.
+  - Integrated dual HadeethEnc retrieval, deterministic verification, deduplication, and database persistence.
+  - Built 4 automated unit and integration tests in `tests/test_ingestion.py` covering verified persistence, rejection auditability, deduplication, and batch metrics.
+  - Full test suite achieves 30/30 passing in 0.22s.
+  - Empirical live ingestion executed against Neon PostgreSQL inserting 9 verified and 1 rejected candidates from Category 5.
+  - Proved candidate queue readiness via `get_next_verified_candidate()` (Candidate ID 66511: Agreed Upon #6953).
 - [x] **Milestone 06 Verified:** Source Catalogue Audit & Acceptance Policy.
   - Audited HadeethEnc root taxonomy (7 root categories, 452 subcategories, 2,776+ Hadiths).
   - Sampled Tier-1 categories (Virtues & Manners, Noble Qur’an) demonstrating 60–75% empirical pass rates.
@@ -116,10 +123,11 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- Milestone 07: Deterministic Validation Engine.
-  - Task 7.1: Build domain candidate ingestion service connecting HadeethEnc to database persistence.
-  - Task 7.2: Implement batch candidate loader and verification runner.
-  - Task 7.3: Comprehensive integration tests for end-to-end candidate ingestion and deduplication.
+- Milestone 08: LangGraph Workflow.
+  - Task 8.1: Define typed workflow state schema (`WorkflowState`) and error channels.
+  - Task 8.2: Implement graph nodes (Candidate Fetch/Select Node, Deterministic Verify Node, Idempotency Check Node, Persistence Node).
+  - Task 8.3: Configure conditional routing edges for fail-closed safe aborts.
+  - Task 8.4: Automated state graph unit tests with mock state transitions.
 
 ---
 
@@ -145,7 +153,7 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 07: Implement candidate ingestion service in `src/ingestion/` connecting HadeethEnc client, verifier, and database repository.
+Begin Milestone 08: Define LangGraph state schema and core workflow graph in `src/workflow/`.
 
 ---
 
