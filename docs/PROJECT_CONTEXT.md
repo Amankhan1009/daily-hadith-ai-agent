@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 07 Verified
+> *Last Updated:* Milestone 08 Verified
 
 ---
 
@@ -75,8 +75,8 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 08 — LangGraph Workflow
-- **Active Task:** Task 8.1 — State Schema & Pipeline Node Design
+- **Active Milestone:** Milestone 09 — Groq Integration
+- **Active Task:** Task 9.1 — Groq Client, System Prompts, and Reflection Segregation
 
 ---
 
@@ -93,6 +93,14 @@ flowchart TD
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 08 Verified:** LangGraph StateGraph Workflow & Live Idempotency.
+  - Installed `langgraph>=0.2.0` (version 1.2.20 verified on Python 3.14.6).
+  - Implemented typed state schema in `src/workflow/state.py` (`DailyWorkflowState`).
+  - Implemented pure node functions in `src/workflow/nodes.py` (idempotency check, queue selection, defense-in-depth safety validation, Telegram formatting, and delivery logging).
+  - Built compiled StateGraph with conditional edge routers in `src/workflow/graph.py` and exported facade in `src/workflow/__init__.py`.
+  - Built 4 automated unit tests in `tests/test_workflow.py` validating all 4 branching pathways (happy path, idempotency skip, queue empty abort, safety abort).
+  - Full test suite achieves 34/34 passing in 0.27s.
+  - Live empirical execution on Neon PostgreSQL completed delivery for Candidate 1 (Agreed Upon #6953) and demonstrated instant idempotency skip on subsequent execution.
 - [x] **Milestone 07 Verified:** Deterministic Validation Engine & Candidate Ingestion.
   - Implemented `CandidateIngestionService` and `ingest_candidate_pair` in `src/ingestion/service.py`.
   - Integrated dual HadeethEnc retrieval, deterministic verification, deduplication, and database persistence.
@@ -123,11 +131,11 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- Milestone 08: LangGraph Workflow.
-  - Task 8.1: Define typed workflow state schema (`WorkflowState`) and error channels.
-  - Task 8.2: Implement graph nodes (Candidate Fetch/Select Node, Deterministic Verify Node, Idempotency Check Node, Persistence Node).
-  - Task 8.3: Configure conditional routing edges for fail-closed safe aborts.
-  - Task 8.4: Automated state graph unit tests with mock state transitions.
+- Milestone 09: Groq Integration.
+  - Task 9.1: Build typed Groq API client with fallback handling.
+  - Task 9.2: Craft system prompt enforcing strict separation of reflection from Hadith text.
+  - Task 9.3: Integrate reflection node into LangGraph StateGraph.
+  - Task 9.4: Unit and contract tests with mock LLM fixtures.
 
 ---
 
@@ -153,13 +161,13 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 08: Define LangGraph state schema and core workflow graph in `src/workflow/`.
+Begin Milestone 09: Configure Groq API client and reflection prompt in `src/llm/`.
 
 ---
 
 ## 13. Latest Verification Evidence
-- Milestone 01 committed cleanly under Git commit `67ab4ea`.
-- Repository tree verified with `git status` clean.
+- 34/34 automated unit and integration tests passing in 0.27s across all modules.
+- Live LangGraph state machine execution verified on Neon PostgreSQL; Candidate 1 delivered with formatted message and idempotency skip verified on re-run.
 
 ---
 

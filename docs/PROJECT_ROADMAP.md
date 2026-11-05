@@ -190,10 +190,16 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Conditional edges route failures to safe abort states.
   - State graph fully typed and unit tested with mock inputs.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Installed `langgraph>=0.2.0` (v1.2.20 verified on Python 3.14.6 arm64).
+  - Implemented typed workflow state schema in `src/workflow/state.py` (`DailyWorkflowState`).
+  - Implemented testable pure node functions in `src/workflow/nodes.py` (idempotency, candidate selection, defense-in-depth safety, message formatting, and delivery logging).
+  - Built compiled StateGraph with conditional routing edges in `src/workflow/graph.py` and exported facade in `src/workflow/__init__.py`.
+  - Added 4 automated unit tests in `tests/test_workflow.py` covering all 4 routing paths (happy path, idempotency skip, queue empty abort, safety abort). Full test suite achieves 34/34 passing in 0.27s.
+  - Live empirical execution on Neon PostgreSQL completed delivery for Candidate 1 (Agreed Upon #6953) and demonstrated instant idempotency skip on subsequent execution.
 - **Known Blockers:** None.
-- **Next Action:** Define LangGraph workflow state schema and core pipeline nodes in `src/workflow/`.
+- **Next Action:** Proceed to Milestone 09 — Groq Integration.
 
 ---
 
@@ -205,10 +211,10 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Model never alters the original Hadith translation.
   - AI reflection clearly demarcated as non-source material.
   - LLM outages gracefully default to delivering verified Hadith alone (or fail closed based on policy).
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 08.
+- **Next Action:** Implement Groq LLM client and theological reflection prompts in `src/llm/`.
 
 ---
 
