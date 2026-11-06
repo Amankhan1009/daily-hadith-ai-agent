@@ -1,6 +1,6 @@
 # Daily Hadith AI Agent
 
-A production-oriented, fail-closed AI system delivering verified daily Hadith notifications to Telegram, orchestrated with **LangGraph**, verified deterministically with **Pydantic**, persisted on **Neon PostgreSQL**, and powered by **Groq**.
+A production-grade, fail-closed AI system and publicly accessible Telegram bot delivering verified daily Hadith notifications to subscribers, orchestrated with **LangGraph**, verified deterministically with **Pydantic**, persisted on **Neon PostgreSQL**, and powered by **Groq**.
 
 [![Python 3.14](https://img.shields.io/badge/python-3.14-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph%201.2-green.svg)](https://github.com/langchain-ai/langgraph)
@@ -27,28 +27,39 @@ A naive implementation might ask an LLM to *"send a daily Hadith from Sahih al-B
 
 ```mermaid
 flowchart TD
-    API["HadeethEnc API (GET)"] --> Fetch["Candidate Ingestion (EN + AR)"]
-    Fetch --> Match["Metadata Cross-Match & Provenance"]
-    Match --> Gate{"Passes Deterministic Gate?"}
-    
-    Gate -- No --> Abort["Persist Audit Log & Abort"]
-    Gate -- Yes --> DB["Neon PostgreSQL Candidate Queue"]
-    
-    DB --> LG["LangGraph Daily StateGraph"]
-    LG --> Idemp{"Idempotency Check (Unique Date?)"}
-    
-    Idemp -- Duplicate --> Skip["Skip Delivery (SKIPPED_IDEMPOTENT)"]
-    Idemp -- Unique --> SafeGate{"Safety Verification Gate"}
-    
-    SafeGate -- Invalid --> SafeAbort["Abort Fail-Closed"]
-    SafeGate -- Valid --> LLM["Groq LLM Reflection (Segregated)"]
-    
-    LLM --> Guard{"Passes Guardrails AI Gate?"}
-    Guard -- Violation --> Fallback["Omit Reflection (Fail-Safe)"]
-    Guard -- Valid --> Format["Format Canonical Notification"]
-    Fallback --> Format
-    Format --> TG["Telegram Bot Dispatch"]
-    TG --> Record["Record Delivery Log in Neon DB"]
+    subgraph Ingestion [1. Deterministic Ingestion Pipeline]
+        API["HadeethEnc API (GET)"] --> Fetch["Candidate Ingestion (EN + AR)"]
+        Fetch --> Match["Metadata Cross-Match & Provenance"]
+        Match --> Gate{"Passes Deterministic Gate?"}
+        Gate -- No --> Abort["Persist Audit Log & Abort"]
+        Gate -- Yes --> DB[("Neon PostgreSQL Candidate Queue")]
+    end
+
+    subgraph Webhook [2. Inbound Webhook & Multi-User Router]
+        Users["Public Telegram Users"] -->|"/start, /today, /stop, /help"| WH["FastAPI POST /telegram/webhook"]
+        WH --> Sec{"Verify Secret Token"}
+        Sec -- Invalid --> Reject["403 Forbidden"]
+        Sec -- Valid --> Router["Command Router"]
+        Router -->|/start (Idempotent)| SubDB[("Telegram Subscribers")]
+        Router -->|/today| InstantSend["Dispatch Today's Hadith"]
+        Router -->|/stop| Deact["Deactivate (is_active = false)"]
+    end
+
+    subgraph Daily [3. Daily Orchestration & Fan-Out Broadcast]
+        Sched["Daily Trigger: 10:00 AM IST"] --> LG["LangGraph Daily StateGraph"]
+        LG --> Idemp{"Idempotency Check"}
+        Idemp -- Already Sent --> Skip["Skip Execution"]
+        Idemp -- Fresh Run --> LLM["Groq LLM Reflection (Segregated)"]
+        LLM --> Guard{"Guardrails AI Gate"}
+        Guard -- Violation --> Fallback["Omit Reflection (Fail-Safe)"]
+        Guard -- Valid --> Format["Format Canonical Notification"]
+        Fallback --> Format
+        Format --> Broadcaster["Multi-User Fan-Out Broadcaster"]
+        SubDB -->|Active Subscribers| Broadcaster
+        Broadcaster -->|30 msg/sec Throttling| TG["Telegram Bot API"]
+        TG -->|403 Blocked| AutoDeact["Auto-Deactivate Blocked User"]
+        TG -->|Delivered| Record["Record Per-Subscriber Delivery Log"]
+    end
 ```
 
 ---
@@ -68,6 +79,7 @@ Every folder in this codebase includes its own dedicated README guide:
 | **[`src/llm/`](src/llm/)** | Groq LLM Reflections, Prompts & Graceful Fallback | **[`src/llm/README.md`](src/llm/README.md)** |
 | **[`src/guardrails/`](src/guardrails/)** | Deterministic Hallucination & Theological Guardrails | **[`src/guardrails/README.md`](src/guardrails/README.md)** |
 | **[`src/formatter/`](src/formatter/)** | Telegram Notification Formatter & HTML Payload Assembly | **[`src/formatter/README.md`](src/formatter/README.md)** |
+| **[`src/delivery/`](src/delivery/)** | Telegram Bot API Client, Webhook Router & Multi-User Broadcaster | **[`src/delivery/README.md`](src/delivery/README.md)** |
 | **[`tests/`](tests/)** | Automated Test Suite (55 unit & integration tests) | **[`tests/README.md`](tests/README.md)** |
 | **[`scripts/`](scripts/)** | Standalone Operational & Live E2E Verification Scripts | **[`scripts/README.md`](scripts/README.md)** |
 | **[`alembic/`](alembic/)** | Database Schema Migration Versions | **[`alembic/README.md`](alembic/README.md)** |
@@ -102,7 +114,7 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **09 — Groq Integration** | `Verified` | LLM reflection generation with strict segregation |
 | **10 — Guardrails AI** | `Verified` | Content validation & hallucination boundary enforcement |
 | **11 — Final Content Validation** | `Verified` | Assembled notification payloads & HTML escaping checks |
-| **12 — Telegram Integration** | `In Progress` | Telegram Bot API adapter & daily dispatch delivery |
+| **12 — Telegram Integration & Public Subscription Engine** | `In Progress` | Public bot webhook, subscriber registration, commands & rate-limited broadcast |
 
 For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 

@@ -6,14 +6,20 @@
 ---
 
 ## 1. What We Are Building
-An AI-assisted, production-grade notification application named **Daily Hadith AI Agent**. It delivers exactly **one verified English Hadith notification to a Telegram account every day at 10:00 AM Asia/Kolkata**.
+An AI-assisted, production-grade notification application and public Telegram bot named **Daily Hadith AI Agent**. It delivers verified English Hadith notifications to registered subscribers on Telegram every day at **10:00 AM Asia/Kolkata**.
 
-Each notification contains:
-1. Exact, unchanged English Hadith text retrieved from an approved source.
+Anyone can access the bot publicly via its shareable link (`https://t.me/<bot_username>`) to:
+1. **Subscribe via `/start`**: Receive a warm onboarding welcome, instant registration, and immediate delivery of today's verified Hadith.
+2. **On-Demand Query via `/today`**: Request today's verified Hadith at any time.
+3. **Opt-Out via `/stop`**: Unsubscribe immediately with instant confirmation.
+4. **Learn via `/help`**: Inspect theological boundaries, source provenance, translation attribution, and system guarantees.
+
+Each daily broadcast notification contains:
+1. Exact, unchanged English Hadith text retrieved from an approved source ([HadeethEnc](https://hadeethenc.com/en/home)).
 2. Verified collection name and citation reference.
 3. Canonical source-page URL.
 4. Source attribution and translation version metadata.
-5. An optional, clearly segregated and labeled AI reflection (if permitted by source terms).
+5. An optional, clearly segregated and labeled AI reflection (strictly non-canonical commentary).
 
 ---
 
@@ -30,21 +36,41 @@ This is a portfolio-grade demonstration of dependable, fail-closed AI engineerin
 
 ```mermaid
 flowchart TD
-    A[HadeethEnc API] --> B[Candidate Retrieval]
-    B --> C[English & Arabic Metadata Matching]
-    C --> D[Reference & Provenance Verification]
-    D --> E{Passes Deterministic Gate?}
-    E -- No --> F[Safe Abort & Log]
-    E -- Yes --> G{Idempotent & Unique?}
-    G -- Duplicate --> H[Skip Delivery]
-    G -- Unique --> I[LangGraph Orchestration]
-    I --> J[Groq LLM Reflection]
-    J --> K{Guardrails Valid?}
-    K -- Invalid --> L[Omit Reflection / Fallback]
-    K -- Valid --> M[Persist Execution Log]
-    L --> M
-    M --> N[Telegram Bot Dispatch]
-    N --> O[Record Delivery Status]
+    subgraph Ingestion & Verification [1. Ingestion & Deterministic Verification]
+        A[HadeethEnc API] --> B[Candidate Retrieval EN + AR]
+        B --> C[English & Arabic Metadata Matching]
+        C --> D[Reference & Provenance Regex Grammar]
+        D --> E{Passes Deterministic Gate?}
+        E -- No --> F[Safe Abort & Audit Log]
+        E -- Yes --> G[Neon PostgreSQL Candidate Queue]
+    end
+
+    subgraph User Interaction [2. Public Multi-User Webhook Engine]
+        TG_User[Public Telegram Users] -->|"/start, /today, /stop, /help"| WH[FastAPI Webhook: POST /telegram/webhook]
+        WH -->|Verify X-Telegram-Bot-Api-Secret-Token| SecGate{Valid Secret?}
+        SecGate -- Invalid --> SecReject[Reject 403 Forbidden]
+        SecGate -- Valid --> CmdRouter[Telegram Command Router]
+        CmdRouter -->|/start (Idempotent)| SubRepo[(Neon DB: TelegramSubscriber)]
+        CmdRouter -->|/stop| DeactSub[Deactivate Subscriber]
+        CmdRouter -->|/today or Onboarding| InstantSend[Dispatch Today's Hadith]
+    end
+
+    subgraph Daily Pipeline [3. LangGraph Orchestration & Daily Broadcast]
+        Scheduler[Daily Scheduler: 10:00 AM IST] --> LG[LangGraph Daily StateGraph]
+        LG --> IdempCheck{Idempotency Check}
+        IdempCheck -- Already Ran --> SkipDaily[Skip Run]
+        IdempCheck -- New Day --> SelectCandidate[Select Candidate Queue Item]
+        SelectCandidate --> GroqLLM[Groq LLM Reflection: gpt-oss-120b]
+        GroqLLM --> GuardGate{Guardrails AI Gate}
+        GuardGate -- Violation --> OmitReflection[Omit Reflection: Fail-Safe]
+        GuardGate -- Valid --> FormatMsg[Format Canonical HTML Payload]
+        OmitReflection --> FormatMsg
+        FormatMsg --> FanOut[Multi-User Fan-Out Broadcaster]
+        SubRepo -->|Active Subscribers| FanOut
+        FanOut -->|30 msg/sec Rate Limit Throttling| TG_Dispatch[Telegram Bot API: sendMessage]
+        TG_Dispatch -->|HTTP 403 Blocked| AutoDeact[Auto-Deactivate Blocked User]
+        TG_Dispatch -->|Success / Retry| RecordDelivery[Record Per-Subscriber Delivery Log]
+    end
 ```
 
 ---
@@ -75,8 +101,8 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 09 — Groq Integration
-- **Active Task:** Task 9.1 — Groq Client, System Prompts, and Reflection Segregation
+- **Active Milestone:** Milestone 12 — Telegram Integration & Public Subscription Engine
+- **Active Task:** Milestone 12 Architectural Specification & Implementation Planning (Subscriber DB Model, Inbound Webhook, Public Commands, Rate-Limited Fan-Out)
 
 ---
 
@@ -150,17 +176,40 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- Milestone 12: Telegram Integration.
-  - Task 12.1: Implement Telegram Bot API adapter in `src/delivery/telegram.py` using typed `httpx.Client`.
-  - Task 12.2: Implement network retry policies, exponential backoff, and rate limit handling (429 Retry-After).
-  - Task 12.3: Wire Telegram dispatch node into LangGraph StateGraph between `format_message` and `record_delivery`.
-  - Task 12.4: Unit and contract tests mocking Telegram Bot API responses (`sendMessage`).
+- **Milestone 12: Telegram Integration & Public Subscription Engine**
+  - **Task 12.1:** Database & Configuration Layer
+    - Add `TELEGRAM_WEBHOOK_SECRET` and `TELEGRAM_BOT_USERNAME` to `src/config.py`.
+    - Define `TelegramSubscriber` SQLAlchemy model (`id`, `chat_id`, `username`, `first_name`, `is_active`, `joined_at`, `updated_at`).
+    - Add subscriber CRUD methods to `src/database/repository.py` (`get_or_create_subscriber`, `deactivate_subscriber`, `get_active_subscribers`).
+    - Generate and apply Alembic migration for `telegram_subscribers` table.
+  - **Task 12.2:** Resilient Telegram Outbound Client (`src/delivery/telegram.py`)
+    - Outbound `sendMessage` client using typed `httpx.Client`.
+    - Exponential backoff retry for transient network errors and Telegram HTTP 429 (`Retry-After`).
+    - Webhook management helper methods (`setWebhook`, `getWebhookInfo`, `deleteWebhook`).
+  - **Task 12.3:** Inbound Telegram Webhook & Public Bot Router (`src/delivery/router.py`)
+    - FastAPI router mounting `POST /telegram/webhook`.
+    - Verification of incoming `X-Telegram-Bot-Api-Secret-Token` header (reject unauthorized requests with HTTP 403).
+    - Parsing inbound Telegram `Update` payloads (messages and commands).
+    - Public command dispatching:
+      - `/start`: Idempotent subscriber registration (or reactivation) + instant delivery of today's verified Hadith.
+      - `/today` / `/hadith`: Instant fetch & delivery of today's verified Hadith for any active or visiting user.
+      - `/stop` / `/unsubscribe`: Graceful opt-out (`is_active = False`) with instant confirmation message.
+      - `/help`: Detailed guidance on commands, theological guardrails, and source attribution.
+  - **Task 12.4:** Multi-User Fan-Out Delivery Engine & Error Recovery
+    - Broadcast engine iterating all active subscribers with rate-limit throttling (max 30 msgs/sec).
+    - Automated failure recovery: If Telegram returns HTTP 403 (`Forbidden: bot was blocked by the user`), immediately mark the subscriber as `is_active = False`.
+  - **Task 12.5:** LangGraph Daily Workflow Integration
+    - Update `src/workflow/nodes.py` to broadcast canonical HTML messages to all active subscribers via the fan-out engine.
+  - **Task 12.6:** Comprehensive Automated Testing
+    - Unit and contract tests in `tests/test_delivery.py` mocking Telegram API (success, 429 rate limit, 403 bot blocked, forged webhook token rejection, command routing).
 
 ---
 
 ## 9. Open Questions and Technical Blockers
-1. **Python 3.14 vs. 3.13:** The local development machine runs Python 3.14.6. When installing LangGraph, Guardrails AI, and FastAPI in Milestone 03, we will audit whether all dependencies have pre-built wheels for 3.14 or if a 3.13 virtual environment is required.
-2. **HadeethEnc API Contract:** Official GET endpoint fields, rate limits, and Arabic/English ID mapping must be audited against live API specs in Milestone 02.
+1. **Local Webhook Testing:** Telegram webhooks require a publicly accessible HTTPS URL. During local development, developers can either:
+   - Use reverse tunneling tools (e.g., ngrok or cloudflared) pointing to local port 8000, OR
+   - Run our automated test suite and mock webhook runner which injects signed webhook payloads directly into the FastAPI client without requiring external tunnels.
+2. **Neon DB Schema Migration:** Adding `TelegramSubscriber` requires an Alembic migration applied to Neon PostgreSQL.
 
 ---
 
@@ -169,18 +218,25 @@ flowchart TD
 - **ADR-002 (Fail-Closed Content Safety):** The system must fail closed. Under no circumstances may an LLM hallucinate, translate, or paraphrase sacred text. If validation fails, zero message is sent.
 - **ADR-003 (Deterministic Gatekeeping):** Theological validation is strictly deterministic (Pydantic + exact metadata matching). Generative AI is restricted to supplementary reflections only.
 - **ADR-004 (Telegram for V1 Delivery):** Telegram Bot API is the single confirmed notification channel for V1, utilizing secure bot tokens and explicit chat IDs.
+- **ADR-005 (Public Multi-User Subscription, Webhook Security & Rate Limiting):**
+  - Public access is enabled via an inbound Telegram webhook endpoint (`POST /telegram/webhook`) secured with `X-Telegram-Bot-Api-Secret-Token`.
+  - Subscribers are tracked in a dedicated `telegram_subscribers` table with idempotent `/start` registration (reactivates if inactive, ignores duplicates).
+  - Outbound daily broadcast iterates active subscribers with rate limit throttling (30 messages/second compliance) to prevent Telegram API 429 penalties.
+  - Delivery failures due to user blocking (HTTP 403 Forbidden) automatically update the subscriber record to `is_active = False` to prevent repeated futile dispatches.
 
 ---
 
 ## 11. Important Constraints
-- **Zero Hardcoded Secrets:** No API keys, bot tokens, or database URLs in source code or commits.
+- **Zero Hardcoded Secrets:** No API keys, bot tokens, webhook secrets, or database URLs in source code or commits.
 - **Attribution Integrity:** Every delivered message must retain publisher attribution, translation version, and canonical link.
-- **Idempotent Delivery:** The scheduler and persistence layer must ensure at most one delivery per calendar day.
+- **Idempotent Delivery:** The scheduler and persistence layer must ensure at most one delivery per calendar day per subscriber.
+- **Telegram Rate Limits:** Broadcasts must strictly respect Telegram's limit of 30 messages/second to avoid HTTP 429 penalties.
+- **Multi-User Isolation:** Each subscriber's interactions, opt-ins, and daily delivery records must be isolated.
 
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 12: Telegram Bot API adapter design in `src/delivery/` and secure bot integration.
+Present the finalized Milestone 12 plan, affected files, and implementation sequence to the user. Await explicit confirmation before generating code.
 
 ---
 
@@ -193,4 +249,5 @@ Begin Milestone 12: Telegram Bot API adapter design in `src/delivery/` and secur
 
 ## 14. Known Limitations
 - Current scope is restricted to curated Hadith available on HadeethEnc; complete exhaustive collections are out of scope for V1.
-- Delivery is single-channel (Telegram) for V1; push notifications (FCM) deferred to future iterations. 
+- Inbound webhooks require a publicly accessible HTTPS endpoint (or reverse tunnel during local development) to receive Telegram updates in real time.
+- Single notification channel (Telegram) for V1; mobile push (FCM) deferred to post-V1. 

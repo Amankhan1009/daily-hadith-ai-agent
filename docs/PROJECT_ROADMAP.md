@@ -20,20 +20,20 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | 02 | Source Validation Specification | Verified |
 | 03 | Configuration and Secrets | Verified |
 | 04 | Database Foundation | Verified |
-| 05 | HadeethEnc Integration | Not Started |
-| 06 | Source Catalogue Audit | Not Started |
-| 07 | Deterministic Validation | Not Started |
-| 08 | LangGraph Workflow | Not Started |
-| 09 | Groq Integration | Not Started |
-| 10 | Guardrails AI | Not Started |
-| 11 | Final Content Validation | Not Started |
-| 12 | Telegram Integration | Not Started |
-| 13 | Scheduling | Not Started |
-| 14 | History and Idempotency | Not Started |
+| 05 | HadeethEnc Integration | Verified |
+| 06 | Source Catalogue Audit | Verified |
+| 07 | Deterministic Validation | Verified |
+| 08 | LangGraph Workflow | Verified |
+| 09 | Groq Integration | Verified |
+| 10 | Guardrails AI | Verified |
+| 11 | Final Content Validation | Verified |
+| 12 | Telegram Integration & Public Subscription Engine | In Progress |
+| 13 | Scheduling & Daily Multi-User Broadcast | Not Started |
+| 14 | History & Per-Subscriber Daily Idempotency | Not Started |
 | 15 | Failure Handling | Not Started |
 | 16 | Automated Testing | Not Started |
 | 17 | Docker Containerization | Not Started |
-| 18 | Cloud Deployment | Not Started |
+| 18 | Cloud Deployment & Public Production Bot | Not Started |
 | 19 | Production Readiness | Not Started |
 | 20 | Future FCM Support (Evaluation) | Not Started |
 
@@ -261,27 +261,48 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 
 ---
 
-## Milestone 12 — Telegram Integration
-- **Goal:** Deliver formatted daily notifications via official Telegram Bot API.
-- **Scope:** Telegram bot adapter, HTML/Markdown formatting, message length safeguards, rate limit handling, and secure credential handling.
+## Milestone 12 — Telegram Integration & Public Subscription Engine
+- **Goal:** Enable anyone to publicly interact with the bot via a shareable link (`https://t.me/<bot_username>`), self-register or opt-out, query verified Hadiths on demand, and receive rate-limited daily notifications via the official Telegram Bot API.
+- **Scope:**
+  - **Outbound Telegram Adapter (`src/delivery/telegram.py`):** Typed `httpx.Client` adapter supporting message dispatch, webhook management (`setWebhook`, `getWebhookInfo`, `deleteWebhook`), and exponential backoff retry for network transients.
+  - **Subscriber Database Model (`src/database/models.py` & Alembic):** `TelegramSubscriber` table (`id`, `chat_id` BigInteger Unique Index, `username`, `first_name`, `is_active`, `joined_at`, `updated_at`).
+  - **Inbound Webhook Security (`src/delivery/router.py`):** FastAPI `POST /telegram/webhook` secured with constant-time verification of `X-Telegram-Bot-Api-Secret-Token`. Rejects missing, invalid, or forged tokens immediately with HTTP 403 Forbidden.
+  - **Duplicate Registration Handling:** Idempotent registration logic in `src/database/repository.py` (`get_or_create_subscriber`). If a user sends `/start` repeatedly:
+    - If already active: preserves existing record without creating duplicate rows or erroring.
+    - If previously deactivated (`is_active = False` via `/stop` or temporary block): reactivates (`is_active = True`) seamlessly.
+  - **Multi-User Isolation:** Each subscriber is keyed strictly by Telegram `chat_id`. Subscriber state, preferences, and delivery logs are isolated per user.
+  - **Public Bot Commands:**
+    - `/start`: Onboarding message, idempotent subscriber registration, and immediate dispatch of today's verified Hadith.
+    - `/today` or `/hadith`: Instant fetch & dispatch of today's verified Hadith without altering subscription status.
+    - `/stop` or `/unsubscribe`: Immediate opt-out (`is_active = False`) with clear confirmation message.
+    - `/help`: Detailed reference explaining command usage, theological guardrails (immutable Hadith text), and canonical HadeethEnc attribution.
+  - **Delivery Failure Recovery:**
+    - If Telegram returns HTTP 403 Forbidden (`bot was blocked by the user`), automatically mark `TelegramSubscriber.is_active = False` to prevent future futile delivery attempts.
+    - If Telegram returns HTTP 429 (`Too Many Requests`), honor `Retry-After` header with exponential backoff.
+  - **Telegram Rate Limits:** Fan-out broadcaster throttles delivery to a maximum of 30 messages/second in compliance with Telegram API broadcast guidelines.
+  - **Automated Test Suite (`tests/test_delivery.py`):** Unit and contract tests mocking Telegram Bot API endpoints (`sendMessage`, webhook updates, 403 bot-blocked, 429 rate limit, forged token rejection).
 - **Dependencies:** Milestone 03, Milestone 11.
 - **Acceptance Criteria:**
-  - Manually triggered test message delivers cleanly to Telegram chat.
-  - Source links, attribution, and AI disclaimer render legibly.
-  - Network and API failures handled with retry/backoff.
+  - Inbound webhook processes `/start`, `/today`, `/stop`, and `/help` reliably.
+  - Webhook rejects forged payloads lacking the valid secret token with HTTP 403.
+  - Multiple users can register, query, and opt-out independently with full data isolation.
+  - Repeated `/start` commands do not violate unique database constraints or duplicate subscriber records.
+  - Bot blocking (HTTP 403) automatically deactivates the subscriber.
+  - Outbound fan-out respects Telegram 30 msgs/sec rate limit.
 - **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 11.
+- **Next Action:** Review plan with user, await confirmation, then begin Task 12.1.
 
 ---
 
-## Milestone 13 — Scheduling
-- **Goal:** Implement scheduled execution triggering daily notifications at 10:00 AM Asia/Kolkata.
-- **Scope:** Scheduler architecture (APScheduler / cron trigger / cloud trigger), timezone handling, misfire protection, and restart recovery.
+## Milestone 13 — Scheduling & Daily Multi-User Broadcast
+- **Goal:** Implement scheduled execution triggering daily notifications at 10:00 AM Asia/Kolkata fanning out to all active subscribers.
+- **Scope:** Scheduler architecture (APScheduler / cron trigger / cloud trigger), timezone handling (`Asia/Kolkata`), multi-user fan-out coordination, Telegram 30 msg/sec rate-limit throttling, and misfire protection.
 - **Dependencies:** Milestone 12.
 - **Acceptance Criteria:**
-  - Job correctly fires according to `Asia/Kolkata` wall-clock time.
+  - Job correctly fires daily according to `Asia/Kolkata` wall-clock time (10:00 AM).
+  - Delivers to 100% of active opted-in subscribers without exceeding Telegram rate limits.
   - Misfire grace times and restart scenarios tested and documented.
 - **Current Status:** `Not Started`
 - **Verification Evidence:** None.
@@ -290,13 +311,14 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 
 ---
 
-## Milestone 14 — History and Idempotency
-- **Goal:** Prevent duplicate daily sends under retries, restarts, or scheduler hiccups.
-- **Scope:** Database unique constraints, execution lock records, and delivery attempt logging.
+## Milestone 14 — History & Per-Subscriber Daily Idempotency
+- **Goal:** Prevent duplicate daily sends per subscriber under retries, restarts, or scheduler hiccups.
+- **Scope:** Database composite unique constraint `(subscriber_id, scheduled_date)` or `(chat_id, scheduled_date)`, execution lock records, and per-user delivery attempt auditing.
 - **Dependencies:** Milestone 04, Milestone 13.
 - **Acceptance Criteria:**
-  - Re-running the scheduler within the same calendar day safely skips delivery.
-  - Delivery outcome and latency recorded for every trigger.
+  - Re-running the scheduler within the same calendar day safely skips already-delivered subscribers.
+  - Each subscriber receives exactly one notification per calendar day.
+  - Delivery outcome, latency, and message ID recorded for every subscriber dispatch.
 - **Current Status:** `Not Started`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
