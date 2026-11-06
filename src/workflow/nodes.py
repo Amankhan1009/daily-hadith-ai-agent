@@ -7,6 +7,7 @@ formatting, and delivery logging.
 """
 
 from datetime import date
+import logging
 from typing import Any, Optional
 from sqlalchemy.orm import Session
 
@@ -18,8 +19,11 @@ from src.database.repository import (
     record_delivery_log,
 )
 from src.database.session import get_db_session
+from src.guardrails import ReflectionValidator
 from src.llm import GroqReflectionClient
 from src.workflow.state import DailyWorkflowState
+
+logger = logging.getLogger(__name__)
 
 APPROVED_COLLECTIONS = {
     "Sahih al-Bukhari",
@@ -31,7 +35,7 @@ APPROVED_COLLECTIONS = {
 class WorkflowNodes:
     """
     Encapsulates all node functions of the Daily Hadith state graph.
-    Allows injecting an explicit database session and LLM client (e.g. in tests)
+    Allows injecting an explicit database session, LLM client, and validator
     or managing them dynamically via default providers.
     """
 
@@ -39,9 +43,11 @@ class WorkflowNodes:
         self,
         session: Optional[Session] = None,
         llm_client: Optional[GroqReflectionClient] = None,
+        validator: Optional[ReflectionValidator] = None,
     ) -> None:
         self._session = session
         self._llm_client = llm_client or GroqReflectionClient()
+        self._validator = validator or ReflectionValidator()
 
     def check_idempotency_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
@@ -166,9 +172,50 @@ class WorkflowNodes:
             "status": "PENDING",
         }
 
+    def validate_guardrails_node(self, state: DailyWorkflowState) -> dict[str, Any]:
+        """
+        Node 5: Enforce Guardrails AI safety checks on generated reflection.
+        If reflection violates theological boundaries, citations, or text leakage,
+        safely omit the reflection while allowing the authentic Hadith to proceed.
+        """
+        reflection = state.get("ai_reflection")
+        status = state.get("ai_reflection_status")
+
+        if not reflection or status != "GENERATED":
+            return {
+                "ai_reflection": None,
+                "ai_reflection_status": status,
+                "status": "PENDING",
+            }
+
+        english_text = state.get("english_text", "")
+        guard_res = self._validator.validate(
+            reflection=reflection,
+            source_hadith_text=english_text,
+        )
+
+        if not guard_res.is_valid:
+            logger.warning(
+                "Guardrail rejected AI reflection: [%s] %s. Omitting reflection fail-safe.",
+                guard_res.error_code,
+                guard_res.reason,
+            )
+            return {
+                "ai_reflection": None,
+                "ai_reflection_status": "OMITTED_GUARDRAIL_FAILED",
+                "error_message": f"Guardrail: {guard_res.reason}",
+                "status": "PENDING",
+            }
+
+        return {
+            "ai_reflection": guard_res.sanitized_text or reflection,
+            "ai_reflection_status": "PASSED_GUARDRAILS",
+            "status": "PENDING",
+        }
+
     def format_message_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
-        Node 5: Assemble the standardized notification message for Telegram.
+        Node 6: Assemble the standardized notification message for Telegram.
         """
         english_text = state.get("english_text", "").strip()
         attribution = state.get("attribution", "").strip()
@@ -177,6 +224,7 @@ class WorkflowNodes:
         grade = state.get("grade", "Authentic").strip()
         source_url = state.get("source_url", "").strip()
         ai_reflection = state.get("ai_reflection")
+        reflection_status = state.get("ai_reflection_status")
 
         message_parts = [
             "📖 *Hadith of the Day*",
@@ -190,7 +238,7 @@ class WorkflowNodes:
             f"🔗 *Canonical Source:* {source_url}",
         ]
 
-        if ai_reflection and state.get("ai_reflection_status") == "GENERATED":
+        if ai_reflection and reflection_status in ("GENERATED", "PASSED_GUARDRAILS"):
             message_parts.extend([
                 "",
                 "💡 *Reflection & Context:*",

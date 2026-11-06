@@ -6,7 +6,7 @@ A production-oriented, fail-closed AI system delivering verified daily Hadith no
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph%201.2-green.svg)](https://github.com/langchain-ai/langgraph)
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/tests-39%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-51%20passed%20(100%25)-brightgreen.svg)](tests/)
 
 ---
 
@@ -43,7 +43,10 @@ flowchart TD
     SafeGate -- Invalid --> SafeAbort["Abort Fail-Closed"]
     SafeGate -- Valid --> LLM["Groq LLM Reflection (Segregated)"]
     
-    LLM --> Format["Format Canonical Notification"]
+    LLM --> Guard{"Passes Guardrails AI Gate?"}
+    Guard -- Violation --> Fallback["Omit Reflection (Fail-Safe)"]
+    Guard -- Valid --> Format["Format Canonical Notification"]
+    Fallback --> Format
     Format --> TG["Telegram Bot Dispatch"]
     TG --> Record["Record Delivery Log in Neon DB"]
 ```
@@ -63,7 +66,8 @@ Every folder in this codebase includes its own dedicated README guide:
 | **[`src/ingestion/`](src/ingestion/)** | Candidate Ingestion Service & Deduplication | **[`src/ingestion/README.md`](src/ingestion/README.md)** |
 | **[`src/workflow/`](src/workflow/)** | LangGraph StateGraph Orchestration & Routing | **[`src/workflow/README.md`](src/workflow/README.md)** |
 | **[`src/llm/`](src/llm/)** | Groq LLM Reflections, Prompts & Graceful Fallback | **[`src/llm/README.md`](src/llm/README.md)** |
-| **[`tests/`](tests/)** | Automated Test Suite (39 unit & integration tests) | **[`tests/README.md`](tests/README.md)** |
+| **[`src/guardrails/`](src/guardrails/)** | Deterministic Hallucination & Theological Guardrails | **[`src/guardrails/README.md`](src/guardrails/README.md)** |
+| **[`tests/`](tests/)** | Automated Test Suite (51 unit & integration tests) | **[`tests/README.md`](tests/README.md)** |
 | **[`scripts/`](scripts/)** | Standalone Operational & Live E2E Verification Scripts | **[`scripts/README.md`](scripts/README.md)** |
 | **[`alembic/`](alembic/)** | Database Schema Migration Versions | **[`alembic/README.md`](alembic/README.md)** |
 
@@ -95,7 +99,8 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **07 — Deterministic Engine** | `Verified` | Ingestion service, queue persistence, live cloud verification |
 | **08 — LangGraph Workflow** | `Verified` | StateGraph state machine with conditional routing & live idempotency |
 | **09 — Groq Integration** | `Verified` | LLM reflection generation with strict segregation |
-| **10 — Guardrails AI** | `In Progress` | Content validation & hallucination boundary enforcement |
+| **10 — Guardrails AI** | `Verified` | Content validation & hallucination boundary enforcement |
+| **11 — Final Content Validation** | `In Progress` | Assembled notification payloads & formatting checks |
 
 For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 

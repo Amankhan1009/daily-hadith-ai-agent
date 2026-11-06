@@ -11,6 +11,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.orm import Session
 
+from src.guardrails import ReflectionValidator
 from src.llm import GroqReflectionClient
 from src.workflow.nodes import WorkflowNodes
 from src.workflow.state import DailyWorkflowState, create_initial_state
@@ -60,11 +61,12 @@ def route_after_verification(
 def build_daily_workflow_graph(
     session: Optional[Session] = None,
     llm_client: Optional[GroqReflectionClient] = None,
+    validator: Optional[ReflectionValidator] = None,
 ) -> CompiledStateGraph:
     """
-    Construct and compile the Daily Hadith LangGraph workflow with reflection node.
+    Construct and compile the Daily Hadith LangGraph workflow with reflection and guardrail nodes.
     """
-    nodes = WorkflowNodes(session=session, llm_client=llm_client)
+    nodes = WorkflowNodes(session=session, llm_client=llm_client, validator=validator)
     workflow = StateGraph(DailyWorkflowState)
 
     # 1. Register Graph Nodes
@@ -72,6 +74,7 @@ def build_daily_workflow_graph(
     workflow.add_node("fetch_candidate", nodes.fetch_candidate_node)
     workflow.add_node("verify_safety", nodes.verify_safety_node)
     workflow.add_node("generate_reflection", nodes.generate_reflection_node)
+    workflow.add_node("validate_guardrails", nodes.validate_guardrails_node)
     workflow.add_node("format_message", nodes.format_message_node)
     workflow.add_node("record_delivery", nodes.record_delivery_node)
 
@@ -107,7 +110,8 @@ def build_daily_workflow_graph(
     )
 
     # 4. Add Linear Edges
-    workflow.add_edge("generate_reflection", "format_message")
+    workflow.add_edge("generate_reflection", "validate_guardrails")
+    workflow.add_edge("validate_guardrails", "format_message")
     workflow.add_edge("format_message", "record_delivery")
     workflow.add_edge("record_delivery", END)
 
@@ -118,11 +122,12 @@ def run_daily_workflow(
     scheduled_date: Optional[str | date] = None,
     session: Optional[Session] = None,
     llm_client: Optional[GroqReflectionClient] = None,
+    validator: Optional[ReflectionValidator] = None,
 ) -> DailyWorkflowState:
     """
     Execute a complete run of the Daily Hadith state graph.
     """
-    graph = build_daily_workflow_graph(session=session, llm_client=llm_client)
+    graph = build_daily_workflow_graph(session=session, llm_client=llm_client, validator=validator)
     initial_state = create_initial_state(scheduled_date=scheduled_date)
     final_state = graph.invoke(initial_state)
     return final_state

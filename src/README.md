@@ -16,6 +16,7 @@ The application is structured into decoupled, domain-driven packages where each 
 | **[`src/ingestion/`](ingestion/)** | Candidate ingestion service, deduplication logic, and batch category scanner. | **[`src/ingestion/README.md`](ingestion/README.md)** |
 | **[`src/workflow/`](workflow/)** | LangGraph StateGraph state machine orchestrating daily idempotency, candidate selection, safety gates, and delivery. | **[`src/workflow/README.md`](workflow/README.md)** |
 | **[`src/llm/`](llm/)** | Groq LLM reflection client, negative prompt constraints, and resilient failover. | **[`src/llm/README.md`](llm/README.md)** |
+| **[`src/guardrails/`](guardrails/)** | Deterministic content validation, theological boundaries, text leakage, and citation verification. | **[`src/guardrails/README.md`](guardrails/README.md)** |
 
 ---
 
@@ -27,6 +28,7 @@ flowchart LR
     Ingestion --> DB["src/database/ (PostgreSQL Models & Session)"]
     DB --> Workflow["src/workflow/ (LangGraph Daily StateGraph)"]
     Workflow --> LLM["src/llm/ (Groq Reflection Client)"]
+    LLM --> Guardrails["src/guardrails/ (Safety Validator)"]
 ```
 
 ## Architectural Guidelines

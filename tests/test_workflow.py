@@ -156,3 +156,71 @@ def test_workflow_safety_gate_rejects_unapproved_collection(db_session: Session)
     assert "unapproved collection" in (final_state.get("error_message") or "")
     assert final_state.get("formatted_message") is None
     assert is_date_delivered(db_session, test_date) is False
+
+
+def test_workflow_guardrail_omits_violating_reflection_while_delivering_hadith(
+    db_session: Session, seed_verified_candidate
+):
+    """
+    Test 5 (Guardrail Fail-Safe Omission):
+    If the LLM returns an invalid reflection (e.g. issuing a theological fatwa),
+    the guardrail node catches it, strips the reflection, and delivers the authentic Hadith cleanly.
+    """
+    from unittest.mock import MagicMock
+    from src.llm import GroqReflectionClient, ReflectionResult
+
+    test_date = date(2026, 11, 5)
+
+    # Mock LLM client returning a prohibited theological fatwa
+    mock_llm = MagicMock(spec=GroqReflectionClient)
+    mock_llm.generate_reflection.return_value = ReflectionResult(
+        reflection="• It is hereby declared strictly haram for all believers to neglect this.",
+        status="GENERATED",
+        model="openai/gpt-oss-120b",
+    )
+
+    final_state = run_daily_workflow(
+        scheduled_date=test_date, session=db_session, llm_client=mock_llm
+    )
+
+    assert final_state["status"] == "COMPLETED"
+    assert final_state["ai_reflection"] is None
+    assert final_state["ai_reflection_status"] == "OMITTED_GUARDRAIL_FAILED"
+    assert "Reflection & Context" not in final_state["formatted_message"]
+    assert "The best of you are those who learn the Qur'an" in final_state["formatted_message"]
+    assert is_date_delivered(db_session, test_date) is True
+
+
+def test_workflow_guardrail_allows_clean_reflection(
+    db_session: Session, seed_verified_candidate
+):
+    """
+    Test 6 (Guardrail Clean Reflection Pass):
+    Compliant reflection passes guardrail node and is rendered in the message.
+    """
+    from unittest.mock import MagicMock
+    from src.llm import GroqReflectionClient, ReflectionResult
+
+    test_date = date(2026, 11, 5)
+
+    clean_reflection = (
+        "• Commit dedicated time daily to studying and practicing sacred guidance.\n"
+        "• Share beneficial understanding generously with family and peers.\n"
+        "• Let continuous learning cultivate humility and patience in character."
+    )
+    mock_llm = MagicMock(spec=GroqReflectionClient)
+    mock_llm.generate_reflection.return_value = ReflectionResult(
+        reflection=clean_reflection,
+        status="GENERATED",
+        model="openai/gpt-oss-120b",
+    )
+
+    final_state = run_daily_workflow(
+        scheduled_date=test_date, session=db_session, llm_client=mock_llm
+    )
+
+    assert final_state["status"] == "COMPLETED"
+    assert final_state["ai_reflection"] is not None
+    assert final_state["ai_reflection_status"] == "PASSED_GUARDRAILS"
+    assert "💡 *Reflection & Context:*" in final_state["formatted_message"]
+    assert is_date_delivered(db_session, test_date) is True
