@@ -224,3 +224,49 @@ def test_workflow_guardrail_allows_clean_reflection(
     assert final_state["ai_reflection_status"] == "PASSED_GUARDRAILS"
     assert "💡 <b>Reflection & Practical Context:</b>" in final_state["formatted_message"]
     assert is_date_delivered(db_session, test_date) is True
+
+from unittest.mock import MagicMock
+from src.database.repository import get_or_create_subscriber, get_subscriber_by_chat_id
+from src.delivery import TelegramBotBlockedError, TelegramClient
+
+
+def test_workflow_multi_user_fanout_and_block_deactivation(
+    db_session: Session, seed_verified_candidate
+):
+    """
+    Verify deliver_telegram node delivers to all active subscribers and
+    automatically marks blocked users as inactive on HTTP 403.
+    """
+    test_date = date(2026, 11, 20)
+
+    # Register 2 subscribers
+    sub1, _ = get_or_create_subscriber(db_session, chat_id=11111, username="user1")
+    sub2, _ = get_or_create_subscriber(db_session, chat_id=22222, username="user2")
+    db_session.commit()
+
+    # Mock TelegramClient: user1 succeeds, user2 blocks bot (HTTP 403)
+    mock_client = MagicMock(spec=TelegramClient)
+    mock_client.bot_token = "MOCK_TOKEN"
+
+    def mock_send(chat_id, text, **kwargs):
+        if chat_id == 22222:
+            raise TelegramBotBlockedError(chat_id=22222, message="Forbidden: bot was blocked")
+        return {"message_id": 777}
+
+    mock_client.send_message.side_effect = mock_send
+
+    final_state = run_daily_workflow(
+        scheduled_date=test_date,
+        session=db_session,
+        telegram_client=mock_client,
+    )
+
+    assert final_state["status"] == "COMPLETED"
+    assert final_state["subscribers_count"] == 2
+    assert final_state["delivered_count"] == 1
+    assert final_state["failed_count"] == 1
+
+    # Verify sub2 was auto-deactivated in database
+    db_session.expire_all()
+    assert get_subscriber_by_chat_id(db_session, 11111).is_active is True
+    assert get_subscriber_by_chat_id(db_session, 22222).is_active is False

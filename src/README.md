@@ -18,6 +18,7 @@ The application is structured into decoupled, domain-driven packages where each 
 | **[`src/llm/`](llm/)** | Groq LLM reflection client, negative prompt constraints, and resilient failover. | **[`src/llm/README.md`](llm/README.md)** |
 | **[`src/guardrails/`](guardrails/)** | Deterministic content validation, theological boundaries, text leakage, and citation verification. | **[`src/guardrails/README.md`](guardrails/README.md)** |
 | **[`src/formatter/`](formatter/)** | Canonical Telegram notification assembly, HTML escaping, and length constraint guards. | **[`src/formatter/README.md`](formatter/README.md)** |
+| **[`src/delivery/`](delivery/)** | Telegram Bot API client adapter, webhook router (`POST /telegram/webhook`), public commands, and multi-user fan-out delivery. | **[`src/delivery/README.md`](delivery/README.md)** |
 
 ---
 
@@ -31,6 +32,7 @@ flowchart LR
     Workflow --> LLM["src/llm/ (Groq Reflection Client)"]
     LLM --> Guardrails["src/guardrails/ (Safety Validator)"]
     Guardrails --> Formatter["src/formatter/ (Telegram Payload Assembly)"]
+    Formatter --> Delivery["src/delivery/ (Fan-Out Broadcaster & Webhook)"]
 ```
 
 ## Architectural Guidelines

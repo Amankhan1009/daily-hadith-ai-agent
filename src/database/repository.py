@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from src.database.models import DailyDeliveryLog, HadithCandidate
 
+from src.database.models import DailyDeliveryLog, HadithCandidate, TelegramSubscriber
 
 def get_candidate_by_source_id(session: Session, source_id: str) -> Optional[HadithCandidate]:
     """Retrieve a Hadith candidate by its HadeethEnc record ID."""
@@ -143,3 +144,81 @@ def record_delivery_log(
 
     session.flush()
     return log
+
+def get_subscriber_by_chat_id(session: Session, chat_id: int) -> Optional[TelegramSubscriber]:
+    """Retrieve a subscriber by their Telegram chat ID."""
+    stmt = select(TelegramSubscriber).where(TelegramSubscriber.chat_id == chat_id)
+    return session.scalars(stmt).first()
+
+
+def get_or_create_subscriber(
+    session: Session,
+    chat_id: int,
+    username: Optional[str] = None,
+    first_name: Optional[str] = None,
+) -> tuple[TelegramSubscriber, bool]:
+    """
+    Idempotently register or reactivate a subscriber.
+
+    Returns:
+        tuple[TelegramSubscriber, bool]: (subscriber, created)
+        - created is True if a new record was inserted.
+        - created is False if existing record was found or reactivated.
+    """
+    subscriber = get_subscriber_by_chat_id(session, chat_id)
+    now = datetime.now(timezone.utc)
+
+    if subscriber is None:
+        subscriber = TelegramSubscriber(
+            chat_id=chat_id,
+            username=username,
+            first_name=first_name,
+            is_active=True,
+            joined_at=now,
+            updated_at=now,
+        )
+        session.add(subscriber)
+        session.flush()
+        return subscriber, True
+
+    # Reactivate if previously opted out or blocked
+    needs_update = False
+    if not subscriber.is_active:
+        subscriber.is_active = True
+        needs_update = True
+    if username is not None and subscriber.username != username:
+        subscriber.username = username
+        needs_update = True
+    if first_name is not None and subscriber.first_name != first_name:
+        subscriber.first_name = first_name
+        needs_update = True
+
+    if needs_update:
+        subscriber.updated_at = now
+        session.flush()
+
+    return subscriber, False
+
+
+def deactivate_subscriber(session: Session, chat_id: int) -> bool:
+    """
+    Deactivate a subscriber by chat ID (opt-out via /stop or bot blocked).
+    Returns True if an active subscriber was deactivated, False otherwise.
+    """
+    subscriber = get_subscriber_by_chat_id(session, chat_id)
+    if subscriber is not None and subscriber.is_active:
+        subscriber.is_active = False
+        subscriber.updated_at = datetime.now(timezone.utc)
+        session.flush()
+        return True
+    return False
+
+
+def get_active_subscribers(session: Session) -> list[TelegramSubscriber]:
+    """Retrieve all active subscribers for daily broadcast dispatch."""
+    stmt = (
+        select(TelegramSubscriber)
+        .where(TelegramSubscriber.is_active == True)  # noqa: E712
+        .order_by(TelegramSubscriber.id.asc())
+    )
+    return list(session.scalars(stmt).all())

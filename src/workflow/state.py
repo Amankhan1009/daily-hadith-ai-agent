@@ -41,9 +41,12 @@ class DailyWorkflowState(TypedDict, total=False):
     ai_reflection: Optional[str]
     ai_reflection_status: str  # "NOT_GENERATED" | "GENERATED" | "OMITTED" | "FAILED"
 
-    # Notification Formatting & Dispatch
+    # Notification Formatting & Multi-User Dispatch
     formatted_message: Optional[str]
     telegram_message_id: Optional[int]
+    subscribers_count: Optional[int]
+    delivered_count: Optional[int]
+    failed_count: Optional[int]
 
     # Execution Lifecycle & Auditing
     # "PENDING" | "COMPLETED" | "SKIPPED_IDEMPOTENT" | "ABORTED_NO_CANDIDATE" | "ABORTED_VALIDATION_FAILED" | "FAILED"

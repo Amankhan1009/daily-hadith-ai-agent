@@ -101,12 +101,18 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 12 — Telegram Integration & Public Subscription Engine
-- **Active Task:** Milestone 12 Architectural Specification & Implementation Planning (Subscriber DB Model, Inbound Webhook, Public Commands, Rate-Limited Fan-Out)
+- **Active Milestone:** Milestone 13 — Scheduling & Daily Multi-User Broadcast
+- **Active Task:** Task 13.1 — Daily Multi-User Broadcast Scheduler Architecture (10:00 AM IST)
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 12 Verified:** Telegram Integration & Public Subscription Engine.
+  - Implemented `TelegramSubscriber` SQLAlchemy model (`chat_id` BigInteger unique index) and applied migration `547b6992865a_create_telegram_subscribers.py` to Neon PostgreSQL.
+  - Implemented `TelegramClient` in `src/delivery/telegram.py` with exponential backoff, rate limiting (25 msg/sec), HTTP 429 `Retry-After` parsing, HTTP 403 `TelegramBotBlockedError` handling, and webhook administration methods.
+  - Built FastAPI router in `src/delivery/router.py` with timing-safe `X-Telegram-Bot-Api-Secret-Token` verification (HTTP 403 on invalid token) and public commands (`/start`, `/today`, `/stop`, `/help`).
+  - Wired `deliver_telegram_node` into LangGraph StateGraph between `format_message` and `record_delivery` supporting multi-user fan-out and automatic subscriber deactivation on HTTP 403.
+  - Automated test suite achieves **68/68 passing tests** (100% pass rate) across all 9 test modules.
 - [x] **Milestone 01 Verified:** Project foundation, Git setup, directories, roadmap, context, and README committed (`67ab4ea`, `8162470`).
 - [x] **Milestone 02 Verified:** Source Validation Specification (`58b7256`).
   - Live empirical audit of HadeethEnc endpoints.
@@ -176,40 +182,17 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- **Milestone 12: Telegram Integration & Public Subscription Engine**
-  - **Task 12.1:** Database & Configuration Layer
-    - Add `TELEGRAM_WEBHOOK_SECRET` and `TELEGRAM_BOT_USERNAME` to `src/config.py`.
-    - Define `TelegramSubscriber` SQLAlchemy model (`id`, `chat_id`, `username`, `first_name`, `is_active`, `joined_at`, `updated_at`).
-    - Add subscriber CRUD methods to `src/database/repository.py` (`get_or_create_subscriber`, `deactivate_subscriber`, `get_active_subscribers`).
-    - Generate and apply Alembic migration for `telegram_subscribers` table.
-  - **Task 12.2:** Resilient Telegram Outbound Client (`src/delivery/telegram.py`)
-    - Outbound `sendMessage` client using typed `httpx.Client`.
-    - Exponential backoff retry for transient network errors and Telegram HTTP 429 (`Retry-After`).
-    - Webhook management helper methods (`setWebhook`, `getWebhookInfo`, `deleteWebhook`).
-  - **Task 12.3:** Inbound Telegram Webhook & Public Bot Router (`src/delivery/router.py`)
-    - FastAPI router mounting `POST /telegram/webhook`.
-    - Verification of incoming `X-Telegram-Bot-Api-Secret-Token` header (reject unauthorized requests with HTTP 403).
-    - Parsing inbound Telegram `Update` payloads (messages and commands).
-    - Public command dispatching:
-      - `/start`: Idempotent subscriber registration (or reactivation) + instant delivery of today's verified Hadith.
-      - `/today` / `/hadith`: Instant fetch & delivery of today's verified Hadith for any active or visiting user.
-      - `/stop` / `/unsubscribe`: Graceful opt-out (`is_active = False`) with instant confirmation message.
-      - `/help`: Detailed guidance on commands, theological guardrails, and source attribution.
-  - **Task 12.4:** Multi-User Fan-Out Delivery Engine & Error Recovery
-    - Broadcast engine iterating all active subscribers with rate-limit throttling (max 30 msgs/sec).
-    - Automated failure recovery: If Telegram returns HTTP 403 (`Forbidden: bot was blocked by the user`), immediately mark the subscriber as `is_active = False`.
-  - **Task 12.5:** LangGraph Daily Workflow Integration
-    - Update `src/workflow/nodes.py` to broadcast canonical HTML messages to all active subscribers via the fan-out engine.
-  - **Task 12.6:** Comprehensive Automated Testing
-    - Unit and contract tests in `tests/test_delivery.py` mocking Telegram API (success, 429 rate limit, 403 bot blocked, forged webhook token rejection, command routing).
+- **Milestone 13: Scheduling & Daily Multi-User Broadcast**
+  - **Task 13.1:** Multi-User Daily Broadcast Runner CLI (`src/workflow/daily_runner.py`).
+  - **Task 13.2:** Idempotent Daily Execution Coordination (10:00 AM Asia/Kolkata).
+  - **Task 13.3:** Cloud Scheduler & Cron Integration Specification.
 
 ---
 
 ## 9. Open Questions and Technical Blockers
 1. **Local Webhook Testing:** Telegram webhooks require a publicly accessible HTTPS URL. During local development, developers can either:
    - Use reverse tunneling tools (e.g., ngrok or cloudflared) pointing to local port 8000, OR
-   - Run our automated test suite and mock webhook runner which injects signed webhook payloads directly into the FastAPI client without requiring external tunnels.
-2. **Neon DB Schema Migration:** Adding `TelegramSubscriber` requires an Alembic migration applied to Neon PostgreSQL.
+   - Run our automated test suite which tests signed webhook payloads directly via FastAPI TestClient.
 
 ---
 
@@ -236,14 +219,14 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Present the finalized Milestone 12 plan, affected files, and implementation sequence to the user. Await explicit confirmation before generating code.
+Begin Milestone 13: Multi-User Daily Broadcast Runner CLI and Scheduler Architecture.
 
 ---
 
 ## 13. Latest Verification Evidence
-- **55/55 Automated Tests Passing:** 100% pass rate in 1.52s across all modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_workflow.py`).
-- **Telegram HTML Payload Assembly Verified:** Preserves sacred text fidelity, selective quote escaping (`Qur'an`), and enforces character limit guards (<4096 chars).
-- **Full End-to-End Live Execution Verified:** Executed `scripts/test_e2e_workflow.py` with live Groq Cloud API (`openai/gpt-oss-120b`) and live Neon PostgreSQL database.
+- **68/68 Automated Tests Passing:** 100% pass rate in 12.3s across all 9 modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_workflow.py`).
+- **Telegram Public Webhook & Commands Verified:** Timing-safe secret verification (`hmac.compare_digest`), `/start` idempotent registration, `/today` on-demand retrieval, `/stop` opt-out, and `/help` guidance.
+- **Multi-User Fan-Out Verified:** Rate-limited delivery to active subscribers with automatic deactivation of blocked users (HTTP 403).
 
 ---
 

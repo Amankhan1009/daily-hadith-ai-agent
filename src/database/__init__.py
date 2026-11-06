@@ -2,10 +2,14 @@
 Database Package Public Exports.
 """
 
-from src.database.models import DailyDeliveryLog, HadithCandidate
+from src.database.models import DailyDeliveryLog, HadithCandidate, TelegramSubscriber
 from src.database.repository import (
+    deactivate_subscriber,
+    get_active_subscribers,
     get_candidate_by_source_id,
     get_next_verified_candidate,
+    get_or_create_subscriber,
+    get_subscriber_by_chat_id,
     is_date_delivered,
     is_delivery_recorded,
     record_delivery_log,

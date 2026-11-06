@@ -27,8 +27,8 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | 09 | Groq Integration | Verified |
 | 10 | Guardrails AI | Verified |
 | 11 | Final Content Validation | Verified |
-| 12 | Telegram Integration & Public Subscription Engine | In Progress |
-| 13 | Scheduling & Daily Multi-User Broadcast | Not Started |
+| 12 | Telegram Integration & Public Subscription Engine | Verified |
+| 13 | Scheduling & Daily Multi-User Broadcast | In Progress |
 | 14 | History & Per-Subscriber Daily Idempotency | Not Started |
 | 15 | Failure Handling | Not Started |
 | 16 | Automated Testing | Not Started |
@@ -289,10 +289,15 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Repeated `/start` commands do not violate unique database constraints or duplicate subscriber records.
   - Bot blocking (HTTP 403) automatically deactivates the subscriber.
   - Outbound fan-out respects Telegram 30 msgs/sec rate limit.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented `TelegramSubscriber` SQLAlchemy model (`chat_id` BigInteger unique index) and applied migration `547b6992865a_create_telegram_subscribers.py` to Neon PostgreSQL.
+  - Implemented `TelegramClient` in `src/delivery/telegram.py` with retry backoff, HTTP 429 `Retry-After` parsing, HTTP 403 `TelegramBotBlockedError` handling, and webhook administration methods (`set_webhook`, `get_webhook_info`, `delete_webhook`).
+  - Built FastAPI router in `src/delivery/router.py` verifying `X-Telegram-Bot-Api-Secret-Token` via `hmac.compare_digest` (HTTP 403 on invalid secret) and public commands (`/start`, `/today`, `/stop`, `/help`).
+  - Wired `deliver_telegram_node` into LangGraph StateGraph between `format_message` and `record_delivery` with multi-user fan-out and automatic subscriber deactivation on HTTP 403.
+  - Automated test suite achieves **68/68 passing tests** (100% pass rate) across all 9 test modules.
 - **Known Blockers:** None.
-- **Next Action:** Review plan with user, await confirmation, then begin Task 12.1.
+- **Next Action:** Proceed to Milestone 13 — Scheduling & Daily Multi-User Broadcast.
 
 ---
 

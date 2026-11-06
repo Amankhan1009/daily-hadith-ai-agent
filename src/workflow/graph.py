@@ -16,6 +16,7 @@ from src.llm import GroqReflectionClient
 from src.workflow.nodes import WorkflowNodes
 from src.workflow.state import DailyWorkflowState, create_initial_state
 
+from src.delivery import TelegramClient
 
 # ---------------------------------------------------------------------------
 # Conditional Edge Routers
@@ -58,15 +59,24 @@ def route_after_verification(
 # StateGraph Builder
 # ---------------------------------------------------------------------------
 
+from src.delivery import TelegramClient
+
+
 def build_daily_workflow_graph(
     session: Optional[Session] = None,
     llm_client: Optional[GroqReflectionClient] = None,
     validator: Optional[ReflectionValidator] = None,
+    telegram_client: Optional[TelegramClient] = None,
 ) -> CompiledStateGraph:
     """
-    Construct and compile the Daily Hadith LangGraph workflow with reflection and guardrail nodes.
+    Construct and compile the Daily Hadith LangGraph workflow with Telegram delivery.
     """
-    nodes = WorkflowNodes(session=session, llm_client=llm_client, validator=validator)
+    nodes = WorkflowNodes(
+        session=session,
+        llm_client=llm_client,
+        validator=validator,
+        telegram_client=telegram_client,
+    )
     workflow = StateGraph(DailyWorkflowState)
 
     # 1. Register Graph Nodes
@@ -76,6 +86,7 @@ def build_daily_workflow_graph(
     workflow.add_node("generate_reflection", nodes.generate_reflection_node)
     workflow.add_node("validate_guardrails", nodes.validate_guardrails_node)
     workflow.add_node("format_message", nodes.format_message_node)
+    workflow.add_node("deliver_telegram", nodes.deliver_telegram_node)
     workflow.add_node("record_delivery", nodes.record_delivery_node)
 
     # 2. Set Entry Point
@@ -112,7 +123,8 @@ def build_daily_workflow_graph(
     # 4. Add Linear Edges
     workflow.add_edge("generate_reflection", "validate_guardrails")
     workflow.add_edge("validate_guardrails", "format_message")
-    workflow.add_edge("format_message", "record_delivery")
+    workflow.add_edge("format_message", "deliver_telegram")
+    workflow.add_edge("deliver_telegram", "record_delivery")
     workflow.add_edge("record_delivery", END)
 
     return workflow.compile()
@@ -123,11 +135,18 @@ def run_daily_workflow(
     session: Optional[Session] = None,
     llm_client: Optional[GroqReflectionClient] = None,
     validator: Optional[ReflectionValidator] = None,
+    telegram_client: Optional[TelegramClient] = None,
 ) -> DailyWorkflowState:
     """
     Execute a complete run of the Daily Hadith state graph.
     """
-    graph = build_daily_workflow_graph(session=session, llm_client=llm_client, validator=validator)
+    graph = build_daily_workflow_graph(
+        session=session,
+        llm_client=llm_client,
+        validator=validator,
+        telegram_client=telegram_client,
+    )
     initial_state = create_initial_state(scheduled_date=scheduled_date)
     final_state = graph.invoke(initial_state)
     return final_state
+

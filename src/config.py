@@ -59,14 +59,22 @@ class Settings(BaseSettings):
         description="Maximum HTTP retry attempts on transient network errors",
     )
 
-    # Telegram Delivery Credentials (Optional in dev, required in prod)
+    # Telegram Delivery Credentials & Public Bot Configuration
     telegram_bot_token: Optional[str] = Field(
         default=None,
         description="Telegram bot token obtained from @BotFather",
     )
     telegram_chat_id: Optional[str] = Field(
         default=None,
-        description="Destination Telegram user or channel Chat ID",
+        description="Optional default destination Telegram chat ID (fallback/admin)",
+    )
+    telegram_webhook_secret: Optional[str] = Field(
+        default=None,
+        description="Secret token verifying incoming webhook requests from Telegram",
+    )
+    telegram_bot_username: Optional[str] = Field(
+        default=None,
+        description="Public Telegram bot username without @ symbol (e.g. DailyHadithAiBot)",
     )
 
     # Groq LLM Configuration
@@ -159,6 +167,9 @@ class Settings(BaseSettings):
             "groq_configured": bool(self.groq_api_key),
             "groq_model": self.groq_model,
             "tavily_configured": bool(self.tavily_api_key),
+            "telegram_configured": bool(self.telegram_bot_token),
+            "telegram_webhook_configured": bool(self.telegram_webhook_secret),
+            "telegram_bot_username": self.telegram_bot_username or "<NOT_SET>",           
         }
 
 

@@ -9,10 +9,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
-from src.database.models import DailyDeliveryLog, HadithCandidate
+from src.database.models import DailyDeliveryLog, HadithCandidate, TelegramSubscriber
 from src.database.repository import (
+    deactivate_subscriber,
+    get_active_subscribers,
     get_candidate_by_source_id,
     get_next_verified_candidate,
+    get_or_create_subscriber,
+    get_subscriber_by_chat_id,
     is_date_delivered,
     record_delivery_log,
     save_candidate,
@@ -212,3 +216,73 @@ def test_unique_constraint_on_scheduled_date(db_session: Session):
 
     with pytest.raises(IntegrityError):
         db_session.commit()
+
+def test_get_or_create_subscriber_lifecycle(db_session: Session):
+    """Verify creating a new subscriber and looking them up."""
+    sub, created = get_or_create_subscriber(
+        session=db_session,
+        chat_id=987654321,
+        username="aman_test",
+        first_name="Aman",
+    )
+    db_session.commit()
+
+    assert created is True
+    assert sub.id is not None
+    assert sub.chat_id == 987654321
+    assert sub.username == "aman_test"
+    assert sub.first_name == "Aman"
+    assert sub.is_active is True
+
+    # Duplicate /start: returns existing, created is False, no duplicate row
+    sub2, created2 = get_or_create_subscriber(
+        session=db_session,
+        chat_id=987654321,
+        username="aman_updated",
+        first_name="Aman New",
+    )
+    db_session.commit()
+
+    assert created2 is False
+    assert sub2.id == sub.id
+    assert sub2.username == "aman_updated"
+    assert sub2.first_name == "Aman New"
+    assert sub2.is_active is True
+
+
+def test_deactivate_and_reactivate_subscriber(db_session: Session):
+    """Verify opting out via deactivate_subscriber and reactivating via get_or_create_subscriber."""
+    sub, _ = get_or_create_subscriber(session=db_session, chat_id=11223344)
+    db_session.commit()
+    assert sub.is_active is True
+
+    # Deactivate (e.g. user sends /stop or blocks bot)
+    deactivated = deactivate_subscriber(session=db_session, chat_id=11223344)
+    db_session.commit()
+    assert deactivated is True
+
+    retrieved = get_subscriber_by_chat_id(db_session, 11223344)
+    assert retrieved is not None
+    assert retrieved.is_active is False
+
+    # Deactivating again returns False (already inactive)
+    assert deactivate_subscriber(session=db_session, chat_id=11223344) is False
+
+    # Reactivate via /start
+    sub_reactivated, created = get_or_create_subscriber(session=db_session, chat_id=11223344)
+    db_session.commit()
+    assert created is False
+    assert sub_reactivated.is_active is True
+
+
+def test_get_active_subscribers(db_session: Session):
+    """Verify get_active_subscribers returns only users where is_active is True."""
+    get_or_create_subscriber(session=db_session, chat_id=101, username="user1")
+    get_or_create_subscriber(session=db_session, chat_id=102, username="user2")
+    get_or_create_subscriber(session=db_session, chat_id=103, username="user3")
+    deactivate_subscriber(session=db_session, chat_id=102)
+    db_session.commit()
+
+    active = get_active_subscribers(db_session)
+    active_chat_ids = [s.chat_id for s in active]
+    assert active_chat_ids == [101, 103]

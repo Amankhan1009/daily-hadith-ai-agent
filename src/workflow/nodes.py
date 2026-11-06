@@ -8,21 +8,26 @@ formatting, and delivery logging.
 
 from datetime import date
 import logging
+import time
 from typing import Any, Optional
 from sqlalchemy.orm import Session
 
+from src.config import get_settings
 from src.database.models import HadithCandidate
 from src.database.repository import (
+    deactivate_subscriber,
+    get_active_subscribers,
     get_candidate_by_source_id,
     get_next_verified_candidate,
     is_date_delivered,
     record_delivery_log,
 )
 from src.database.session import get_db_session
+from src.delivery import TelegramBotBlockedError, TelegramClient
+from src.formatter import format_daily_hadith_message
 from src.guardrails import ReflectionValidator
 from src.llm import GroqReflectionClient
 from src.workflow.state import DailyWorkflowState
-from src.formatter import format_daily_hadith_message
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +50,12 @@ class WorkflowNodes:
         session: Optional[Session] = None,
         llm_client: Optional[GroqReflectionClient] = None,
         validator: Optional[ReflectionValidator] = None,
+        telegram_client: Optional[TelegramClient] = None,
     ) -> None:
         self._session = session
         self._llm_client = llm_client or GroqReflectionClient()
         self._validator = validator or ReflectionValidator()
+        self._telegram_client = telegram_client
 
     def check_idempotency_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
@@ -242,6 +249,82 @@ class WorkflowNodes:
             "formatted_message": payload.text,
             "status": "PENDING",
         }
+
+    def deliver_telegram_node(self, state: DailyWorkflowState) -> dict[str, Any]:
+        """
+        Node 7: Fan out the formatted Hadith notification to all active subscribers.
+        Enforces 25 msg/sec rate limiting and auto-deactivates blocked users (HTTP 403).
+        """
+        formatted_message = state.get("formatted_message")
+        if not formatted_message:
+            return {
+                "status": "FAILED",
+                "error_message": "No formatted message available for delivery.",
+            }
+
+        client = self._telegram_client or TelegramClient()
+        if not client.bot_token:
+            logger.info("Telegram bot token not configured in dev/test mode. Skipping network dispatch.")
+            return {
+                "delivered_count": 0,
+                "subscribers_count": 0,
+                "status": "PENDING",
+            }
+
+        def _execute(session: Session) -> dict[str, Any]:
+            active_subscribers = get_active_subscribers(session)
+            settings = get_settings()
+
+            # Target subscribers or fallback to default TELEGRAM_CHAT_ID
+            target_chat_ids = [sub.chat_id for sub in active_subscribers]
+            if not target_chat_ids and settings.telegram_chat_id:
+                try:
+                    target_chat_ids = [int(settings.telegram_chat_id)]
+                except ValueError:
+                    target_chat_ids = [settings.telegram_chat_id]
+
+            if not target_chat_ids:
+                logger.warning("No active subscribers found for daily broadcast.")
+                return {
+                    "subscribers_count": 0,
+                    "delivered_count": 0,
+                    "failed_count": 0,
+                    "status": "PENDING",
+                }
+
+            first_message_id = None
+            delivered_count = 0
+            failed_count = 0
+
+            for chat_id in target_chat_ids:
+                try:
+                    res = client.send_message(chat_id=chat_id, text=formatted_message)
+                    if first_message_id is None and isinstance(res, dict):
+                        first_message_id = res.get("message_id")
+                    delivered_count += 1
+                    time.sleep(0.04)  # Rate limit throttle: 25 msg/sec
+                except TelegramBotBlockedError:
+                    logger.info("Subscriber %s blocked the bot. Marking inactive...", chat_id)
+                    if isinstance(chat_id, int):
+                        deactivate_subscriber(session, chat_id)
+                        session.commit()
+                    failed_count += 1
+                except Exception as exc:
+                    logger.error("Failed to deliver daily Hadith to chat %s: %s", chat_id, exc)
+                    failed_count += 1
+
+            return {
+                "telegram_message_id": first_message_id,
+                "subscribers_count": len(target_chat_ids),
+                "delivered_count": delivered_count,
+                "failed_count": failed_count,
+                "status": "PENDING",
+            }
+
+        if self._session is not None:
+            return _execute(self._session)
+        with get_db_session() as session:
+            return _execute(session)
 
     def record_delivery_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """

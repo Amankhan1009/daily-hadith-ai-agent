@@ -8,7 +8,7 @@ status, and idempotent daily delivery tracking.
 from datetime import date, datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.session import Base
@@ -110,3 +110,49 @@ class DailyDeliveryLog(Base):
 
     # Relationships
     candidate: Mapped[Optional["HadithCandidate"]] = relationship(back_populates="delivery_logs")
+
+class TelegramSubscriber(Base):
+    """
+    Subscribers registered via public Telegram /start for daily Hadith notifications.
+    """
+
+    __tablename__ = "telegram_subscribers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger,
+        unique=True,
+        index=True,
+        nullable=False,
+        doc="Telegram unique 64-bit chat ID",
+    )
+    username: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        doc="Telegram @username without symbol",
+    )
+    first_name: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        doc="Telegram user first name",
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        index=True,
+        nullable=False,
+        doc="Subscription status: True if opted in, False if opted out via /stop or blocked",
+    )
+    joined_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        nullable=False,
+        doc="Initial subscription registration timestamp",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+        nullable=False,
+        doc="Timestamp of latest command interaction or status change",
+    )

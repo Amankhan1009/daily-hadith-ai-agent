@@ -11,14 +11,15 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | Test Module | Component Tested | Test Count | Key Invariants Verified |
 |---|---|---|---|
 | **[`test_config.py`](test_config.py)** | `src.config` | 6 tests | IANA timezone validation (`Asia/Kolkata`), numeric boundaries, secret masking in logs, env overrides. |
-| **[`test_database.py`](test_database.py)** | `src.database` | 5 tests | Candidate persistence, updating records, daily delivery idempotency, unique date constraint. |
-| **[`test_hadeethenc.py`](test_hadeethenc.py)** | `src.hadeethenc` | 15 tests | API client mocking, 404/500/timeout handling, Arabic text identity, regex citation extraction, bibliographic rejection. |
+| **[`test_database.py`](test_database.py)** | `src.database` | 8 tests | Candidate persistence, updating records, subscriber lifecycle, idempotent `/start`, active subscriber filtering, unique date constraint. |
+| **[`test_delivery.py`](test_delivery.py)** | `src.delivery` | 9 tests | TelegramClient sendMessage mock, 4096 character limits, HTTP 403 bot blocked handling, HTTP 429 rate limit retries, webhook secret token validation, `/start`, `/stop`, `/help` routing. |
+| **[`test_formatter.py`](test_formatter.py)** | `src.formatter` | 4 tests | Telegram HTML payload formatting, quote preservation, HTML entity escaping, 4096 character limits. |
+| **[`test_guardrails.py`](test_guardrails.py)** | `src.guardrails` | 10 tests | Fatwa prohibitions, unauthorized citations, text leakage detection, length limits, bullet formatting. |
+| **[`test_hadeethenc.py`](test_hadeethenc.py)** | `src.hadeethenc` | 14 tests | API client mocking, 404/500/timeout handling, Arabic text identity, regex citation extraction, bibliographic rejection. |
 | **[`test_ingestion.py`](test_ingestion.py)** | `src.ingestion` | 4 tests | Verified candidate persistence, rejected audit recording, deduplication idempotency, batch metrics calculation. |
 | **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
-| **[`test_guardrails.py`](test_guardrails.py)** | `src.guardrails` | 10 tests | Fatwa prohibitions, unauthorized citations, text leakage detection, length limits, bullet formatting. |
-| **[`test_formatter.py`](test_formatter.py)** | `src.formatter` | 4 tests | Telegram HTML payload formatting, quote preservation, HTML entity escaping, 4096 character limits. |
-| **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 6 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission. |
-| **Total** | **All Modules** | **55 tests** | **100% automated pass rate in <1.6s** |
+| **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 8 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission, clean reflection pass, multi-user fan-out and HTTP 403 auto-deactivation. |
+| **Total** | **All Modules** | **68 tests** | **100% automated pass rate** |
 
 ---
 
