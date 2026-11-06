@@ -1,6 +1,6 @@
 # LLM & Reflection Generation Package (`src/llm/`)
 
-This package manages the generation of supplementary, educational reflections using **Groq Cloud** and open-weights models (`llama-3.3-70b-versatile` / `openai/gpt-oss-120b`).
+This package manages the generation of supplementary, educational reflections using **Groq Cloud** and `openai/gpt-oss-120b`.
 
 ---
 

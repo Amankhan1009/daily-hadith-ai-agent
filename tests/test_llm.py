@@ -80,6 +80,7 @@ def test_groq_client_generates_reflection_success_mock():
 
     assert result.status == "GENERATED"
     assert result.reflection is not None
+    assert result.model == "openai/gpt-oss-120b"
     assert "Sincerity in intention" in result.reflection
     assert result.error is None
 
