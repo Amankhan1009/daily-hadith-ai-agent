@@ -7,6 +7,7 @@ from src.database.repository import (
     get_candidate_by_source_id,
     get_next_verified_candidate,
     is_date_delivered,
+    is_delivery_recorded,
     record_delivery_log,
     save_candidate,
 )

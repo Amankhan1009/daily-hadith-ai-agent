@@ -54,7 +54,7 @@ class DailyWorkflowState(TypedDict, total=False):
 def get_current_ist_date() -> str:
     """Return the current calendar date in Asia/Kolkata timezone as YYYY-MM-DD."""
     settings = get_settings()
-    tz = zoneinfo.ZoneInfo(settings.app_timezone)
+    tz = zoneinfo.ZoneInfo(settings.timezone)
     return datetime.now(tz).date().isoformat()
 
 

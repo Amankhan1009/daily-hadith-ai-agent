@@ -83,6 +83,10 @@ def is_date_delivered(session: Session, scheduled_date: date) -> bool:
     return session.scalars(stmt).first() is not None
 
 
+# Convenience alias
+is_delivery_recorded = is_date_delivered
+
+
 def get_next_verified_candidate(session: Session) -> Optional[HadithCandidate]:
     """
     Find the earliest verified candidate that has not yet been delivered.

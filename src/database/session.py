@@ -37,7 +37,9 @@ def _get_connect_args(url: str) -> dict[str, Any]:
     """Return dialect-specific connection arguments."""
     if url.startswith("sqlite"):
         return {"check_same_thread": False}
-    return {}
+    return {
+        "connect_timeout": 15,
+    }
 
 
 settings = get_settings()
@@ -48,6 +50,7 @@ engine = create_engine(
     connect_args=_get_connect_args(settings.database_url),
     echo=settings.log_level == "DEBUG",
     pool_pre_ping=True,  # Vital for Neon serverless sleeping connections
+    pool_recycle=300,    # Recycle connections after 5 mins to avoid stale pooler drops
 )
 
 SessionLocal = sessionmaker(

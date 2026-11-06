@@ -64,6 +64,7 @@ Every folder in this codebase includes its own dedicated README guide:
 | **[`src/workflow/`](src/workflow/)** | LangGraph StateGraph Orchestration & Routing | **[`src/workflow/README.md`](src/workflow/README.md)** |
 | **[`src/llm/`](src/llm/)** | Groq LLM Reflections, Prompts & Graceful Fallback | **[`src/llm/README.md`](src/llm/README.md)** |
 | **[`tests/`](tests/)** | Automated Test Suite (39 unit & integration tests) | **[`tests/README.md`](tests/README.md)** |
+| **[`scripts/`](scripts/)** | Standalone Operational & Live E2E Verification Scripts | **[`scripts/README.md`](scripts/README.md)** |
 | **[`alembic/`](alembic/)** | Database Schema Migration Versions | **[`alembic/README.md`](alembic/README.md)** |
 
 ---

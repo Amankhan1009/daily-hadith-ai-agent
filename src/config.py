@@ -112,9 +112,27 @@ class Settings(BaseSettings):
             raise ValueError(f"Invalid IANA timezone '{v}'. Must be a valid timezone like 'Asia/Kolkata'.") from exc
         return v
 
+    @field_validator("groq_api_key", mode="before")
+    @classmethod
+    def validate_groq_api_key(cls, v: Optional[str]) -> Optional[str]:
+        """Ensure placeholder keys do not mask valid .env configuration."""
+        if v and "your" in v.lower():
+            from dotenv import dotenv_values
+            env_vals = dotenv_values(".env")
+            file_key = env_vals.get("GROQ_API_KEY")
+            if file_key and "your" not in file_key.lower():
+                return file_key
+            return None
+        return v
+
     def is_production(self) -> bool:
         """Helper to check if running in production mode."""
         return self.app_env == "production"
+
+    @property
+    def app_timezone(self) -> str:
+        """Convenience alias for timezone."""
+        return self.timezone
 
     def get_safe_summary(self) -> dict:
         """

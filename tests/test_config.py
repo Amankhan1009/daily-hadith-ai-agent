@@ -14,6 +14,7 @@ def test_default_settings():
 
     assert settings.app_env == "development"
     assert settings.timezone == "Asia/Kolkata"
+    assert settings.app_timezone == "Asia/Kolkata"
     assert settings.schedule_cron == "0 10 * * *"
     assert settings.hadeethenc_base_url == "https://hadeethenc.com/api/v1"
     assert settings.hadeethenc_timeout_seconds == 10.0
