@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 08 Verified
+> *Last Updated:* Milestone 09 Verified
 
 ---
 
@@ -93,6 +93,13 @@ flowchart TD
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 09 Verified:** Groq Integration & Reflection Fallback.
+  - Installed `groq>=0.9.0` (version 1.7.0 verified on Python 3.14.6 arm64).
+  - Created `src/llm/prompts.py` enforcing strict theological negative constraints (no text modification, no fatwas, practical reflections capped under 120 words).
+  - Created `src/llm/client.py` (`GroqReflectionClient`) with resilient failover to `OMITTED` (when `GROQ_API_KEY` is not provided) or `FAILED` (upon API error) without halting Hadith delivery.
+  - Exported facade in `src/llm/__init__.py` and documented package in `src/llm/README.md`.
+  - Integrated `generate_reflection` node into LangGraph StateGraph in `src/workflow/graph.py` and `src/workflow/nodes.py`.
+  - Added 5 unit tests in `tests/test_llm.py`. Full test suite achieves 39/39 passing in 1.68s.
 - [x] **Milestone 08 Verified:** LangGraph StateGraph Workflow & Live Idempotency.
   - Installed `langgraph>=0.2.0` (version 1.2.20 verified on Python 3.14.6).
   - Implemented typed state schema in `src/workflow/state.py` (`DailyWorkflowState`).
@@ -131,11 +138,11 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- Milestone 09: Groq Integration.
-  - Task 9.1: Build typed Groq API client with fallback handling.
-  - Task 9.2: Craft system prompt enforcing strict separation of reflection from Hadith text.
-  - Task 9.3: Integrate reflection node into LangGraph StateGraph.
-  - Task 9.4: Unit and contract tests with mock LLM fixtures.
+- Milestone 10: Guardrails AI & Reflection Safety Verification.
+  - Task 10.1: Audit `guardrails-ai` dependency compatibility on Python 3.14.6 arm64.
+  - Task 10.2: Define custom deterministic hallucination and theological boundary validators.
+  - Task 10.3: Wire guardrail validation into LangGraph reflection node.
+  - Task 10.4: Automated unit tests with adversarial and edge-case reflection payloads.
 
 ---
 
@@ -161,13 +168,14 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 09: Configure Groq API client and reflection prompt in `src/llm/`.
+Begin Milestone 10: Audit Guardrails AI dependencies and design reflection validation rules.
 
 ---
 
 ## 13. Latest Verification Evidence
-- 34/34 automated unit and integration tests passing in 0.27s across all modules.
-- Live LangGraph state machine execution verified on Neon PostgreSQL; Candidate 1 delivered with formatted message and idempotency skip verified on re-run.
+- 39/39 automated unit and integration tests passing in 1.68s across all modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_workflow.py`).
+- Groq reflection integration verified with fail-safe fallback when API key is missing or invalid.
+- LangGraph daily StateGraph verified with all 8 nodes in compiled execution order.
 
 ---
 

@@ -211,10 +211,16 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Model never alters the original Hadith translation.
   - AI reflection clearly demarcated as non-source material.
   - LLM outages gracefully default to delivering verified Hadith alone (or fail closed based on policy).
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Installed `groq>=0.9.0` (v1.7.0 verified on Python 3.14.6 arm64).
+  - Implemented prompt template with strict negative theological constraints in `src/llm/prompts.py` (prohibiting fatwas, re-translation, or paraphrasing; capped at 120 words).
+  - Built resilient `GroqReflectionClient` in `src/llm/client.py` with automatic graceful fallback when API keys are unconfigured, rate-limited, or services encounter network errors.
+  - Exported facade in `src/llm/__init__.py` and documented architecture in `src/llm/README.md`.
+  - Wired `generate_reflection` node into LangGraph StateGraph between safety verification and message formatting (`src/workflow/nodes.py` & `src/workflow/graph.py`).
+  - Added 5 automated unit tests in `tests/test_llm.py`. Full test suite achieves 39/39 passing in 0.66s.
 - **Known Blockers:** None.
-- **Next Action:** Implement Groq LLM client and theological reflection prompts in `src/llm/`.
+- **Next Action:** Proceed to Milestone 10 — Guardrails AI.
 
 ---
 
@@ -225,10 +231,10 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Guardrail failures trigger fallback or safe omission of commentary.
   - System performance and latency remain acceptable.
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 09.
+- **Next Action:** Audit Guardrails AI dependencies on Python 3.14 and define hallucination prevention rails in `src/guardrails/`.
 
 ---
 

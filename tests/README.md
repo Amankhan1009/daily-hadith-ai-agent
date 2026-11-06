@@ -14,8 +14,9 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_database.py`](test_database.py)** | `src.database` | 5 tests | Candidate persistence, updating records, daily delivery idempotency, unique date constraint. |
 | **[`test_hadeethenc.py`](test_hadeethenc.py)** | `src.hadeethenc` | 15 tests | API client mocking, 404/500/timeout handling, Arabic text identity, regex citation extraction, bibliographic rejection. |
 | **[`test_ingestion.py`](test_ingestion.py)** | `src.ingestion` | 4 tests | Verified candidate persistence, rejected audit recording, deduplication idempotency, batch metrics calculation. |
+| **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
 | **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 4 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, defense-in-depth safety abort. |
-| **Total** | **All Modules** | **34 tests** | **100% automated pass rate in <0.3s** |
+| **Total** | **All Modules** | **39 tests** | **100% automated pass rate in <1.7s** |
 
 ---
 

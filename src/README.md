@@ -15,6 +15,7 @@ The application is structured into decoupled, domain-driven packages where each 
 | **[`src/hadeethenc/`](hadeethenc/)** | Resilient HTTP client, Pydantic response models, and deterministic Arabic/English invariant verifier. | **[`src/hadeethenc/README.md`](hadeethenc/README.md)** |
 | **[`src/ingestion/`](ingestion/)** | Candidate ingestion service, deduplication logic, and batch category scanner. | **[`src/ingestion/README.md`](ingestion/README.md)** |
 | **[`src/workflow/`](workflow/)** | LangGraph StateGraph state machine orchestrating daily idempotency, candidate selection, safety gates, and delivery. | **[`src/workflow/README.md`](workflow/README.md)** |
+| **[`src/llm/`](llm/)** | Groq LLM reflection client, negative prompt constraints, and resilient failover. | **[`src/llm/README.md`](llm/README.md)** |
 
 ---
 
@@ -25,6 +26,7 @@ flowchart LR
     HadeethEnc["src/hadeethenc/ (Client + Verifier)"] --> Ingestion["src/ingestion/ (Candidate Ingestion)"]
     Ingestion --> DB["src/database/ (PostgreSQL Models & Session)"]
     DB --> Workflow["src/workflow/ (LangGraph Daily StateGraph)"]
+    Workflow --> LLM["src/llm/ (Groq Reflection Client)"]
 ```
 
 ## Architectural Guidelines

@@ -2,7 +2,8 @@
 LangGraph Workflow Nodes.
 
 Implements pure, testable node functions for checking idempotency, candidate
-selection, deterministic safety validation, message formatting, and delivery logging.
+selection, deterministic safety validation, AI reflection generation, message
+formatting, and delivery logging.
 """
 
 from datetime import date
@@ -17,6 +18,7 @@ from src.database.repository import (
     record_delivery_log,
 )
 from src.database.session import get_db_session
+from src.llm import GroqReflectionClient
 from src.workflow.state import DailyWorkflowState
 
 APPROVED_COLLECTIONS = {
@@ -29,18 +31,17 @@ APPROVED_COLLECTIONS = {
 class WorkflowNodes:
     """
     Encapsulates all node functions of the Daily Hadith state graph.
-    Allows injecting an explicit database session (e.g. in tests) or managing
-    sessions dynamically via get_db_session().
+    Allows injecting an explicit database session and LLM client (e.g. in tests)
+    or managing them dynamically via default providers.
     """
 
-    def __init__(self, session: Optional[Session] = None) -> None:
+    def __init__(
+        self,
+        session: Optional[Session] = None,
+        llm_client: Optional[GroqReflectionClient] = None,
+    ) -> None:
         self._session = session
-
-    def _get_active_session(self) -> Session:
-        """Return the active or current session."""
-        if self._session is not None:
-            return self._session
-        raise RuntimeError("No database session provided.")
+        self._llm_client = llm_client or GroqReflectionClient()
 
     def check_idempotency_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
@@ -144,9 +145,30 @@ class WorkflowNodes:
             "error_message": None,
         }
 
+    def generate_reflection_node(self, state: DailyWorkflowState) -> dict[str, Any]:
+        """
+        Node 4: Generate segregated educational reflection using Groq LLM.
+        Operates with fail-safe fallback (omits reflection if key is missing or API fails).
+        """
+        english_text = state.get("english_text", "")
+        attribution = state.get("attribution", "")
+        collection = state.get("collection", "")
+
+        res = self._llm_client.generate_reflection(
+            english_text=english_text,
+            attribution=attribution,
+            collection=collection,
+        )
+
+        return {
+            "ai_reflection": res.reflection,
+            "ai_reflection_status": res.status,
+            "status": "PENDING",
+        }
+
     def format_message_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
-        Node 4: Assemble the standardized notification message for Telegram.
+        Node 5: Assemble the standardized notification message for Telegram.
         """
         english_text = state.get("english_text", "").strip()
         attribution = state.get("attribution", "").strip()
@@ -183,7 +205,7 @@ class WorkflowNodes:
 
     def record_delivery_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
-        Node 5: Record the delivery outcome in DailyDeliveryLog for idempotency.
+        Node 6: Record the delivery outcome in DailyDeliveryLog for idempotency.
         """
         scheduled_date_str = state.get("scheduled_date")
         target_date = (
