@@ -22,6 +22,7 @@ from src.database.session import get_db_session
 from src.guardrails import ReflectionValidator
 from src.llm import GroqReflectionClient
 from src.workflow.state import DailyWorkflowState
+from src.formatter import format_daily_hadith_message
 
 logger = logging.getLogger(__name__)
 
@@ -215,39 +216,30 @@ class WorkflowNodes:
 
     def format_message_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
-        Node 6: Assemble the standardized notification message for Telegram.
+        Node 6: Assemble the standardized notification message for Telegram using HTML formatting.
         """
         english_text = state.get("english_text", "").strip()
         attribution = state.get("attribution", "").strip()
         collection = state.get("collection", "").strip()
-        hadith_number = state.get("hadith_number", "").strip()
+        hadith_number = str(state.get("hadith_number", "")).strip()
         grade = state.get("grade", "Authentic").strip()
         source_url = state.get("source_url", "").strip()
         ai_reflection = state.get("ai_reflection")
         reflection_status = state.get("ai_reflection_status")
 
-        message_parts = [
-            "📖 *Hadith of the Day*",
-            "",
-            f'"{english_text}"',
-            "",
-            f"— *{attribution}*",
-            f"📚 *Collection:* {collection} (#{hadith_number})",
-            f"🏅 *Grade:* {grade}",
-            "",
-            f"🔗 *Canonical Source:* {source_url}",
-        ]
+        payload = format_daily_hadith_message(
+            english_text=english_text,
+            attribution=attribution,
+            collection=collection,
+            hadith_number=hadith_number,
+            grade=grade,
+            source_url=source_url,
+            ai_reflection=ai_reflection,
+            ai_reflection_status=reflection_status,
+        )
 
-        if ai_reflection and reflection_status in ("GENERATED", "PASSED_GUARDRAILS"):
-            message_parts.extend([
-                "",
-                "💡 *Reflection & Context:*",
-                ai_reflection.strip(),
-            ])
-
-        formatted = "\n".join(message_parts)
         return {
-            "formatted_message": formatted,
+            "formatted_message": payload.text,
             "status": "PENDING",
         }
 

@@ -186,7 +186,7 @@ def test_workflow_guardrail_omits_violating_reflection_while_delivering_hadith(
     assert final_state["status"] == "COMPLETED"
     assert final_state["ai_reflection"] is None
     assert final_state["ai_reflection_status"] == "OMITTED_GUARDRAIL_FAILED"
-    assert "Reflection & Context" not in final_state["formatted_message"]
+    assert "Reflection & Practical Context" not in final_state["formatted_message"]
     assert "The best of you are those who learn the Qur'an" in final_state["formatted_message"]
     assert is_date_delivered(db_session, test_date) is True
 
@@ -222,5 +222,5 @@ def test_workflow_guardrail_allows_clean_reflection(
     assert final_state["status"] == "COMPLETED"
     assert final_state["ai_reflection"] is not None
     assert final_state["ai_reflection_status"] == "PASSED_GUARDRAILS"
-    assert "💡 *Reflection & Context:*" in final_state["formatted_message"]
+    assert "💡 <b>Reflection & Practical Context:</b>" in final_state["formatted_message"]
     assert is_date_delivered(db_session, test_date) is True

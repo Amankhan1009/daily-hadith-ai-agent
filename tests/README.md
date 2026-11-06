@@ -16,8 +16,9 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_ingestion.py`](test_ingestion.py)** | `src.ingestion` | 4 tests | Verified candidate persistence, rejected audit recording, deduplication idempotency, batch metrics calculation. |
 | **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
 | **[`test_guardrails.py`](test_guardrails.py)** | `src.guardrails` | 10 tests | Fatwa prohibitions, unauthorized citations, text leakage detection, length limits, bullet formatting. |
+| **[`test_formatter.py`](test_formatter.py)** | `src.formatter` | 4 tests | Telegram HTML payload formatting, quote preservation, HTML entity escaping, 4096 character limits. |
 | **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 6 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission. |
-| **Total** | **All Modules** | **51 tests** | **100% automated pass rate in <1.8s** |
+| **Total** | **All Modules** | **55 tests** | **100% automated pass rate in <1.6s** |
 
 ---
 

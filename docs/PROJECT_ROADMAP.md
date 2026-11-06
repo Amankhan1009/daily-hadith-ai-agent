@@ -250,10 +250,14 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Assembled messages verified against source integrity guidelines.
   - Zero hallucination or unverified reference leakage.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented modular formatter package in `src/formatter/message.py` and exported facade in `src/formatter/__init__.py`.
+  - Built `format_daily_hadith_message` enforcing Telegram HTML formatting, quote preservation (`quote=False`), and character limits (<= 4096 chars).
+  - Enforced mandatory canonical metadata (Collection, citation reference, grade, source URL) and segregated non-canonical AI reflection disclaimer.
+  - Added 4 contract tests in `tests/test_formatter.py` and updated workflow assertions. Full test suite achieves 55/55 passing in 1.52s.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 10.
+- **Next Action:** Proceed to Milestone 12 — Telegram Integration.
 
 ---
 
@@ -265,7 +269,7 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Manually triggered test message delivers cleanly to Telegram chat.
   - Source links, attribution, and AI disclaimer render legibly.
   - Network and API failures handled with retry/backoff.
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
 - **Next Action:** Await Milestone 11.

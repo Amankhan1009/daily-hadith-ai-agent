@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 10 Verified
+> *Last Updated:* Milestone 11 Verified
 
 ---
 
@@ -93,6 +93,12 @@ flowchart TD
   - `.env.example` created with strict zero-secret placeholders.
   - `src/config.py` implemented with Pydantic v2 `BaseSettings` and safe secret masking.
   - `tests/test_config.py` automated unit test suite passing 6/6 tests.
+- [x] **Milestone 11 Verified:** Final Content Validation & Formatter Architecture.
+  - Implemented modular `src/formatter/message.py` and `src/formatter/__init__.py` assembling Telegram-compliant HTML payloads.
+  - Enforced selective entity escaping (`quote=False`) to avoid mangling Arabic transliterated quotes (e.g. `Qur'an`), while strictly neutralizing HTML injection (`<`, `>`, `&`).
+  - Guaranteed Telegram 4096-character limit enforcement fail-closed.
+  - Added 4 contract tests in `tests/test_formatter.py` and integrated formatter directly into LangGraph `format_message_node`.
+  - Full automated test suite achieves 55/55 passing in 1.52s.
 - [x] **Milestone 10 Verified:** Guardrails AI & Reflection Safety Verification.
   - Implemented deterministic boundary rules in `src/guardrails/rules.py` (prohibiting fatwas, unauthorized citations, verbatim text leakage, and word count violations).
   - Implemented pure validation engine in `src/guardrails/validator.py` (`ReflectionValidator`, `validate_reflection`).
@@ -144,10 +150,11 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- Milestone 11: Final Content Validation.
-  - Task 11.1: End-to-end audit of assembled notification payloads against source integrity guidelines.
-  - Task 11.2: Verify zero hallucination or unverified reference leakage in final payloads.
-  - Task 11.3: Validate Markdown/HTML escaping contracts before Telegram delivery integration.
+- Milestone 12: Telegram Integration.
+  - Task 12.1: Implement Telegram Bot API adapter in `src/delivery/telegram.py` using typed `httpx.Client`.
+  - Task 12.2: Implement network retry policies, exponential backoff, and rate limit handling (429 Retry-After).
+  - Task 12.3: Wire Telegram dispatch node into LangGraph StateGraph between `format_message` and `record_delivery`.
+  - Task 12.4: Unit and contract tests mocking Telegram Bot API responses (`sendMessage`).
 
 ---
 
@@ -173,17 +180,14 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 11: Final Content Validation and end-to-end payload assembly contracts.
+Begin Milestone 12: Telegram Bot API adapter design in `src/delivery/` and secure bot integration.
 
 ---
 
 ## 13. Latest Verification Evidence
-- **51/51 Automated Tests Passing:** 100% pass rate in 1.71s across all modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_workflow.py`).
-- **Guardrails AI Validation Gate:** Actively wired into LangGraph StateGraph, proven to strip invalid commentary fail-safe while delivering authentic Hadith texts without disruption.
+- **55/55 Automated Tests Passing:** 100% pass rate in 1.52s across all modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_workflow.py`).
+- **Telegram HTML Payload Assembly Verified:** Preserves sacred text fidelity, selective quote escaping (`Qur'an`), and enforces character limit guards (<4096 chars).
 - **Full End-to-End Live Execution Verified:** Executed `scripts/test_e2e_workflow.py` with live Groq Cloud API (`openai/gpt-oss-120b`) and live Neon PostgreSQL database.
-  - Step 1: Live Groq reflection generated with theological negative constraints strictly observed.
-  - Step 2: Delivered Candidate 4 (Agreed Upon #13) from Neon DB with verified source attribution and segregated `💡 Reflection & Context`.
-  - Step 3: Verified daily idempotency guard (`SKIPPED_IDEMPOTENT`) blocking duplicate delivery.
 
 ---
 
