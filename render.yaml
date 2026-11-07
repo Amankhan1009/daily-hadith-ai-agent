@@ -1,0 +1,29 @@
+# Render Infrastructure as Code Blueprint
+# Reference: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: daily-hadith-ai-agent
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: TIMEZONE
+        value: Asia/Kolkata
+      - key: ENABLE_IN_PROCESS_SCHEDULER
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CRON_SECRET_TOKEN
+        sync: false
