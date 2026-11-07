@@ -17,20 +17,20 @@ This package manages the assembly and formatting of verified Hadith notification
 
 ```mermaid
 flowchart TD
-    State[Verified Hadith Record] --> TextSanitize[HTML Entity Escaping]
-    Reflection[Validated AI Reflection] --> Disclaim[Attach Segregated Non-Canonical Disclaimer]
+    State["Verified Hadith Record"] --> TextSanitize["HTML Entity Escaping"]
+    Reflection["Validated AI Reflection"] --> Disclaim["Attach Segregated Non-Canonical Disclaimer"]
     
-    TextSanitize --> CorePayload[Assemble Canonical Header & Hadith Body]
-    Disclaim --> ConditionalAppend{Was Reflection Validated?}
+    TextSanitize --> CorePayload["Assemble Canonical Header & Hadith Body"]
+    Disclaim --> ConditionalAppend{"Was Reflection Validated?"}
     
-    ConditionalAppend -- Yes --> AttachReflection[Append Formatted Reflection Section]
-    ConditionalAppend -- No --> SkipReflection[Omit Reflection Cleanly]
+    ConditionalAppend -- "Yes" --> AttachReflection["Append Formatted Reflection Section"]
+    ConditionalAppend -- "No" --> SkipReflection["Omit Reflection Cleanly"]
     
-    AttachReflection --> LengthCheck{Length <= 4096 Chars?}
+    AttachReflection --> LengthCheck{"Length <= 4096 Chars?"}
     SkipReflection --> LengthCheck
     
-    LengthCheck -- Exceeded --> Abort[Raise ValueError Payload Oversized]
-    LengthCheck -- Valid --> PayloadReady[NotificationPayload Ready for Telegram Dispatch]
+    LengthCheck -- "Exceeded" --> Abort["Raise ValueError Payload Oversized"]
+    LengthCheck -- "Valid" --> PayloadReady["NotificationPayload Ready for Telegram Dispatch"]
 ```
 
 ---

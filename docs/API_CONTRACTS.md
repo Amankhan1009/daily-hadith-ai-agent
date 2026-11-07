@@ -98,14 +98,14 @@ To guarantee provenance and eliminate any possibility of mismatched data or corr
 
 ```mermaid
 flowchart TD
-    A[Fetch Record ID: language=en] --> B[Fetch Record ID: language=ar]
-    B --> C{ID Matching: en.id == ar.id?}
-    C -- Fail --> Reject1[REJECT: ID Mismatch]
-    C -- Pass --> D{Text Verification: en.hadeeth_ar == ar.hadeeth?}
-    D -- Fail --> Reject2[REJECT: Arabic Text Corrupted]
-    D -- Pass --> E{Attribution Verification: en.attribution_ar == ar.attribution?}
-    E -- Fail --> Reject3[REJECT: Attribution Mismatch]
-    E -- Pass --> F[Extract Reference from ar.reference]
+    A["Fetch Record ID: language=en"] --> B["Fetch Record ID: language=ar"]
+    B --> C{"ID Matching: en.id == ar.id?"}
+    C -- "Fail" --> Reject1["REJECT: ID Mismatch"]
+    C -- "Pass" --> D{"Text Verification: en.hadeeth_ar == ar.hadeeth?"}
+    D -- "Fail" --> Reject2["REJECT: Arabic Text Corrupted"]
+    D -- "Pass" --> E{"Attribution Verification: en.attribution_ar == ar.attribution?"}
+    E -- "Fail" --> Reject3["REJECT: Attribution Mismatch"]
+    E -- "Pass" --> F["Extract Reference from ar.reference"]
 ```
 
 ### Verification Invariants:

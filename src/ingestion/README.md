@@ -17,14 +17,14 @@ This package bridges external API retrieval with internal database persistence. 
 
 ```mermaid
 flowchart TD
-    Start[Category List Candidate] --> CheckDB{Already Ingested?}
-    CheckDB -- Yes --> Skip[Return: SKIPPED_EXISTING]
-    CheckDB -- No --> FetchDual[Fetch English & Arabic Pair]
-    FetchDual --> Verifier[Run verify_candidate_pair]
-    Verifier -->|Valid Bukhari/Muslim| SaveVerified[Save to DB: VERIFIED]
-    Verifier -->|Unapproved/Ambiguous| SaveRejected[Save to DB: REJECTED with Reason]
-    SaveVerified --> Done[Candidate Ready in Queue]
-    SaveRejected --> Done[Audit Trail Preserved]
+    Start["Category List Candidate"] --> CheckDB{"Already Ingested?"}
+    CheckDB -- Yes --> Skip["Return: SKIPPED_EXISTING"]
+    CheckDB -- No --> FetchDual["Fetch English & Arabic Pair"]
+    FetchDual --> Verifier["Run verify_candidate_pair"]
+    Verifier -->|"Valid Bukhari/Muslim"| SaveVerified["Save to DB: VERIFIED"]
+    Verifier -->|"Unapproved/Ambiguous"| SaveRejected["Save to DB: REJECTED with Reason"]
+    SaveVerified --> Done["Candidate Ready in Queue"]
+    SaveRejected --> Done["Audit Trail Preserved"]
 ```
 
 ### Key Functions

@@ -18,13 +18,13 @@ This package manages the generation of supplementary, educational reflections us
 
 ```mermaid
 flowchart TD
-    Hadith[Deterministic Verified Hadith] --> Prompt[Strict Negative Constraint Prompt]
-    Prompt --> Groq[Groq Cloud LLM]
-    Groq --> Check{Generation Outcome}
-    Check -- Missing Key --> Omit[ai_reflection: None | status: OMITTED]
-    Check -- Network / RateLimit Failure --> Fail[ai_reflection: None | status: FAILED]
-    Check -- Valid Takeaway --> Success[ai_reflection: 2-3 Bullets | status: GENERATED]
-    Omit --> Pipeline[Daily Notification Pipeline]
+    Hadith["Deterministic Verified Hadith"] --> Prompt["Strict Negative Constraint Prompt"]
+    Prompt --> Groq["Groq Cloud LLM"]
+    Groq --> Check{"Generation Outcome"}
+    Check -- "Missing Key" --> Omit["ai_reflection: None | status: OMITTED"]
+    Check -- "Network / RateLimit Failure" --> Fail["ai_reflection: None | status: FAILED"]
+    Check -- "Valid Takeaway" --> Success["ai_reflection: 2-3 Bullets | status: GENERATED"]
+    Omit --> Pipeline["Daily Notification Pipeline"]
     Fail --> Pipeline
     Success --> Pipeline
 ```

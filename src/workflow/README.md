@@ -21,18 +21,18 @@ This package implements the end-to-end daily delivery pipeline as a typed, obser
 
 ```mermaid
 flowchart TD
-    Start([Start Daily Trigger: 10:00 AM IST]) --> CheckIdempotency[Node: check_idempotency]
-    CheckIdempotency -->|Already Delivered Today| SkipDelivery[End: SKIPPED_IDEMPOTENT]
-    CheckIdempotency -->|Not Delivered Today| FetchCandidate[Node: fetch_candidate]
-    FetchCandidate -->|No Candidates Available| AbortNoCandidate[End: ABORTED_NO_CANDIDATE]
-    FetchCandidate -->|Candidate Found| VerifySafety[Node: verify_safety]
-    VerifySafety -->|Invariant Failed| AbortSafety[End: ABORTED_VALIDATION_FAILED]
-    VerifySafety -->|Invariant Passed| GenReflection[Node: generate_reflection]
-    GenReflection --> ValidateGuardrails[Node: validate_guardrails]
-    ValidateGuardrails --> FormatMessage[Node: format_message]
-    FormatMessage --> DeliverTelegram[Node: deliver_telegram]
-    DeliverTelegram --> RecordDelivery[Node: record_delivery]
-    RecordDelivery --> Completed([End: COMPLETED])
+    Start(["Start Daily Trigger: 10:00 AM IST"]) --> CheckIdempotency["Node: check_idempotency"]
+    CheckIdempotency -->|"Already Delivered Today"| SkipDelivery["End: SKIPPED_IDEMPOTENT"]
+    CheckIdempotency -->|"Not Delivered Today"| FetchCandidate["Node: fetch_candidate"]
+    FetchCandidate -->|"No Candidates Available"| AbortNoCandidate["End: ABORTED_NO_CANDIDATE"]
+    FetchCandidate -->|"Candidate Found"| VerifySafety["Node: verify_safety"]
+    VerifySafety -->|"Invariant Failed"| AbortSafety["End: ABORTED_VALIDATION_FAILED"]
+    VerifySafety -->|"Invariant Passed"| GenReflection["Node: generate_reflection"]
+    GenReflection --> ValidateGuardrails["Node: validate_guardrails"]
+    ValidateGuardrails --> FormatMessage["Node: format_message"]
+    FormatMessage --> DeliverTelegram["Node: deliver_telegram"]
+    DeliverTelegram --> RecordDelivery["Node: record_delivery"]
+    RecordDelivery --> Completed(["End: COMPLETED"])
 ```
 
 ### CLI Execution

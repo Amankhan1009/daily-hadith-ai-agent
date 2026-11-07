@@ -33,15 +33,15 @@ flowchart TD
         API["HadeethEnc API (GET)"] --> Fetch["Candidate Ingestion (EN + AR)"]
         Fetch --> Match["Metadata Cross-Match & Provenance"]
         Match --> Gate{"Passes Deterministic Gate?"}
-        Gate -- No --> Abort["Persist Audit Log & Abort"]
-        Gate -- Yes --> DB[("Neon PostgreSQL Candidate Queue")]
+        Gate -- "No" --> Abort["Persist Audit Log & Abort"]
+        Gate -- "Yes" --> DB[("Neon PostgreSQL Candidate Queue")]
     end
 
     subgraph Webhook ["2. Inbound Webhook & Multi-User Router"]
         Users["Public Telegram Users"] -->|"/start, /today, /stop, /help"| WH["FastAPI POST /telegram/webhook"]
         WH --> Sec{"Verify Secret Token"}
-        Sec -- Invalid --> Reject["403 Forbidden"]
-        Sec -- Valid --> Router["Command Router"]
+        Sec -- "Invalid" --> Reject["403 Forbidden"]
+        Sec -- "Valid" --> Router["Command Router"]
         Router -->|"/start (Idempotent)"| SubDB[("Telegram Subscribers")]
         Router -->|"/today"| InstantSend["Dispatch Today's Hadith"]
         Router -->|"/stop"| Deact["Deactivate (is_active = false)"]
@@ -50,17 +50,17 @@ flowchart TD
     subgraph Daily ["3. Daily Orchestration & Fan-Out Broadcast"]
         Sched["Daily Trigger: 10:00 AM IST"] --> LG["LangGraph Daily StateGraph"]
         LG --> Idemp{"Idempotency Check"}
-        Idemp -- Already Sent --> Skip["Skip Execution"]
-        Idemp -- Fresh Run --> LLM["Groq LLM Reflection (Segregated)"]
+        Idemp -- "Already Sent" --> Skip["Skip Execution"]
+        Idemp -- "Fresh Run" --> LLM["Groq LLM Reflection (Segregated)"]
         LLM --> Guard{"Guardrails AI Gate"}
-        Guard -- Violation --> Fallback["Omit Reflection (Fail-Safe)"]
-        Guard -- Valid --> Format["Format Canonical Notification"]
+        Guard -- "Violation" --> Fallback["Omit Reflection (Fail-Safe)"]
+        Guard -- "Valid" --> Format["Format Canonical Notification"]
         Fallback --> Format
         Format --> Broadcaster["Multi-User Fan-Out Broadcaster"]
-        SubDB -->|Active Subscribers| Broadcaster
+        SubDB -->|"Active Subscribers"| Broadcaster
         Broadcaster -->|"30 msg/sec Throttling"| TG["Telegram Bot API"]
         TG -->|"403 Blocked"| AutoDeact["Auto-Deactivate Blocked User"]
-        TG -->|Delivered| Record["Record Per-Subscriber Delivery Log"]
+        TG -->|"Delivered"| Record["Record Per-Subscriber Delivery Log"]
     end
 ```
 

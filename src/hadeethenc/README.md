@@ -19,16 +19,16 @@ This package provides a typed HTTP client and deterministic invariant verificati
 
 ```mermaid
 flowchart TD
-    A[Fetch English Detail] --> B[Fetch Arabic Counterpart]
-    B --> C{ID Invariance: en.id == ar.id?}
-    C -- No --> Fail1[Reject: ERR_RECORD_MISMATCH]
-    C -- Yes --> D{Arabic Text Identity: en.hadeeth_ar == ar.hadeeth?}
-    D -- No --> Fail2[Reject: ERR_RECORD_MISMATCH]
-    D -- Yes --> E{Attribution Match: en.attribution_ar == ar.attribution?}
-    E -- No --> Fail3[Reject: ERR_ATTRIBUTION_MISMATCH]
-    E -- Yes --> F{Approved Collection & Number?}
-    F -- No --> Fail4[Reject: ERR_UNAPPROVED_COLLECTION / ERR_AMBIGUOUS_CITATION]
-    F -- Yes --> Pass[VERIFIED: Return Canonical Hadith Number]
+    A["Fetch English Detail"] --> B["Fetch Arabic Counterpart"]
+    B --> C{"ID Invariance: en.id == ar.id?"}
+    C -- No --> Fail1["Reject: ERR_RECORD_MISMATCH"]
+    C -- Yes --> D{"Arabic Text Identity: en.hadeeth_ar == ar.hadeeth?"}
+    D -- No --> Fail2["Reject: ERR_RECORD_MISMATCH"]
+    D -- Yes --> E{"Attribution Match: en.attribution_ar == ar.attribution?"}
+    E -- No --> Fail3["Reject: ERR_ATTRIBUTION_MISMATCH"]
+    E -- Yes --> F{"Approved Collection & Number?"}
+    F -- No --> Fail4["Reject: ERR_UNAPPROVED_COLLECTION / ERR_AMBIGUOUS_CITATION"]
+    F -- Yes --> Pass["VERIFIED: Return Canonical Hadith Number"]
 ```
 
 ### Approved Collection Regex Grammar

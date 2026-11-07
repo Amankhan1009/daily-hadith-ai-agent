@@ -18,26 +18,26 @@ This package enforces deterministic validation and theological guardrails over L
 
 ```mermaid
 flowchart TD
-    LLM[Raw Groq Reflection] --> EmptyCheck{Is Non-Empty?}
-    EmptyCheck -- No --> RejectEmpty[Status: REJECTED | ERR_EMPTY_REFLECTION]
-    EmptyCheck -- Yes --> WordCheck{Word Count: 8 to 150?}
+    LLM["Raw Groq Reflection"] --> EmptyCheck{"Is Non-Empty?"}
+    EmptyCheck -- No --> RejectEmpty["Status: REJECTED | ERR_EMPTY_REFLECTION"]
+    EmptyCheck -- Yes --> WordCheck{"Word Count: 8 to 150?"}
     
-    WordCheck -- No --> RejectWord[Status: REJECTED | ERR_REFLECTION_TOO_LONG / SHORT]
-    WordCheck -- Yes --> BulletCheck{Has Bullet Structure?}
+    WordCheck -- No --> RejectWord["Status: REJECTED | ERR_REFLECTION_TOO_LONG / SHORT"]
+    WordCheck -- Yes --> BulletCheck{"Has Bullet Structure?"}
     
-    BulletCheck -- No --> RejectBullet[Status: REJECTED | ERR_MISSING_BULLET_STRUCTURE]
-    BulletCheck -- Yes --> FatwaCheck{Contains Fatwa / Decree?}
+    BulletCheck -- No --> RejectBullet["Status: REJECTED | ERR_MISSING_BULLET_STRUCTURE"]
+    BulletCheck -- Yes --> FatwaCheck{"Contains Fatwa / Decree?"}
     
-    FatwaCheck -- Yes --> RejectFatwa[Status: REJECTED | ERR_THEOLOGICAL_DECREE]
-    FatwaCheck -- No --> CitationCheck{Contains Fabricated Citation?}
+    FatwaCheck -- Yes --> RejectFatwa["Status: REJECTED | ERR_THEOLOGICAL_DECREE"]
+    FatwaCheck -- No --> CitationCheck{"Contains Fabricated Citation?"}
     
-    CitationCheck -- Yes --> RejectCite[Status: REJECTED | ERR_UNAUTHORIZED_CITATION]
-    CitationCheck -- No --> LeakageCheck{Repeats Hadith Text?}
+    CitationCheck -- Yes --> RejectCite["Status: REJECTED | ERR_UNAUTHORIZED_CITATION"]
+    CitationCheck -- No --> LeakageCheck{"Repeats Hadith Text?"}
     
-    LeakageCheck -- Yes --> RejectLeak[Status: REJECTED | ERR_HADITH_TEXT_LEAKAGE]
-    LeakageCheck -- No --> Passed[Status: PASSED | Allowed in Telegram Dispatch]
+    LeakageCheck -- Yes --> RejectLeak["Status: REJECTED | ERR_HADITH_TEXT_LEAKAGE"]
+    LeakageCheck -- No --> Passed["Status: PASSED | Allowed in Telegram Dispatch"]
 
-    RejectEmpty --> FailClosed[Omit AI Reflection & Deliver Pure Hadith Alone]
+    RejectEmpty --> FailClosed["Omit AI Reflection & Deliver Pure Hadith Alone"]
     RejectWord --> FailClosed
     RejectBullet --> FailClosed
     RejectFatwa --> FailClosed
