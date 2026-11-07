@@ -29,11 +29,11 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | 11 | Final Content Validation | Verified |
 | 12 | Telegram Integration & Public Subscription Engine | Verified |
 | 13 | Scheduling & Daily Multi-User Broadcast | Verified |
-| 14 | History & Per-Subscriber Daily Idempotency | In Progress |
-| 15 | Failure Handling | Not Started |
-| 16 | Automated Testing | Not Started |
-| 17 | Docker Containerization | Not Started |
-| 18 | Cloud Deployment & Public Production Bot | Not Started |
+| 14 | History & Per-Subscriber Daily Idempotency | Verified |
+| 15 | Failure Handling & System Resilience | Verified |
+| 16 | Automated Testing & Code Quality Audit | Verified |
+| 17 | Docker Containerization & GitHub Actions CI/CD | Verified |
+| 18 | Cloud Deployment & Public Production Bot | In Progress |
 | 19 | Production Readiness | Not Started |
 | 20 | Future FCM Support (Evaluation) | Not Started |
 
