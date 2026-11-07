@@ -9,7 +9,7 @@ from functools import lru_cache
 from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     )
     telegram_webhook_secret: str | None = Field(
         default=None,
+        validation_alias=AliasChoices("telegram_webhook_secret", "telegram_webhook_secret_token"),
         description="Secret token verifying incoming webhook requests from Telegram",
     )
     telegram_bot_username: str | None = Field(
@@ -112,11 +113,10 @@ class Settings(BaseSettings):
         description="Database connection string (SQLite dev / Neon PG prod)",
     )
 
-    # Optional Auxiliary Tooling (Tavily MCP)
-    tavily_api_key: str | None = Field(
-        default=None,
-        description="Optional Tavily API key for auxiliary research",
-    )
+    @property
+    def telegram_webhook_secret_token(self) -> str | None:
+        """Alias property for telegram_webhook_secret for backwards compatibility."""
+        return self.telegram_webhook_secret
 
     @field_validator("timezone")
     @classmethod
@@ -179,7 +179,6 @@ class Settings(BaseSettings):
             else "<POSTGRES_MASKED>",
             "groq_configured": bool(self.groq_api_key),
             "groq_model": self.groq_model,
-            "tavily_configured": bool(self.tavily_api_key),
             "telegram_configured": bool(self.telegram_bot_token),
             "telegram_webhook_configured": bool(self.telegram_webhook_secret),
             "telegram_bot_username": self.telegram_bot_username or "<NOT_SET>",
