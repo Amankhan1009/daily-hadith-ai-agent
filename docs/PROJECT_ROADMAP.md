@@ -388,29 +388,31 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Container builds reproducibly without embedded secrets.
   - Container runs non-root and responds cleanly to `/health`.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented multi-stage `Dockerfile` (`python:3.13-slim` builder compiling wheels, unprivileged `runtime` container ~160MB).
+  - Hardened container security: non-root execution (`appuser:appgroup`, UID 10001), `PYTHONUNBUFFERED=1`, `PYTHONDONTWRITEBYTECODE=1`, zero embedded credentials.
+  - Implemented comprehensive `.dockerignore` excluding `.env*`, `.venv/`, `.git/`, `tests/`, and cache artifacts.
+  - Configured container `HEALTHCHECK` probing `GET /health` on port 8080.
+  - Created `docker-compose.yml` for local container orchestration.
+  - Created automated test suite in `tests/test_container.py` (5 tests covering multi-stage structure, non-root user, ignore patterns, Compose config, and `/health` probe response).
+  - Full automated test suite achieves **99/99 passing tests (100% pass rate in 16.32s)** with **89% code coverage**.
 - **Known Blockers:** None.
-- **Next Action:** Author production multi-stage Dockerfile and `.dockerignore`.
-  - Container runs and passes internal health checks.
-- **Current Status:** `Not Started`
-- **Verification Evidence:** None.
-- **Known Blockers:** None.
-- **Next Action:** Await Milestone 16.
+- **Next Action:** Proceed to Milestone 18 — Cloud Deployment.
 
 ---
 
 ## Milestone 18 — Cloud Deployment
-- **Goal:** Deploy the FastAPI service and scheduler to cloud hosting (e.g., Render) backed by Neon PostgreSQL.
-- **Scope:** Production environment configuration, database migration on deploy, scheduler verification, secure secret management.
+- **Goal:** Deploy the containerized FastAPI service and scheduler to cloud hosting backed by Neon PostgreSQL.
+- **Scope:** Production environment configuration, database migration on deploy, Cloud Scheduler trigger verification, secure secret management.
 - **Dependencies:** Milestone 17.
 - **Acceptance Criteria:**
   - Application deployed and connected to Neon PostgreSQL.
   - Scheduled run triggers successfully in production environment.
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 17.
+- **Next Action:** Prepare deployment manifest and cloud infrastructure setup.
 
 ---
 

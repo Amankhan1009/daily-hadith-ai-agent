@@ -1,0 +1,47 @@
+# ==============================================================================
+# Daily Hadith AI Agent — Docker Ignore Patterns
+# Excludes local environments, caches, git metadata, and secret files
+# ==============================================================================
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets & Environment Configurations
+.env
+.env.*
+!.env.example
+
+# Git & Agent Metadata
+.git/
+.gitignore
+.github/
+.gemini/
+
+# Python Bytecode, Caches & Compilations
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Development & Operational Artifacts
+scratch/
+tmp/
+*.log
+*.sqlite
+*.db
+
+# Automated Tests & Developer Docs (omitted from runtime image for lean size)
+tests/
+docs/
+*.md
+LICENSE

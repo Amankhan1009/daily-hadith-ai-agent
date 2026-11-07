@@ -1,0 +1,27 @@
+# ==============================================================================
+# Daily Hadith AI Agent — Local Docker Compose Orchestration
+# ==============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: daily-hadith-ai-agent:local
+    container_name: daily-hadith-app
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - PORT=8080
+      - APP_ENV=production
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

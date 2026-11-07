@@ -101,12 +101,20 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 17 — Docker Containerization
-- **Active Task:** Task 17.1 — Multi-Stage Dockerfile & Container Architecture Specification
+- **Active Milestone:** Milestone 18 — Cloud Deployment
+- **Active Task:** Task 18.1 — Cloud Deployment Configuration & Service Blueprint
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 17 Verified:** Docker Containerization.
+  - Implemented multi-stage `Dockerfile` (`python:3.13-slim` builder and runtime stages).
+  - Enforced container security: unprivileged non-root user (`appuser:appgroup`, UID 10001), `PYTHONUNBUFFERED=1`, `PYTHONDONTWRITEBYTECODE=1`, zero embedded credentials.
+  - Implemented `.dockerignore` excluding `.env*`, `.venv/`, `.git/`, test artifacts, and bytecode.
+  - Configured container `HEALTHCHECK` targeting `/health` on port 8080.
+  - Implemented `docker-compose.yml` for local container orchestration.
+  - Added automated test suite `tests/test_container.py` (5 tests).
+  - Test suite achieves **99/99 passing tests (100% pass rate in 16.32s)** with **89% code coverage**.
 - [x] **Milestone 16 Verified:** Automated Testing & Code Quality Audit.
   - Formatted 100% of codebase (65 Python files) to PEP 8 standards with Ruff.
   - Zero linting errors or warnings across entire repository (`ruff check .` returns 0 issues).
@@ -207,11 +215,10 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- **Milestone 17: Docker Containerization**
-  - **Task 17.1:** Production multi-stage `Dockerfile` (build stage with dependencies wheel compilation, minimal slim runtime stage).
-  - **Task 17.2:** Container security hardening (non-root unprivileged user `appuser`, zero embedded secrets).
-  - **Task 17.3:** `.dockerignore` optimization to exclude `.venv`, `.git`, `.env`, and test artifacts.
-  - **Task 17.4:** Container `/health` status check verification.
+- **Milestone 18: Cloud Deployment**
+  - **Task 18.1:** Prepare cloud deployment blueprint (Google Cloud Run / Render) backed by Neon PostgreSQL.
+  - **Task 18.2:** Database migration execution on deployment (`alembic upgrade head`).
+  - **Task 18.3:** Webhook configuration and Cloud Scheduler cron trigger wiring.
 
 ---
 
@@ -245,13 +252,14 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Create production multi-stage `Dockerfile` and `.dockerignore`.
+Prepare cloud deployment configuration and documentation for Milestone 18.
 
 ---
 
 ## 13. Latest Verification Evidence
-- **94/94 Automated Tests Passing:** 100% pass rate in 17.13s across all 12 test modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_failure_handling.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
+- **99/99 Automated Tests Passing:** 100% pass rate in 16.32s across all 13 test modules (`tests/test_config.py`, `tests/test_container.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_failure_handling.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
 - **89% Total Code Coverage:** Core domain packages reach 94%–100% test coverage.
+- **Multi-Stage Dockerfile Verified:** `Dockerfile` (builder + unprivileged runtime user `appuser:appgroup`), `.dockerignore` security filters, `docker-compose.yml`, and container `/health` probe verified.
 - **Zero Ruff Errors:** `ruff check .` returns 0 issues, and `ruff format --check .` confirms 100% formatted.
 
 ---
