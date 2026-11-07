@@ -148,7 +148,7 @@ def handle_start_command(
 
 
 def handle_today_command(session: Session, client: TelegramClient, chat_id: int) -> dict[str, Any]:
-    """Handle /today: Fetch and send the current verified Hadith."""
+    """Handle /today: Fetch and send the current verified Hadith with on-demand reflection."""
     candidate = get_next_verified_candidate(session)
     if candidate is None:
         fallback_msg = (
@@ -160,6 +160,37 @@ def handle_today_command(session: Session, client: TelegramClient, chat_id: int)
         except Exception:
             pass
         return {"ok": True}
+
+    # Generate reflection on-demand if candidate does not already have one
+    if not candidate.ai_reflection and candidate.ai_reflection_status != "OMITTED_GUARDRAIL_FAILED":
+        try:
+            from src.guardrails.validator import ReflectionValidator
+            from src.llm.client import GroqReflectionClient
+
+            llm_client = GroqReflectionClient()
+            res = llm_client.generate_reflection(
+                english_text=candidate.english_text,
+                attribution=candidate.attribution,
+                collection=candidate.collection,
+            )
+            if res.status == "GENERATED" and res.reflection:
+                validator = ReflectionValidator()
+                guard_res = validator.validate(
+                    reflection=res.reflection,
+                    source_hadith_text=candidate.english_text,
+                )
+                if guard_res.is_valid:
+                    candidate.ai_reflection = guard_res.sanitized_text or res.reflection
+                    candidate.ai_reflection_status = "PASSED_GUARDRAILS"
+                    session.commit()
+                else:
+                    candidate.ai_reflection_status = "OMITTED_GUARDRAIL_FAILED"
+                    session.commit()
+            else:
+                candidate.ai_reflection_status = res.status
+                session.commit()
+        except Exception as exc:
+            logger.warning("On-demand reflection generation failed (fail-safe fallback): %s", exc)
 
     payload = format_daily_hadith_message(
         english_text=candidate.english_text,

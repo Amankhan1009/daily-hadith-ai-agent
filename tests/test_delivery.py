@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from src.config import get_settings
 from src.database.session import Base
 from src.delivery.router import get_db
 from src.delivery.router import router as webhook_router
@@ -178,6 +179,9 @@ def test_webhook_routes_start_command(api_client, monkeypatch):
 
     monkeypatch.setattr(TelegramClient, "send_message", mock_send_message)
 
+    secret = get_settings().telegram_webhook_secret
+    headers = {"X-Telegram-Bot-Api-Secret-Token": secret} if secret else {}
+
     payload = {
         "update_id": 100,
         "message": {
@@ -188,7 +192,7 @@ def test_webhook_routes_start_command(api_client, monkeypatch):
         },
     }
 
-    response = api_client.post("/telegram/webhook", json=payload)
+    response = api_client.post("/telegram/webhook", json=payload, headers=headers)
     assert response.status_code == 200
     assert len(sent_messages) >= 1
     assert "Assalamu Alaikum" in sent_messages[0]["text"]
@@ -204,6 +208,9 @@ def test_webhook_routes_stop_command(api_client, monkeypatch):
 
     monkeypatch.setattr(TelegramClient, "send_message", mock_send_message)
 
+    secret = get_settings().telegram_webhook_secret
+    headers = {"X-Telegram-Bot-Api-Secret-Token": secret} if secret else {}
+
     payload = {
         "update_id": 101,
         "message": {
@@ -214,7 +221,7 @@ def test_webhook_routes_stop_command(api_client, monkeypatch):
         },
     }
 
-    response = api_client.post("/telegram/webhook", json=payload)
+    response = api_client.post("/telegram/webhook", json=payload, headers=headers)
     assert response.status_code == 200
     assert any("unsubscribed" in msg["text"].lower() for msg in sent_messages)
 
@@ -229,6 +236,9 @@ def test_webhook_routes_help_command(api_client, monkeypatch):
 
     monkeypatch.setattr(TelegramClient, "send_message", mock_send_message)
 
+    secret = get_settings().telegram_webhook_secret
+    headers = {"X-Telegram-Bot-Api-Secret-Token": secret} if secret else {}
+
     payload = {
         "update_id": 102,
         "message": {
@@ -239,6 +249,6 @@ def test_webhook_routes_help_command(api_client, monkeypatch):
         },
     }
 
-    response = api_client.post("/telegram/webhook", json=payload)
+    response = api_client.post("/telegram/webhook", json=payload, headers=headers)
     assert response.status_code == 200
     assert any("Zero Text Modification" in msg["text"] for msg in sent_messages)
