@@ -2,6 +2,8 @@
 
 A production-grade, fail-closed AI system and publicly accessible Telegram bot delivering verified daily Hadith notifications to subscribers, orchestrated with **LangGraph**, verified deterministically with **Pydantic**, persisted on **Neon PostgreSQL**, and powered by **Groq**.
 
+[![CI/CD Pipeline](https://github.com/Amankhan1009/daily-hadith-ai-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Amankhan1009/daily-hadith-ai-agent/actions/workflows/ci.yml)
+[![Docker Image](https://img.shields.io/badge/docker%20image-ready-blue?logo=docker)](https://hub.docker.com/r/amankhan1009/daily-hadith-ai-agent)
 [![Python 3.14](https://img.shields.io/badge/python-3.14-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph%201.2-green.svg)](https://github.com/langchain-ai/langgraph)
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
