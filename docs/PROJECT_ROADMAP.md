@@ -363,17 +363,21 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 
 ---
 
-## Milestone 16 — Automated Testing
+## Milestone 16 — Automated Testing & Code Quality
 - **Goal:** Implement comprehensive test suite with automated linting and formatting.
 - **Scope:** Unit tests, integration tests with mocks, Ruff linting/formatting checks, and test coverage reporting.
 - **Dependencies:** Milestone 15.
 - **Acceptance Criteria:**
   - `pytest` passes 100% of tests.
   - `ruff check` and `ruff format` pass without warnings.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Configured repository-wide Ruff standards in `pyproject.toml` (`line-length = 100`, isort, flake8-bugbear, pyupgrade).
+  - Executed `ruff check .` across all 65 Python files with zero warnings or lint errors.
+  - Executed `ruff format .` formatting 100% of codebase to PEP 8 standards.
+  - Executed `pytest --cov=src --cov-report=term-missing` achieving **94/94 passing tests (100% pass rate in 17.13s)** with **89% total test coverage** across `src/` (core packages `src.database`, `src.formatter`, `src.guardrails`, `src.workflow` reaching 94–100% coverage).
 - **Known Blockers:** None.
-- **Next Action:** Run Ruff linter and code formatter checks across all packages.
+- **Next Action:** Proceed to Milestone 17 — Docker Containerization.
 
 ---
 
@@ -383,6 +387,11 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Dependencies:** Milestone 16.
 - **Acceptance Criteria:**
   - Container builds reproducibly without embedded secrets.
+  - Container runs non-root and responds cleanly to `/health`.
+- **Current Status:** `In Progress`
+- **Verification Evidence:** None.
+- **Known Blockers:** None.
+- **Next Action:** Author production multi-stage Dockerfile and `.dockerignore`.
   - Container runs and passes internal health checks.
 - **Current Status:** `Not Started`
 - **Verification Evidence:** None.

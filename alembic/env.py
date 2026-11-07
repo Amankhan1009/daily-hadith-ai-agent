@@ -6,8 +6,6 @@ Binds Alembic to the application's SQLAlchemy metadata and dynamic settings.
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-
 from alembic import context
 from src.database import Base, engine
 

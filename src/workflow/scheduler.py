@@ -6,7 +6,7 @@ with 1-hour misfire grace time to guarantee execution after server restarts.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -17,7 +17,7 @@ from src.workflow.daily_runner import run_daily_broadcast
 
 logger = logging.getLogger(__name__)
 
-_scheduler: Optional[BackgroundScheduler] = None
+_scheduler: BackgroundScheduler | None = None
 JOB_ID = "daily_hadith_broadcast"
 
 
@@ -44,8 +44,8 @@ def create_daily_scheduler() -> BackgroundScheduler:
         id=JOB_ID,
         name="Daily Hadith Broadcast (10:00 AM IST)",
         misfire_grace_time=3600,  # 1 hour grace time for server reboots
-        coalesce=True,            # Combine multiple missed runs into single run
-        max_instances=1,          # Prevent overlapping executions
+        coalesce=True,  # Combine multiple missed runs into single run
+        max_instances=1,  # Prevent overlapping executions
         replace_existing=True,
     )
 

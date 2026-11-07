@@ -6,8 +6,6 @@ educational commentary, preventing the model from hallucinating, paraphrasing,
 or issuing theological/legal rulings.
 """
 
-from typing import Any
-
 REFLECTION_SYSTEM_PROMPT = """You are a respectful, scholarly ethical educator for a daily Hadith notification service.
 
 CRITICAL SAFETY RULES:

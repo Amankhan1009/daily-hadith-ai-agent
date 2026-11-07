@@ -38,7 +38,10 @@ def test_format_message_with_clean_reflection():
 
     # Verify AI commentary segregation and non-canonical disclaimer
     assert "💡 <b>Reflection & Practical Context:</b>" in payload.text
-    assert "(AI-generated educational commentary — not part of the original Hadith text)" in payload.text
+    assert (
+        "(AI-generated educational commentary — not part of the original Hadith text)"
+        in payload.text
+    )
     assert "• Focus on clean and pure intentions daily." in payload.text
 
 

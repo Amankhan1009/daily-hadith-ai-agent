@@ -6,10 +6,9 @@ database deduplication, and structured candidate persistence.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+
 from sqlalchemy.orm import Session
 
-from src.database.models import HadithCandidate
 from src.database.repository import get_candidate_by_source_id, save_candidate
 from src.hadeethenc.client import HadeethEncClient
 from src.hadeethenc.schemas import HadeethEncCandidatePair
@@ -22,10 +21,10 @@ class IngestionResult:
 
     source_id: str
     status: str  # 'INGESTED_VERIFIED' | 'INGESTED_REJECTED' | 'SKIPPED_EXISTING'
-    candidate_id: Optional[int] = None
-    collection: Optional[str] = None
-    hadith_number: Optional[str] = None
-    rejection_reason: Optional[str] = None
+    candidate_id: int | None = None
+    collection: str | None = None
+    hadith_number: str | None = None
+    rejection_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -109,7 +108,7 @@ class CandidateIngestionService:
     verification, and persistence into the application database.
     """
 
-    def __init__(self, client: Optional[HadeethEncClient] = None) -> None:
+    def __init__(self, client: HadeethEncClient | None = None) -> None:
         self.client = client or HadeethEncClient()
         self._owns_client = client is None
 
@@ -136,7 +135,7 @@ class CandidateIngestionService:
         category_id: int | str,
         page: int = 1,
         per_page: int = 20,
-        max_to_process: Optional[int] = None,
+        max_to_process: int | None = None,
     ) -> BatchIngestionSummary:
         """
         Scan a category page, retrieve dual pairs, verify, and persist each candidate.

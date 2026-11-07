@@ -5,10 +5,9 @@ Enforces strict theological negative constraints, citation bounds,
 length boundaries, and sacred text invariance on LLM commentary.
 """
 
-from dataclasses import dataclass
 import logging
 import re
-from typing import Optional
+from dataclasses import dataclass
 
 from src.guardrails.rules import (
     MAX_REFLECTION_WORDS,
@@ -28,9 +27,9 @@ class GuardrailResult:
 
     is_valid: bool
     status: str  # "PASSED" | "REJECTED"
-    error_code: Optional[str] = None
-    reason: Optional[str] = None
-    sanitized_text: Optional[str] = None
+    error_code: str | None = None
+    reason: str | None = None
+    sanitized_text: str | None = None
 
 
 class ReflectionValidator:
@@ -40,8 +39,8 @@ class ReflectionValidator:
 
     def validate(
         self,
-        reflection: Optional[str],
-        source_hadith_text: Optional[str] = None,
+        reflection: str | None,
+        source_hadith_text: str | None = None,
     ) -> GuardrailResult:
         """
         Run comprehensive structural, theological, and content guardrails.
@@ -93,7 +92,9 @@ class ReflectionValidator:
             match = pattern.search(cleaned)
             if match:
                 matched_term = match.group(0)
-                logger.warning("Guardrail tripped: Theological decree pattern '%s' detected.", matched_term)
+                logger.warning(
+                    "Guardrail tripped: Theological decree pattern '%s' detected.", matched_term
+                )
                 return GuardrailResult(
                     is_valid=False,
                     status="REJECTED",
@@ -106,7 +107,9 @@ class ReflectionValidator:
             match = pattern.search(cleaned)
             if match:
                 matched_term = match.group(0)
-                logger.warning("Guardrail tripped: Citation pattern '%s' detected in reflection.", matched_term)
+                logger.warning(
+                    "Guardrail tripped: Citation pattern '%s' detected in reflection.", matched_term
+                )
                 return GuardrailResult(
                     is_valid=False,
                     status="REJECTED",
@@ -119,7 +122,9 @@ class ReflectionValidator:
             match = pattern.search(cleaned)
             if match:
                 matched_term = match.group(0)
-                logger.warning("Guardrail tripped: Inflammatory pattern '%s' detected.", matched_term)
+                logger.warning(
+                    "Guardrail tripped: Inflammatory pattern '%s' detected.", matched_term
+                )
                 return GuardrailResult(
                     is_valid=False,
                     status="REJECTED",
@@ -160,14 +165,40 @@ class ReflectionValidator:
                         is_valid=False,
                         status="REJECTED",
                         error_code="ERR_HADITH_TEXT_LEAKAGE",
-                        reason=f"Reflection repeats Hadith text verbatim: '...{ref_phrase}...'."
+                        reason=f"Reflection repeats Hadith text verbatim: '...{ref_phrase}...'.",
                     )
 
         # Check vocabulary overlap ratio (excluding stop words)
         stop_words = {
-            "the", "and", "to", "of", "a", "in", "is", "that", "for", "it",
-            "as", "was", "with", "be", "by", "on", "not", "he", "i", "this",
-            "at", "or", "his", "from", "you", "are", "we", "an", "your",
+            "the",
+            "and",
+            "to",
+            "of",
+            "a",
+            "in",
+            "is",
+            "that",
+            "for",
+            "it",
+            "as",
+            "was",
+            "with",
+            "be",
+            "by",
+            "on",
+            "not",
+            "he",
+            "i",
+            "this",
+            "at",
+            "or",
+            "his",
+            "from",
+            "you",
+            "are",
+            "we",
+            "an",
+            "your",
         }
         ref_vocab = set(ref_words) - stop_words
         src_vocab = set(src_words) - stop_words
@@ -191,9 +222,8 @@ _default_validator = ReflectionValidator()
 
 
 def validate_reflection(
-    reflection: Optional[str],
-    source_hadith_text: Optional[str] = None,
+    reflection: str | None,
+    source_hadith_text: str | None = None,
 ) -> GuardrailResult:
     """Convenience helper to validate a reflection using the default validator."""
     return _default_validator.validate(reflection, source_hadith_text)
-

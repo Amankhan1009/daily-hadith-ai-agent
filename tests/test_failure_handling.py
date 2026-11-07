@@ -9,14 +9,14 @@ Validates fail-closed safety, error recovery, and resilience across:
 5. Neon/SQLite database constraints and rollback integrity.
 """
 
-from datetime import date
 import time
-from typing import Any
+from datetime import date
 from unittest.mock import MagicMock
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
+
 import httpx
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
@@ -32,8 +32,6 @@ from src.database.models import (
 )
 from src.database.repository import (
     get_subscriber_by_chat_id,
-    record_delivery_log,
-    record_subscriber_delivery,
     save_candidate,
 )
 from src.delivery.router import get_db, router
@@ -55,14 +53,14 @@ from src.hadeethenc.schemas import (
     HadeethEncPaginationMeta,
 )
 from src.ingestion.service import CandidateIngestionService
-from src.llm.client import GroqReflectionClient, ReflectionResult
+from src.llm.client import GroqReflectionClient
 from src.workflow.nodes import WorkflowNodes
 from src.workflow.state import DailyWorkflowState
-
 
 # ---------------------------------------------------------------------------
 # Test Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def test_db_session():
@@ -96,8 +94,10 @@ def test_client(test_db_session: Session):
 # 1. HadeethEnc API Failure Handling & Fail-Closed Invariants
 # ---------------------------------------------------------------------------
 
+
 def test_hadeethenc_500_server_error_fails_closed():
     """Verify HadeethEnc HTTP 500/503 raises HadeethEncResponseError without data corruption."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, text="Internal Server Error")
 
@@ -112,6 +112,7 @@ def test_hadeethenc_500_server_error_fails_closed():
 
 def test_hadeethenc_network_timeout_fails_closed():
     """Verify network timeouts raise HadeethEncNetworkError cleanly."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         raise httpx.TimeoutException("Connection timed out after 10.0s")
 
@@ -126,8 +127,11 @@ def test_hadeethenc_network_timeout_fails_closed():
 
 def test_hadeethenc_malformed_json_fails_closed():
     """Verify unparseable HTML/malformed JSON responses fail closed."""
+
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=b"<html>Bad Gateway</html>", headers={"content-type": "text/html"})
+        return httpx.Response(
+            200, content=b"<html>Bad Gateway</html>", headers={"content-type": "text/html"}
+        )
 
     transport = httpx.MockTransport(handler)
     mock_http_client = httpx.Client(transport=transport)
@@ -224,6 +228,7 @@ def test_ingestion_batch_survives_partial_api_outages(test_db_session: Session):
 # 2. Groq LLM Degradation, Rate Limits & Guardrail Boundaries
 # ---------------------------------------------------------------------------
 
+
 def test_groq_missing_api_key_reflection_omitted():
     """Verify missing GROQ_API_KEY returns status OMITTED without raising exceptions."""
     client = GroqReflectionClient()
@@ -239,6 +244,7 @@ def test_groq_missing_api_key_reflection_omitted():
 
 def test_groq_rate_limit_or_api_exception_fallback():
     """Verify Groq API exception (rate limit or connection drop) yields FAILED fallback."""
+
     class FailingGroqClient:
         @property
         def chat(self):
@@ -320,6 +326,7 @@ def test_groq_guardrail_violation_drops_reflection_safely(test_db_session: Sessi
 # 3. Telegram Bot API Delivery Resilience & Fan-Out Failure Isolation
 # ---------------------------------------------------------------------------
 
+
 def test_telegram_http_500_retries_and_succeeds(monkeypatch):
     """Verify Telegram 500 error triggers exponential backoff retry and succeeds on attempt 2."""
     monkeypatch.setattr(time, "sleep", lambda s: None)
@@ -345,10 +352,14 @@ def test_telegram_http_500_retries_exhausted_raises_delivery_error(monkeypatch):
     monkeypatch.setattr(time, "sleep", lambda s: None)
 
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(500, json={"ok": False, "description": "Persistent Internal Server Error"})
+        return httpx.Response(
+            500, json={"ok": False, "description": "Persistent Internal Server Error"}
+        )
 
     transport = httpx.MockTransport(handler)
-    client = TelegramClient(bot_token="test_token", max_retries=3, client=httpx.Client(transport=transport))
+    client = TelegramClient(
+        bot_token="test_token", max_retries=3, client=httpx.Client(transport=transport)
+    )
 
     with pytest.raises(TelegramDeliveryError) as exc_info:
         client.send_message(chat_id=12345, text="Peace and blessings.")
@@ -396,18 +407,23 @@ def test_telegram_fanout_handles_mixed_subscriber_states(test_db_session: Sessio
 
     def handler(request: httpx.Request) -> httpx.Response:
         import json
+
         body = json.loads(request.content.decode("utf-8"))
         chat_id = body.get("chat_id")
         if chat_id == 1001:
             return httpx.Response(200, json={"ok": True, "result": {"message_id": 5001}})
         elif chat_id == 1002:
-            return httpx.Response(403, json={"ok": False, "description": "Forbidden: bot was blocked by the user"})
+            return httpx.Response(
+                403, json={"ok": False, "description": "Forbidden: bot was blocked by the user"}
+            )
         elif chat_id == 1003:
             return httpx.Response(500, json={"ok": False, "description": "Server Error"})
         return httpx.Response(400)
 
     transport = httpx.MockTransport(handler)
-    telegram_client = TelegramClient(bot_token="test_token", max_retries=1, client=httpx.Client(transport=transport))
+    telegram_client = TelegramClient(
+        bot_token="test_token", max_retries=1, client=httpx.Client(transport=transport)
+    )
 
     nodes = WorkflowNodes(session=test_db_session, telegram_client=telegram_client)
 
@@ -444,7 +460,9 @@ def test_telegram_fanout_handles_mixed_subscriber_states(test_db_session: Sessio
     assert sub1_reloaded.is_active is True
 
     # Check delivery logs in database
-    logs = test_db_session.query(SubscriberDeliveryLog).order_by(SubscriberDeliveryLog.chat_id).all()
+    logs = (
+        test_db_session.query(SubscriberDeliveryLog).order_by(SubscriberDeliveryLog.chat_id).all()
+    )
     assert len(logs) == 3
     assert logs[0].status == "DELIVERED"
     assert logs[0].chat_id == 1001
@@ -457,6 +475,7 @@ def test_telegram_fanout_handles_mixed_subscriber_states(test_db_session: Sessio
 # ---------------------------------------------------------------------------
 # 4. Inbound Webhook Security & Payload Corruption Resilience
 # ---------------------------------------------------------------------------
+
 
 def test_webhook_forged_secret_token_returns_403(test_client: TestClient, monkeypatch):
     """Verify unauthorized or forged webhook calls receive HTTP 403 Forbidden."""
@@ -560,6 +579,7 @@ def test_webhook_unrecognized_text_acknowledged_silently(test_client: TestClient
 # ---------------------------------------------------------------------------
 # 5. Database Constraint & Rollback Invariants
 # ---------------------------------------------------------------------------
+
 
 def test_daily_delivery_log_unique_date_constraint(test_db_session: Session):
     """Verify database unique constraint prevents duplicate daily delivery records."""

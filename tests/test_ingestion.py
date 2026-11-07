@@ -4,6 +4,7 @@ Automated Unit and Integration Tests for Candidate Ingestion and Validation Serv
 
 from collections.abc import Generator
 from unittest.mock import MagicMock
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -27,7 +28,7 @@ from src.ingestion.service import (
 
 
 @pytest.fixture
-def db_session() -> Generator[Session, None, None]:
+def db_session() -> Generator[Session]:
     """Provides an isolated in-memory SQLite database session."""
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
@@ -148,18 +149,12 @@ def test_ingest_candidate_skips_existing_idempotent(
     assert first_res.status == "INGESTED_VERIFIED"
 
     # Second ingestion without force_reverify
-    second_res = ingest_candidate_pair(
-        db_session, valid_bukhari_pair, force_reverify=False
-    )
+    second_res = ingest_candidate_pair(db_session, valid_bukhari_pair, force_reverify=False)
     assert second_res.status == "SKIPPED_EXISTING"
     assert second_res.candidate_id == first_res.candidate_id
 
     # Verify no duplicate entries were created
-    candidates = (
-        db_session.query(HadithCandidate)
-        .filter(HadithCandidate.source_id == "5913")
-        .all()
-    )
+    candidates = db_session.query(HadithCandidate).filter(HadithCandidate.source_id == "5913").all()
     assert len(candidates) == 1
 
 
@@ -178,17 +173,13 @@ def test_ingest_category_batch_workflow(
     # Mock category listing returning 3 items
     mock_client.get_hadiths_by_category.return_value = HadeethEncListResponse(
         data=[
-            HadeethEncListItem(
-                id="5913", title="Best of you", translations=["en", "ar"]
-            ),
+            HadeethEncListItem(id="5913", title="Best of you", translations=["en", "ar"]),
             HadeethEncListItem(
                 id="66541",
                 title="Keep tongue moist",
                 translations=["en", "ar"],
             ),
-            HadeethEncListItem(
-                id="9999", title="Error candidate", translations=["en", "ar"]
-            ),
+            HadeethEncListItem(id="9999", title="Error candidate", translations=["en", "ar"]),
         ],
         meta=HadeethEncPaginationMeta(
             current_page="1",
@@ -208,9 +199,7 @@ def test_ingest_category_batch_workflow(
 
     # 3. Run batch ingestion
     service = CandidateIngestionService(client=mock_client)
-    summary = service.ingest_category_batch(
-        session=db_session, category_id=5, page=1, per_page=20
-    )
+    summary = service.ingest_category_batch(session=db_session, category_id=5, page=1, per_page=20)
 
     assert summary.total_scanned == 3
     assert summary.already_existed == 1  # 5913 was pre-seeded

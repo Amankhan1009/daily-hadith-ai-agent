@@ -2,19 +2,26 @@
 Automated Unit and Contract Tests for Outbound Telegram Client.
 """
 
-import pytest
 import httpx
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
+from src.database.session import Base
+from src.delivery.router import get_db
+from src.delivery.router import router as webhook_router
 from src.delivery.telegram import (
     TelegramBotBlockedError,
     TelegramClient,
-    TelegramDeliveryError,
-    TelegramNetworkError,
 )
 
 
 def test_send_message_success_mock():
     """Verify happy-path message delivery returns result payload."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/botTEST_TOKEN/sendMessage"
         return httpx.Response(
@@ -40,10 +47,15 @@ def test_send_message_exceeds_character_limit_raises_value_error():
 
 def test_send_message_403_raises_bot_blocked_error():
     """Verify HTTP 403 Forbidden raises TelegramBotBlockedError."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
             403,
-            json={"ok": False, "error_code": 403, "description": "Forbidden: bot was blocked by the user"},
+            json={
+                "ok": False,
+                "error_code": 403,
+                "description": "Forbidden: bot was blocked by the user",
+            },
         )
 
     mock_client = httpx.Client(transport=httpx.MockTransport(handler))
@@ -83,6 +95,7 @@ def test_send_message_429_rate_limit_retry_succeeds():
 
 def test_webhook_management_helpers():
     """Verify set_webhook and delete_webhook endpoints."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path.endswith("/setWebhook"):
             return httpx.Response(200, json={"ok": True, "result": True})
@@ -93,18 +106,11 @@ def test_webhook_management_helpers():
     mock_client = httpx.Client(transport=httpx.MockTransport(handler))
     client = TelegramClient(bot_token="TEST_TOKEN", client=mock_client)
 
-    assert client.set_webhook(url="https://example.com/telegram/webhook", secret_token="sec123") is True
+    assert (
+        client.set_webhook(url="https://example.com/telegram/webhook", secret_token="sec123")
+        is True
+    )
     assert client.delete_webhook() is True
-
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from unittest.mock import patch
-
-from src.database.session import Base
-from src.delivery.router import get_db, router as webhook_router
 
 
 @pytest.fixture
@@ -137,6 +143,7 @@ def test_webhook_rejects_missing_or_invalid_secret(api_client, monkeypatch):
     """Verify webhook rejects requests with invalid X-Telegram-Bot-Api-Secret-Token."""
     monkeypatch.setenv("TELEGRAM_WEBHOOK_SECRET", "super_secret_token_123")
     from src.config import get_settings
+
     get_settings.cache_clear()
 
     # Missing header -> 403

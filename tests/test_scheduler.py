@@ -3,8 +3,8 @@ Automated Unit and Contract Tests for Daily Runner, Scheduler, and FastAPI Endpo
 """
 
 from collections.abc import Generator
-from datetime import date
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -14,15 +14,13 @@ from sqlalchemy.pool import StaticPool
 from src.database.models import HadithCandidate
 from src.database.repository import get_or_create_subscriber, save_candidate
 from src.database.session import Base
-from src.delivery import TelegramClient
-from src.delivery.router import get_db
 from src.main import create_app
 from src.workflow.daily_runner import run_daily_broadcast
-from src.workflow.scheduler import create_daily_scheduler, get_scheduler_status
+from src.workflow.scheduler import create_daily_scheduler
 
 
 @pytest.fixture
-def test_db_session() -> Generator[Session, None, None]:
+def test_db_session() -> Generator[Session]:
     """Provides an isolated in-memory SQLite database session."""
     engine = create_engine(
         "sqlite:///:memory:",
@@ -102,6 +100,7 @@ def test_api_cron_endpoint_security_and_dispatch(monkeypatch):
     """Verify POST /api/cron/daily-broadcast rejects invalid secret and accepts valid token."""
     monkeypatch.setenv("CRON_SECRET_TOKEN", "valid_cron_secret_777")
     from src.config import get_settings
+
     get_settings.cache_clear()
 
     app = create_app()

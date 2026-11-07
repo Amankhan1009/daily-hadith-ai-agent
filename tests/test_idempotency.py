@@ -5,6 +5,7 @@ Automated Unit and Invariant Tests for Per-Subscriber Daily Idempotency and Mid-
 from collections.abc import Generator
 from datetime import date
 from unittest.mock import MagicMock
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
@@ -14,19 +15,18 @@ from sqlalchemy.pool import StaticPool
 from src.database.models import HadithCandidate, SubscriberDeliveryLog
 from src.database.repository import (
     get_or_create_subscriber,
-    get_subscriber_by_chat_id,
     get_undelivered_active_subscribers,
     is_subscriber_delivered,
     record_subscriber_delivery,
     save_candidate,
 )
 from src.database.session import Base
-from src.delivery import TelegramBotBlockedError, TelegramClient
+from src.delivery import TelegramClient
 from src.workflow import run_daily_workflow
 
 
 @pytest.fixture
-def test_db_session() -> Generator[Session, None, None]:
+def test_db_session() -> Generator[Session]:
     """Provides an isolated in-memory SQLite database session."""
     engine = create_engine(
         "sqlite:///:memory:",
@@ -62,7 +62,9 @@ def seed_candidate(test_db_session: Session) -> HadithCandidate:
     return cand
 
 
-def test_subscriber_daily_unique_constraint(test_db_session: Session, seed_candidate: HadithCandidate):
+def test_subscriber_daily_unique_constraint(
+    test_db_session: Session, seed_candidate: HadithCandidate
+):
     """
     Verify physical database constraint: inserting two delivery logs for the
     exact same (subscriber_id, scheduled_date) raises an IntegrityError.
@@ -179,7 +181,9 @@ def test_full_rerun_on_same_day_sends_zero_messages(
     sent_calls = []
     mock_client = MagicMock(spec=TelegramClient)
     mock_client.bot_token = "MOCK_TOKEN"
-    mock_client.send_message.side_effect = lambda chat_id, text, **kwargs: sent_calls.append(chat_id)
+    mock_client.send_message.side_effect = lambda chat_id, text, **kwargs: sent_calls.append(
+        chat_id
+    )
 
     final_state = run_daily_workflow(
         scheduled_date=target_date,

@@ -9,7 +9,7 @@ execution metrics, and sets exit codes.
 import argparse
 import logging
 import sys
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock
 
 from src.config import get_settings
@@ -25,9 +25,9 @@ logger = logging.getLogger("daily_runner")
 
 
 def run_daily_broadcast(
-    target_date: Optional[str] = None,
+    target_date: str | None = None,
     dry_run: bool = False,
-    telegram_client: Optional[TelegramClient] = None,
+    telegram_client: TelegramClient | None = None,
 ) -> dict[str, Any]:
     """
     Execute daily broadcast workflow for target date with structured logging.
@@ -48,7 +48,10 @@ def run_daily_broadcast(
     logger.info("=" * 65)
     logger.info("• Target Scheduled Date (IST): %s", scheduled_date)
     logger.info("• Execution Timezone: %s", settings.timezone)
-    logger.info("• Dry Run Mode: %s", "ENABLED (simulated dispatch)" if dry_run else "DISABLED (live dispatch)")
+    logger.info(
+        "• Dry Run Mode: %s",
+        "ENABLED (simulated dispatch)" if dry_run else "DISABLED (live dispatch)",
+    )
 
     # In dry-run mode, simulate delivery without calling Telegram Bot API
     if dry_run and telegram_client is None:
@@ -68,7 +71,9 @@ def run_daily_broadcast(
     logger.info("-" * 65)
     logger.info("• Final Status: %s", status)
     logger.info("• Candidate ID: %s", final_state.get("candidate_id"))
-    logger.info("• Collection: %s (#%s)", final_state.get("collection"), final_state.get("hadith_number"))
+    logger.info(
+        "• Collection: %s (#%s)", final_state.get("collection"), final_state.get("hadith_number")
+    )
     logger.info("• AI Reflection Status: %s", final_state.get("ai_reflection_status"))
     logger.info("• Total Active Subscribers: %s", final_state.get("subscribers_count", 0))
     logger.info("• Successfully Delivered: %s", final_state.get("delivered_count", 0))

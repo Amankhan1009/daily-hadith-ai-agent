@@ -101,12 +101,16 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 16 — Automated Testing
-- **Active Task:** Task 16.1 — Code Quality, Ruff Linting and Formatting Verification
+- **Active Milestone:** Milestone 17 — Docker Containerization
+- **Active Task:** Task 17.1 — Multi-Stage Dockerfile & Container Architecture Specification
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 16 Verified:** Automated Testing & Code Quality Audit.
+  - Formatted 100% of codebase (65 Python files) to PEP 8 standards with Ruff.
+  - Zero linting errors or warnings across entire repository (`ruff check .` returns 0 issues).
+  - Executed full test suite with coverage: **94/94 passing tests (100% pass rate in 17.13s)** with **89% total code coverage** across `src/`.
 - [x] **Milestone 15 Verified:** Failure Handling & System Resilience.
   - Built comprehensive stress-test suite in `tests/test_failure_handling.py` (19 isolated unit/integration tests).
   - Verified upstream HadeethEnc API failure fail-closed invariants (HTTP 500, timeouts, malformed HTML, and partial batch recovery).
@@ -203,10 +207,11 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- **Milestone 16: Automated Testing & Code Quality**
-  - **Task 16.1:** Run Ruff linter and code formatter checks across all packages (`src/`, `tests/`).
-  - **Task 16.2:** Address any style, docstring, or typing warnings.
-  - **Task 16.3:** Verify 100% test pass rate and clean lint report.
+- **Milestone 17: Docker Containerization**
+  - **Task 17.1:** Production multi-stage `Dockerfile` (build stage with dependencies wheel compilation, minimal slim runtime stage).
+  - **Task 17.2:** Container security hardening (non-root unprivileged user `appuser`, zero embedded secrets).
+  - **Task 17.3:** `.dockerignore` optimization to exclude `.venv`, `.git`, `.env`, and test artifacts.
+  - **Task 17.4:** Container `/health` status check verification.
 
 ---
 
@@ -240,14 +245,14 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Execute Ruff linting and formatting verification (`ruff check .`, `ruff format --check .`).
+Create production multi-stage `Dockerfile` and `.dockerignore`.
 
 ---
 
 ## 13. Latest Verification Evidence
-- **94/94 Automated Tests Passing:** 100% pass rate in 16.75s across all 12 test modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_failure_handling.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
-- **Resilience Against External Outages Verified:** Stress-tested 19 failure scenarios across upstream HadeethEnc API down/timeouts, Groq rate limits, Telegram 500 retry backoffs, bot blocking deactivations, and forged webhook rejections.
-- **Dead Code Cleaned Up:** Cleaned up redundant execution block in `src/workflow/nodes.py`.
+- **94/94 Automated Tests Passing:** 100% pass rate in 17.13s across all 12 test modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_failure_handling.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
+- **89% Total Code Coverage:** Core domain packages reach 94%–100% test coverage.
+- **Zero Ruff Errors:** `ruff check .` returns 0 issues, and `ruff format --check .` confirms 100% formatted.
 
 ---
 

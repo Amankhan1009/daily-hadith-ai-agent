@@ -2,8 +2,6 @@
 Automated Unit and Integration Tests for HadeethEnc Client & Invariant Verifier.
 """
 
-import json
-from typing import Any
 import httpx
 import pytest
 
@@ -66,6 +64,7 @@ MOCK_LIST_PAYLOAD = {
 
 def test_client_get_hadiths_by_category_success():
     """Verify listing Hadiths returns a valid, typed HadeethEncListResponse."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         assert "hadeeths/list/" in str(request.url)
         return httpx.Response(200, json=MOCK_LIST_PAYLOAD)
@@ -82,6 +81,7 @@ def test_client_get_hadiths_by_category_success():
 
 def test_client_get_candidate_pair_success():
     """Verify fetching both records generates a synchronized HadeethEncCandidatePair."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         params = dict(request.url.params)
         if params.get("language") == "en":
@@ -103,6 +103,7 @@ def test_client_get_candidate_pair_success():
 
 def test_client_404_raises_not_found():
     """Verify HTTP 404 is mapped to HadeethEncNotFoundError."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(404, text="Not Found")
 
@@ -115,6 +116,7 @@ def test_client_404_raises_not_found():
 
 def test_client_empty_response_raises_not_found():
     """Verify HTTP 200 with empty body/string is treated as Not Found."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json="")
 
@@ -127,6 +129,7 @@ def test_client_empty_response_raises_not_found():
 
 def test_client_timeout_raises_network_error():
     """Verify request timeouts map cleanly to HadeethEncNetworkError."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         raise httpx.ReadTimeout("Read timed out")
 
@@ -140,6 +143,7 @@ def test_client_timeout_raises_network_error():
 
 def test_client_500_raises_response_error():
     """Verify upstream HTTP 500 errors map to HadeethEncResponseError."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, text="Internal Server Error")
 
@@ -153,6 +157,7 @@ def test_client_500_raises_response_error():
 
 def test_client_malformed_payload_raises_response_error():
     """Verify unexpected payload structure triggers HadeethEncResponseError."""
+
     def handler(request: httpx.Request) -> httpx.Response:
         # Missing required fields like 'hadeeth', 'attribution'
         return httpx.Response(200, json={"id": "5913", "title": "Incomplete"})
@@ -197,9 +202,7 @@ def create_mock_pair(
 
 def test_verifier_valid_bukhari_passes():
     """Valid Sahih al-Bukhari pair must pass with correct number extracted."""
-    pair = create_mock_pair(
-        reference_text="صحيح البخاري (6/ 192) (5027).\nفتح الباري (1/ 374)."
-    )
+    pair = create_mock_pair(reference_text="صحيح البخاري (6/ 192) (5027).\nفتح الباري (1/ 374).")
     result = verify_candidate_pair(pair)
 
     assert result.is_valid is True
@@ -281,6 +284,8 @@ def test_verifier_missing_reference_fails():
 
     assert result.is_valid is False
     assert "ERR_MISSING_REFERENCE" in str(result.rejection_reason)
+
+
 def test_verifier_bibliographic_citation_without_number_fails():
     """Verify that a record citing Bukhari/Muslim without an exact Hadith number is rejected fail-closed."""
     en = HadeethEncEnglishDetail(
@@ -301,9 +306,7 @@ def test_verifier_bibliographic_citation_without_number_fails():
         grade="صحيح",
         reference="صحيح البخاري –الجامع الصحيح- دار طوق النجاة، 1422هـ",  # Bibliographic only
     )
-    pair = HadeethEncCandidatePair(
-        source_id="10112", english=en, arabic=ar, canonical_url="url"
-    )
+    pair = HadeethEncCandidatePair(source_id="10112", english=en, arabic=ar, canonical_url="url")
     res = verify_candidate_pair(pair)
     assert not res.is_valid
     assert "ERR_AMBIGUOUS_CITATION" in res.rejection_reason

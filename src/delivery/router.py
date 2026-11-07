@@ -7,10 +7,10 @@ and routes commands (/start, /today, /stop, /help).
 
 import hmac
 import logging
-from typing import Any, Optional
-
 from collections.abc import Generator
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
+from typing import Any
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from src.config import get_settings
@@ -28,13 +28,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/telegram", tags=["Telegram Webhook"])
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db() -> Generator[Session]:
     """FastAPI dependency yielding a transactional database session."""
     with get_db_session() as session:
         yield session
 
 
-def verify_webhook_secret(secret_token_header: Optional[str]) -> bool:
+def verify_webhook_secret(secret_token_header: str | None) -> bool:
     """
     Verify incoming X-Telegram-Bot-Api-Secret-Token using constant-time comparison.
     """
@@ -52,14 +52,16 @@ def verify_webhook_secret(secret_token_header: Optional[str]) -> bool:
 @router.post("/webhook")
 async def telegram_webhook(
     request: Request,
-    x_telegram_bot_api_secret_token: Optional[str] = Header(None),
+    x_telegram_bot_api_secret_token: str | None = Header(None),
     session: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Receive and process inbound Telegram webhook updates.
     """
     if not verify_webhook_secret(x_telegram_bot_api_secret_token):
-        logger.warning("Rejected unauthorized Telegram webhook call: invalid or missing secret token.")
+        logger.warning(
+            "Rejected unauthorized Telegram webhook call: invalid or missing secret token."
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Forbidden: Invalid secret token",
@@ -110,8 +112,8 @@ def handle_start_command(
     session: Session,
     client: TelegramClient,
     chat_id: int,
-    username: Optional[str],
-    first_name: Optional[str],
+    username: str | None,
+    first_name: str | None,
 ) -> dict[str, Any]:
     """Handle /start: Idempotently register subscriber and send today's Hadith."""
     subscriber, created = get_or_create_subscriber(

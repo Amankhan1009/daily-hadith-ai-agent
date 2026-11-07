@@ -5,8 +5,6 @@ Provides strict structural models for list responses, detailed single-record
 responses (English and Arabic), and paired candidate representations.
 """
 
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -57,15 +55,15 @@ class HadeethEncEnglishDetail(BaseModel):
     hadeeth: str = Field(description="Canonical English translation text")
     attribution: str = Field(description="English attribution, e.g. 'Narrated by Al-Bukhari'")
     grade: str = Field(description="Authenticity grade, e.g. 'Authentic'")
-    explanation: Optional[str] = None
+    explanation: str | None = None
     hints: list[str] = Field(default_factory=list)
     categories: list[str] = Field(default_factory=list)
     translations: list[str] = Field(default_factory=list)
 
     # Embedded Arabic cross-check fields
     hadeeth_ar: str = Field(description="Arabic text embedded in the English response")
-    hadeeth_intro_ar: Optional[str] = None
-    explanation_ar: Optional[str] = None
+    hadeeth_intro_ar: str | None = None
+    explanation_ar: str | None = None
     attribution_ar: str = Field(description="Arabic attribution, e.g. 'رواه البخاري'")
     grade_ar: str = Field(description="Arabic grade, e.g. 'صحيح'")
 
@@ -83,7 +81,7 @@ class HadeethEncArabicDetail(BaseModel):
     hadeeth: str = Field(description="Canonical Arabic text")
     attribution: str = Field(description="Arabic attribution, e.g. 'رواه البخاري'")
     grade: str = Field(description="Arabic grade, e.g. 'صحيح'")
-    explanation: Optional[str] = None
+    explanation: str | None = None
     hints: list[str] = Field(default_factory=list)
     categories: list[str] = Field(default_factory=list)
     translations: list[str] = Field(default_factory=list)

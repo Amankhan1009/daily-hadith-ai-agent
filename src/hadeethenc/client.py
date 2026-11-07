@@ -5,7 +5,8 @@ Provides typed methods for candidate discovery, dual English/Arabic retrieval,
 strict timeout enforcement, and domain-specific error mapping.
 """
 
-from typing import Any, Optional
+from typing import Any
+
 import httpx
 from pydantic import ValidationError
 
@@ -49,9 +50,9 @@ class HadeethEncClient:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        timeout_seconds: Optional[float] = None,
-        client: Optional[httpx.Client] = None,
+        base_url: str | None = None,
+        timeout_seconds: float | None = None,
+        client: httpx.Client | None = None,
     ) -> None:
         settings = get_settings()
         self.base_url = (base_url or settings.hadeethenc_base_url).rstrip("/")
@@ -90,9 +91,7 @@ class HadeethEncClient:
                 f"Request to {url} timed out after {self.timeout}s."
             ) from exc
         except httpx.NetworkError as exc:
-            raise HadeethEncNetworkError(
-                f"Network failure while requesting {url}: {exc}"
-            ) from exc
+            raise HadeethEncNetworkError(f"Network failure while requesting {url}: {exc}") from exc
 
         if response.status_code == 404:
             raise HadeethEncNotFoundError(f"Record not found at {url} with params {params}")

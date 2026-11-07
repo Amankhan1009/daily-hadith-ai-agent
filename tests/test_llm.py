@@ -3,11 +3,10 @@ Automated Unit Tests for Groq LLM Reflection Client and Prompt Construction.
 """
 
 from unittest.mock import MagicMock
-import pytest
+
 from groq import Groq
 
 from src.llm import GroqReflectionClient, build_reflection_prompt
-from src.llm.prompts import REFLECTION_SYSTEM_PROMPT
 
 
 def test_build_reflection_prompt_content_and_rules():

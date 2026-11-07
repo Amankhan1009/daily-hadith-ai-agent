@@ -7,9 +7,9 @@ Executes the entire daily pipeline against live Neon PostgreSQL and Groq Cloud:
 3. Immediate re-run verification for idempotency skip guard.
 """
 
+import sys
 from datetime import date
 from pathlib import Path
-import sys
 
 # Ensure project root is in sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -18,7 +18,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import get_settings
 from src.llm import GroqReflectionClient
-from src.workflow import run_daily_workflow, get_current_ist_date
+from src.workflow import get_current_ist_date, run_daily_workflow
 
 
 def main() -> None:
@@ -28,10 +28,16 @@ def main() -> None:
 
     settings = get_settings()
     has_real_key = bool(settings.groq_api_key and "your" not in settings.groq_api_key.lower())
-    key_preview = f"{settings.groq_api_key[:8]}...{settings.groq_api_key[-4:]}" if settings.groq_api_key else "<NOT SET>"
+    key_preview = (
+        f"{settings.groq_api_key[:8]}...{settings.groq_api_key[-4:]}"
+        if settings.groq_api_key
+        else "<NOT SET>"
+    )
     print(f"• Timezone: {settings.timezone}")
     print(f"• Groq Model: {settings.groq_model}")
-    print(f"• Groq Key Configured: {'✅ YES (' + key_preview + ')' if has_real_key else '⚠️ PLACEHOLDER (' + key_preview + ')'}")
+    print(
+        f"• Groq Key Configured: {'✅ YES (' + key_preview + ')' if has_real_key else '⚠️ PLACEHOLDER (' + key_preview + ')'}"
+    )
     print(f"• Target Date (IST): {get_current_ist_date()}")
     print("-" * 70)
 
@@ -55,10 +61,11 @@ def main() -> None:
     # -------------------------------------------------------------
     # Step 2: Full LangGraph StateGraph Execution on Neon DB
     # -------------------------------------------------------------
-    from datetime import timedelta
     import time
-    from src.database.session import get_db_session
+    from datetime import timedelta
+
     from src.database.repository import is_date_delivered
+    from src.database.session import get_db_session
 
     target_date_str = sys.argv[1] if len(sys.argv) > 1 else get_current_ist_date()
 
@@ -67,14 +74,22 @@ def main() -> None:
         try:
             with get_db_session() as session:
                 while is_date_delivered(session, date.fromisoformat(target_date_str)):
-                    next_date = (date.fromisoformat(target_date_str) + timedelta(days=1)).isoformat()
+                    next_date = (
+                        date.fromisoformat(target_date_str) + timedelta(days=1)
+                    ).isoformat()
                     target_date_str = next_date
-                if target_date_str != (sys.argv[1] if len(sys.argv) > 1 else get_current_ist_date()):
-                    print(f"ℹ️ Advancing test run to next undelivered date '{target_date_str}' for fresh candidate delivery.")
+                if target_date_str != (
+                    sys.argv[1] if len(sys.argv) > 1 else get_current_ist_date()
+                ):
+                    print(
+                        f"ℹ️ Advancing test run to next undelivered date '{target_date_str}' for fresh candidate delivery."
+                    )
             break
-        except Exception as exc:
+        except Exception:
             if attempt < 3:
-                print(f"⏳ Neon DB compute endpoint waking up (attempt {attempt}/3)... Retrying in 2s")
+                print(
+                    f"⏳ Neon DB compute endpoint waking up (attempt {attempt}/3)... Retrying in 2s"
+                )
                 time.sleep(2.0)
             else:
                 raise
@@ -93,7 +108,9 @@ def main() -> None:
     # -------------------------------------------------------------
     # Step 3: Immediate Idempotency Skip Verification
     # -------------------------------------------------------------
-    print(f"\n[Step 3/3] Testing Idempotency Protection (Immediate Re-run for '{target_date_str}')...")
+    print(
+        f"\n[Step 3/3] Testing Idempotency Protection (Immediate Re-run for '{target_date_str}')..."
+    )
     rerun_state = run_daily_workflow(scheduled_date=target_date_str)
     print(f"Re-run Status: {rerun_state.get('status')}")
     assert rerun_state.get("status") == "SKIPPED_IDEMPOTENT", (
@@ -108,4 +125,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

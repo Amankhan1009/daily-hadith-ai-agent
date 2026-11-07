@@ -5,15 +5,20 @@ Encapsulates CRUD operations, candidate deduplication, and daily delivery
 idempotency queries.
 """
 
-from datetime import date, datetime, timezone
-from typing import Optional
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.database.models import DailyDeliveryLog, HadithCandidate, SubscriberDeliveryLog, TelegramSubscriber
+from src.database.models import (
+    DailyDeliveryLog,
+    HadithCandidate,
+    SubscriberDeliveryLog,
+    TelegramSubscriber,
+)
 
-def get_candidate_by_source_id(session: Session, source_id: str) -> Optional[HadithCandidate]:
+
+def get_candidate_by_source_id(session: Session, source_id: str) -> HadithCandidate | None:
     """Retrieve a Hadith candidate by its HadeethEnc record ID."""
     stmt = select(HadithCandidate).where(HadithCandidate.source_id == str(source_id))
     return session.scalars(stmt).first()
@@ -29,10 +34,10 @@ def save_candidate(
     attribution: str,
     grade: str,
     source_url: str,
-    hadith_number: Optional[str] = None,
-    translation_version: Optional[str] = None,
+    hadith_number: str | None = None,
+    translation_version: str | None = None,
     verification_status: str = "PENDING",
-    rejection_reason: Optional[str] = None,
+    rejection_reason: str | None = None,
 ) -> HadithCandidate:
     """Create or update a Hadith candidate record."""
     candidate = get_candidate_by_source_id(session, source_id)
@@ -86,7 +91,7 @@ def is_date_delivered(session: Session, scheduled_date: date) -> bool:
 is_delivery_recorded = is_date_delivered
 
 
-def get_next_verified_candidate(session: Session) -> Optional[HadithCandidate]:
+def get_next_verified_candidate(session: Session) -> HadithCandidate | None:
     """
     Find the earliest verified candidate that has not yet been delivered.
     """
@@ -109,9 +114,9 @@ def record_delivery_log(
     session: Session,
     scheduled_date: date,
     status: str,
-    candidate_id: Optional[int] = None,
-    error_message: Optional[str] = None,
-    telegram_message_id: Optional[int] = None,
+    candidate_id: int | None = None,
+    error_message: str | None = None,
+    telegram_message_id: int | None = None,
 ) -> DailyDeliveryLog:
     """
     Create or update the delivery log for a calendar date.
@@ -119,7 +124,7 @@ def record_delivery_log(
     stmt = select(DailyDeliveryLog).where(DailyDeliveryLog.scheduled_date == scheduled_date)
     log = session.scalars(stmt).first()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if log is None:
         log = DailyDeliveryLog(
             scheduled_date=scheduled_date,
@@ -143,7 +148,8 @@ def record_delivery_log(
     session.flush()
     return log
 
-def get_subscriber_by_chat_id(session: Session, chat_id: int) -> Optional[TelegramSubscriber]:
+
+def get_subscriber_by_chat_id(session: Session, chat_id: int) -> TelegramSubscriber | None:
     """Retrieve a subscriber by their Telegram chat ID."""
     stmt = select(TelegramSubscriber).where(TelegramSubscriber.chat_id == chat_id)
     return session.scalars(stmt).first()
@@ -152,8 +158,8 @@ def get_subscriber_by_chat_id(session: Session, chat_id: int) -> Optional[Telegr
 def get_or_create_subscriber(
     session: Session,
     chat_id: int,
-    username: Optional[str] = None,
-    first_name: Optional[str] = None,
+    username: str | None = None,
+    first_name: str | None = None,
 ) -> tuple[TelegramSubscriber, bool]:
     """
     Idempotently register or reactivate a subscriber.
@@ -164,7 +170,7 @@ def get_or_create_subscriber(
         - created is False if existing record was found or reactivated.
     """
     subscriber = get_subscriber_by_chat_id(session, chat_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     if subscriber is None:
         subscriber = TelegramSubscriber(
@@ -206,7 +212,7 @@ def deactivate_subscriber(session: Session, chat_id: int) -> bool:
     subscriber = get_subscriber_by_chat_id(session, chat_id)
     if subscriber is not None and subscriber.is_active:
         subscriber.is_active = False
-        subscriber.updated_at = datetime.now(timezone.utc)
+        subscriber.updated_at = datetime.now(UTC)
         session.flush()
         return True
     return False
@@ -221,7 +227,10 @@ def get_active_subscribers(session: Session) -> list[TelegramSubscriber]:
     )
     return list(session.scalars(stmt).all())
 
-def get_undelivered_active_subscribers(session: Session, scheduled_date: date) -> list[TelegramSubscriber]:
+
+def get_undelivered_active_subscribers(
+    session: Session, scheduled_date: date
+) -> list[TelegramSubscriber]:
     """
     Retrieve active subscribers who have not yet received a successful delivery on scheduled_date.
     Guarantees mid-run recovery without sending duplicate notifications.
@@ -246,10 +255,10 @@ def record_subscriber_delivery(
     subscriber_id: int,
     chat_id: int,
     scheduled_date: date,
-    candidate_id: Optional[int],
+    candidate_id: int | None,
     status: str,
-    telegram_message_id: Optional[int] = None,
-    error_message: Optional[str] = None,
+    telegram_message_id: int | None = None,
+    error_message: str | None = None,
 ) -> SubscriberDeliveryLog:
     """
     Record or update an individual subscriber's delivery status for a calendar date.
@@ -260,7 +269,7 @@ def record_subscriber_delivery(
         .where(SubscriberDeliveryLog.scheduled_date == scheduled_date)
     )
     log = session.scalars(stmt).first()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     if log is None:
         log = SubscriberDeliveryLog(

@@ -5,9 +5,8 @@ Enforces cross-matching invariants between English and Arabic records and
 extracts canonical collection references using deterministic regex grammar.
 """
 
-from dataclasses import dataclass
 import re
-from typing import Optional
+from dataclasses import dataclass
 
 from src.hadeethenc.schemas import HadeethEncCandidatePair
 
@@ -23,9 +22,9 @@ class VerificationResult:
     """
 
     is_valid: bool
-    collection: Optional[str] = None
-    hadith_number: Optional[str] = None
-    rejection_reason: Optional[str] = None
+    collection: str | None = None
+    hadith_number: str | None = None
+    rejection_reason: str | None = None
 
 
 def normalize_arabic_text(text: str) -> str:
@@ -42,7 +41,7 @@ def normalize_arabic_text(text: str) -> str:
 
 def extract_collection_and_reference(
     attribution_ar: str, reference_text: str
-) -> tuple[Optional[str], Optional[str], Optional[str]]:
+) -> tuple[str | None, str | None, str | None]:
     """
     Parse Arabic attribution and multi-line citation to resolve approved collection and reference number.
     Returns: (collection, hadith_number, rejection_reason)
@@ -68,10 +67,18 @@ def extract_collection_and_reference(
         return "Sahih Muslim", muslim_match.group(1), None
 
     if "البخاري" in attribution_ar or "مسلم" in attribution_ar:
-        return None, None, "ERR_AMBIGUOUS_CITATION: Attribution mentions approved collection but citation lacks canonical Hadith number"
+        return (
+            None,
+            None,
+            "ERR_AMBIGUOUS_CITATION: Attribution mentions approved collection but citation lacks canonical Hadith number",
+        )
 
     # If it cites neither Bukhari nor Muslim, reject for V1
-    return None, None, "ERR_UNAPPROVED_COLLECTION: Candidate does not cite Sahih al-Bukhari or Sahih Muslim"
+    return (
+        None,
+        None,
+        "ERR_UNAPPROVED_COLLECTION: Candidate does not cite Sahih al-Bukhari or Sahih Muslim",
+    )
 
 
 def verify_candidate_pair(pair: HadeethEncCandidatePair) -> VerificationResult:

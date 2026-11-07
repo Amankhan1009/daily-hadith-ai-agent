@@ -7,7 +7,7 @@ session lifecycles for Neon PostgreSQL (and SQLite fallback).
 
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Union
+from typing import Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL, make_url
@@ -22,7 +22,7 @@ class Base(DeclarativeBase):
     pass
 
 
-def get_normalized_database_url(raw_url: str) -> Union[str, URL]:
+def get_normalized_database_url(raw_url: str) -> str | URL:
     """
     Ensure PostgreSQL URLs use the modern psycopg v3 driver.
     Returns a SQLAlchemy URL object without masking the password.
@@ -50,7 +50,7 @@ engine = create_engine(
     connect_args=_get_connect_args(settings.database_url),
     echo=settings.log_level == "DEBUG",
     pool_pre_ping=True,  # Vital for Neon serverless sleeping connections
-    pool_recycle=300,    # Recycle connections after 5 mins to avoid stale pooler drops
+    pool_recycle=300,  # Recycle connections after 5 mins to avoid stale pooler drops
 )
 
 SessionLocal = sessionmaker(
@@ -62,7 +62,7 @@ SessionLocal = sessionmaker(
 
 
 @contextmanager
-def get_db_session() -> Generator[Session, None, None]:
+def get_db_session() -> Generator[Session]:
     """
     Context manager yielding a transactional database session.
     Automatically commits on normal exit and rolls back on exception.

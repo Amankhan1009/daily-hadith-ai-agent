@@ -6,9 +6,9 @@ tracking candidate provenance, deterministic verification, AI reflection status,
 and delivery idempotency.
 """
 
-from datetime import date, datetime
-from typing import Optional, TypedDict
 import zoneinfo
+from datetime import date, datetime
+from typing import TypedDict
 
 from src.config import get_settings
 
@@ -23,35 +23,35 @@ class DailyWorkflowState(TypedDict, total=False):
     is_idempotent: bool  # True if a successful delivery already occurred for this date
 
     # Selected Hadith Candidate Data
-    candidate_id: Optional[int]
-    source_id: Optional[str]
-    collection: Optional[str]
-    hadith_number: Optional[str]
-    english_title: Optional[str]
-    english_text: Optional[str]
-    arabic_text: Optional[str]
-    attribution: Optional[str]
-    grade: Optional[str]
-    source_url: Optional[str]
+    candidate_id: int | None
+    source_id: str | None
+    collection: str | None
+    hadith_number: str | None
+    english_title: str | None
+    english_text: str | None
+    arabic_text: str | None
+    attribution: str | None
+    grade: str | None
+    source_url: str | None
 
     # Deterministic Safety Gate
     verification_passed: bool
 
     # AI Commentary / Reflection (Segregated)
-    ai_reflection: Optional[str]
+    ai_reflection: str | None
     ai_reflection_status: str  # "NOT_GENERATED" | "GENERATED" | "OMITTED" | "FAILED"
 
     # Notification Formatting & Multi-User Dispatch
-    formatted_message: Optional[str]
-    telegram_message_id: Optional[int]
-    subscribers_count: Optional[int]
-    delivered_count: Optional[int]
-    failed_count: Optional[int]
+    formatted_message: str | None
+    telegram_message_id: int | None
+    subscribers_count: int | None
+    delivered_count: int | None
+    failed_count: int | None
 
     # Execution Lifecycle & Auditing
     # "PENDING" | "COMPLETED" | "SKIPPED_IDEMPOTENT" | "ABORTED_NO_CANDIDATE" | "ABORTED_VALIDATION_FAILED" | "FAILED"
     status: str
-    error_message: Optional[str]
+    error_message: str | None
 
 
 def get_current_ist_date() -> str:
@@ -62,7 +62,7 @@ def get_current_ist_date() -> str:
 
 
 def create_initial_state(
-    scheduled_date: Optional[str | date] = None,
+    scheduled_date: str | date | None = None,
 ) -> DailyWorkflowState:
     """
     Construct a clean initial state dictionary for a daily pipeline run.

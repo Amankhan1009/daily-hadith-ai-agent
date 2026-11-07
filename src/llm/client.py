@@ -5,9 +5,9 @@ Provides structured completion handling, configurable model parameters,
 and automatic fail-safe fallback when API keys are missing or services outage.
 """
 
-from dataclasses import dataclass
 import logging
-from typing import Optional
+from dataclasses import dataclass
+
 from groq import Groq
 
 from src.config import get_settings
@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 class ReflectionResult:
     """Structured outcome of an LLM reflection generation attempt."""
 
-    reflection: Optional[str]
+    reflection: str | None
     status: str  # "GENERATED" | "OMITTED" | "FAILED"
     model: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class GroqReflectionClient:
@@ -33,9 +33,9 @@ class GroqReflectionClient:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        client: Optional[Groq] = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        client: Groq | None = None,
     ) -> None:
         settings = get_settings()
         self.api_key = api_key or settings.groq_api_key

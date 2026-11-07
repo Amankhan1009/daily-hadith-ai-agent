@@ -7,6 +7,8 @@ A production-grade, fail-closed AI system and publicly accessible Telegram bot d
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![Tests Passing](https://img.shields.io/badge/tests-94%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](tests/)
+[![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 ---
 
@@ -118,7 +120,8 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **13 — Scheduling & Daily Multi-User Broadcast** | `Verified` | Headless runner CLI, APScheduler (10 AM IST, 1hr misfire grace), Cloud Scheduler cron endpoint |
 | **14 — History & Per-Subscriber Daily Idempotency** | `Verified` | Composite idempotency unique constraints, mid-run recovery queries & per-user delivery logs |
 | **15 — Failure Handling** | `Verified` | Fault tolerance, retry exponential backoff & fail-closed resilience stress tests (19 tests) |
-| **16 — Automated Testing** | `In Progress` | Automated test suite expansion, Ruff linting & code formatting audits |
+| **16 — Automated Testing** | `Verified` | Automated test suite (94 tests, 89% coverage), Ruff linting & code formatting audits |
+| **17 — Docker Containerization** | `In Progress` | Multi-stage Docker containerization, non-root execution & container health check |
 
 For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 

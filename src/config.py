@@ -6,7 +6,7 @@ environment-driven configuration with fail-fast validation.
 """
 
 from functools import lru_cache
-from typing import Literal, Optional
+from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import Field, field_validator
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
         default=False,
         description="Whether to run the in-process APScheduler inside the FastAPI server process",
     )
-    cron_secret_token: Optional[str] = Field(
+    cron_secret_token: str | None = Field(
         default=None,
         description="Secret token verifying incoming Cloud Scheduler requests to /api/cron/daily-broadcast",
     )
@@ -68,25 +68,25 @@ class Settings(BaseSettings):
     )
 
     # Telegram Delivery Credentials & Public Bot Configuration
-    telegram_bot_token: Optional[str] = Field(
+    telegram_bot_token: str | None = Field(
         default=None,
         description="Telegram bot token obtained from @BotFather",
     )
-    telegram_chat_id: Optional[str] = Field(
+    telegram_chat_id: str | None = Field(
         default=None,
         description="Optional default destination Telegram chat ID (fallback/admin)",
     )
-    telegram_webhook_secret: Optional[str] = Field(
+    telegram_webhook_secret: str | None = Field(
         default=None,
         description="Secret token verifying incoming webhook requests from Telegram",
     )
-    telegram_bot_username: Optional[str] = Field(
+    telegram_bot_username: str | None = Field(
         default=None,
         description="Public Telegram bot username without @ symbol (e.g. DailyHadithAiBot)",
     )
 
     # Groq LLM Configuration
-    groq_api_key: Optional[str] = Field(
+    groq_api_key: str | None = Field(
         default=None,
         description="Groq Cloud API key for reflection generation",
     )
@@ -113,7 +113,7 @@ class Settings(BaseSettings):
     )
 
     # Optional Auxiliary Tooling (Tavily MCP)
-    tavily_api_key: Optional[str] = Field(
+    tavily_api_key: str | None = Field(
         default=None,
         description="Optional Tavily API key for auxiliary research",
     )
@@ -125,15 +125,18 @@ class Settings(BaseSettings):
         try:
             ZoneInfo(v)
         except ZoneInfoNotFoundError as exc:
-            raise ValueError(f"Invalid IANA timezone '{v}'. Must be a valid timezone like 'Asia/Kolkata'.") from exc
+            raise ValueError(
+                f"Invalid IANA timezone '{v}'. Must be a valid timezone like 'Asia/Kolkata'."
+            ) from exc
         return v
 
     @field_validator("groq_api_key", mode="before")
     @classmethod
-    def validate_groq_api_key(cls, v: Optional[str]) -> Optional[str]:
+    def validate_groq_api_key(cls, v: str | None) -> str | None:
         """Ensure placeholder keys do not mask valid .env configuration."""
         if v and "your" in v.lower():
             from dotenv import dotenv_values
+
             env_vals = dotenv_values(".env")
             file_key = env_vals.get("GROQ_API_KEY")
             if file_key and "your" not in file_key.lower():
@@ -155,7 +158,8 @@ class Settings(BaseSettings):
         Returns configuration dictionary with all secret tokens masked.
         Safe for operational logging and diagnostic inspection.
         """
-        def mask(val: Optional[str]) -> str:
+
+        def mask(val: str | None) -> str:
             if not val or val.startswith("your_"):
                 return "<NOT_SET>"
             if len(val) <= 8:
@@ -170,14 +174,15 @@ class Settings(BaseSettings):
             "hadeethenc_base_url": self.hadeethenc_base_url,
             "hadeethenc_timeout_seconds": self.hadeethenc_timeout_seconds,
             "hadeethenc_max_retries": self.hadeethenc_max_retries,
-            "database_url": self.database_url if not self.database_url.startswith("postgresql") else "<POSTGRES_MASKED>",
-            "telegram_configured": bool(self.telegram_bot_token and self.telegram_chat_id),
+            "database_url": self.database_url
+            if not self.database_url.startswith("postgresql")
+            else "<POSTGRES_MASKED>",
             "groq_configured": bool(self.groq_api_key),
             "groq_model": self.groq_model,
             "tavily_configured": bool(self.tavily_api_key),
             "telegram_configured": bool(self.telegram_bot_token),
             "telegram_webhook_configured": bool(self.telegram_webhook_secret),
-            "telegram_bot_username": self.telegram_bot_username or "<NOT_SET>",           
+            "telegram_bot_username": self.telegram_bot_username or "<NOT_SET>",
             "enable_in_process_scheduler": self.enable_in_process_scheduler,
             "cron_secret_configured": bool(self.cron_secret_token),
         }

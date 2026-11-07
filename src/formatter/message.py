@@ -6,10 +6,9 @@ enforcing source text invariance, attribution integrity, character limits,
 and explicit segregation of non-canonical AI reflections.
 """
 
-from dataclasses import dataclass
 import html
 import logging
-from typing import Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ class NotificationPayload:
     has_reflection: bool
 
 
-def escape_html(text: Optional[str]) -> str:
+def escape_html(text: str | None) -> str:
     """
     Escape HTML special characters for Telegram HTML parse mode.
     Only <, >, and & require escaping; quotes (' and ") are preserved for clean readability.
@@ -44,8 +43,8 @@ def format_daily_hadith_message(
     hadith_number: str,
     grade: str,
     source_url: str,
-    ai_reflection: Optional[str] = None,
-    ai_reflection_status: Optional[str] = None,
+    ai_reflection: str | None = None,
+    ai_reflection_status: str | None = None,
 ) -> NotificationPayload:
     """
     Assemble the canonical notification payload using clean Telegram HTML formatting.
@@ -76,13 +75,15 @@ def format_daily_hadith_message(
         clean_reflection = ai_reflection.strip()
         if clean_reflection:
             has_reflection = True
-            lines.extend([
-                "",
-                "💡 <b>Reflection & Practical Context:</b>",
-                f"<i>(AI-generated educational commentary — not part of the original Hadith text)</i>",
-                "",
-                escape_html(clean_reflection),
-            ])
+            lines.extend(
+                [
+                    "",
+                    "💡 <b>Reflection & Practical Context:</b>",
+                    "<i>(AI-generated educational commentary — not part of the original Hadith text)</i>",
+                    "",
+                    escape_html(clean_reflection),
+                ]
+            )
 
     assembled = "\n".join(lines)
 

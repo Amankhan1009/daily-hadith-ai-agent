@@ -8,7 +8,7 @@ detection, and webhook administration.
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class TelegramDeliveryError(Exception):
     """Base exception for Telegram delivery and API failures."""
+
     pass
 
 
@@ -32,11 +33,13 @@ class TelegramBotBlockedError(TelegramDeliveryError):
 
 class TelegramRateLimitError(TelegramDeliveryError):
     """Raised when Telegram returns HTTP 429 and rate-limit retries are exhausted."""
+
     pass
 
 
 class TelegramNetworkError(TelegramDeliveryError):
     """Raised on network connection errors or timeouts."""
+
     pass
 
 
@@ -47,11 +50,11 @@ class TelegramClient:
 
     def __init__(
         self,
-        bot_token: Optional[str] = None,
+        bot_token: str | None = None,
         timeout_seconds: float = 10.0,
         max_retries: int = 3,
         base_url: str = "https://api.telegram.org",
-        client: Optional[httpx.Client] = None,
+        client: httpx.Client | None = None,
     ):
         settings = get_settings()
         self.bot_token = bot_token or settings.telegram_bot_token
@@ -64,7 +67,9 @@ class TelegramClient:
     def api_url(self) -> str:
         """Construct the base API URL including the secret bot token."""
         if not self.bot_token:
-            raise ValueError("Telegram bot token is not configured. Set TELEGRAM_BOT_TOKEN in .env.")
+            raise ValueError(
+                "Telegram bot token is not configured. Set TELEGRAM_BOT_TOKEN in .env."
+            )
         return f"{self.base_url}/bot{self.bot_token}"
 
     def _get_client(self) -> httpx.Client:
@@ -123,7 +128,9 @@ class TelegramClient:
                     data = response.json()
                     if data.get("ok"):
                         return data.get("result", {})
-                    raise TelegramDeliveryError(f"Telegram API error: {data.get('description', 'Unknown error')}")
+                    raise TelegramDeliveryError(
+                        f"Telegram API error: {data.get('description', 'Unknown error')}"
+                    )
 
                 # HTTP 403: Bot was blocked or chat deleted
                 if response.status_code == 403:
@@ -138,10 +145,15 @@ class TelegramClient:
                 if response.status_code == 429:
                     retry_after = 1.0
                     try:
-                        retry_after = float(response.json().get("parameters", {}).get("retry_after", 1.0))
+                        retry_after = float(
+                            response.json().get("parameters", {}).get("retry_after", 1.0)
+                        )
                     except Exception:
                         pass
-                    logger.warning("Telegram rate limited (429). Waiting %s seconds before retry...", retry_after)
+                    logger.warning(
+                        "Telegram rate limited (429). Waiting %s seconds before retry...",
+                        retry_after,
+                    )
                     time.sleep(retry_after)
                     continue
 
@@ -164,7 +176,9 @@ class TelegramClient:
                     error_desc = response.json().get("description", response.text)
                 except Exception:
                     pass
-                raise TelegramDeliveryError(f"Telegram API rejected request ({response.status_code}): {error_desc}")
+                raise TelegramDeliveryError(
+                    f"Telegram API rejected request ({response.status_code}): {error_desc}"
+                )
 
             except (httpx.TimeoutException, httpx.NetworkError) as exc:
                 logger.warning(
@@ -175,16 +189,20 @@ class TelegramClient:
                     backoff,
                 )
                 if attempts >= self.max_retries:
-                    raise TelegramNetworkError(f"Telegram network failure after {attempts} attempts: {exc}") from exc
+                    raise TelegramNetworkError(
+                        f"Telegram network failure after {attempts} attempts: {exc}"
+                    ) from exc
                 time.sleep(backoff)
                 backoff *= 2.0
 
-        raise TelegramDeliveryError(f"Exhausted {self.max_retries} attempts sending message to chat {chat_id}")
+        raise TelegramDeliveryError(
+            f"Exhausted {self.max_retries} attempts sending message to chat {chat_id}"
+        )
 
     def set_webhook(
         self,
         url: str,
-        secret_token: Optional[str] = None,
+        secret_token: str | None = None,
         drop_pending_updates: bool = False,
     ) -> dict[str, Any]:
         """Configure Telegram inbound webhook URL and secret token verification."""
@@ -200,7 +218,9 @@ class TelegramClient:
         response = client.post(endpoint, json=payload)
         data = response.json()
         if not data.get("ok"):
-            raise TelegramDeliveryError(f"Failed to set webhook: {data.get('description', 'Unknown error')}")
+            raise TelegramDeliveryError(
+                f"Failed to set webhook: {data.get('description', 'Unknown error')}"
+            )
         return data.get("result", {})
 
     def get_webhook_info(self) -> dict[str, Any]:
@@ -210,7 +230,9 @@ class TelegramClient:
         response = client.get(endpoint)
         data = response.json()
         if not data.get("ok"):
-            raise TelegramDeliveryError(f"Failed to get webhook info: {data.get('description', 'Unknown error')}")
+            raise TelegramDeliveryError(
+                f"Failed to get webhook info: {data.get('description', 'Unknown error')}"
+            )
         return data.get("result", {})
 
     def delete_webhook(self, drop_pending_updates: bool = False) -> dict[str, Any]:
@@ -221,5 +243,7 @@ class TelegramClient:
         response = client.post(endpoint, json=payload)
         data = response.json()
         if not data.get("ok"):
-            raise TelegramDeliveryError(f"Failed to delete webhook: {data.get('description', 'Unknown error')}")
+            raise TelegramDeliveryError(
+                f"Failed to delete webhook: {data.get('description', 'Unknown error')}"
+            )
         return data.get("result", {})

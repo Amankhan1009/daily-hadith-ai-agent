@@ -6,21 +6,22 @@ branching, and fail-closed safety abort edges.
 """
 
 from datetime import date
-from typing import Literal, Optional
+from typing import Literal
+
 from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.orm import Session
 
+from src.delivery import TelegramClient
 from src.guardrails import ReflectionValidator
 from src.llm import GroqReflectionClient
 from src.workflow.nodes import WorkflowNodes
 from src.workflow.state import DailyWorkflowState, create_initial_state
 
-from src.delivery import TelegramClient
-
 # ---------------------------------------------------------------------------
 # Conditional Edge Routers
 # ---------------------------------------------------------------------------
+
 
 def route_after_idempotency(
     state: DailyWorkflowState,
@@ -59,14 +60,12 @@ def route_after_verification(
 # StateGraph Builder
 # ---------------------------------------------------------------------------
 
-from src.delivery import TelegramClient
-
 
 def build_daily_workflow_graph(
-    session: Optional[Session] = None,
-    llm_client: Optional[GroqReflectionClient] = None,
-    validator: Optional[ReflectionValidator] = None,
-    telegram_client: Optional[TelegramClient] = None,
+    session: Session | None = None,
+    llm_client: GroqReflectionClient | None = None,
+    validator: ReflectionValidator | None = None,
+    telegram_client: TelegramClient | None = None,
 ) -> CompiledStateGraph:
     """
     Construct and compile the Daily Hadith LangGraph workflow with Telegram delivery.
@@ -131,11 +130,11 @@ def build_daily_workflow_graph(
 
 
 def run_daily_workflow(
-    scheduled_date: Optional[str | date] = None,
-    session: Optional[Session] = None,
-    llm_client: Optional[GroqReflectionClient] = None,
-    validator: Optional[ReflectionValidator] = None,
-    telegram_client: Optional[TelegramClient] = None,
+    scheduled_date: str | date | None = None,
+    session: Session | None = None,
+    llm_client: GroqReflectionClient | None = None,
+    validator: ReflectionValidator | None = None,
+    telegram_client: TelegramClient | None = None,
 ) -> DailyWorkflowState:
     """
     Execute a complete run of the Daily Hadith state graph.
@@ -149,4 +148,3 @@ def run_daily_workflow(
     initial_state = create_initial_state(scheduled_date=scheduled_date)
     final_state = graph.invoke(initial_state)
     return final_state
-

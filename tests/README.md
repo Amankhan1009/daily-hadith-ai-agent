@@ -26,14 +26,20 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 
 ---
 
-## Running the Tests
+## Running the Tests & Quality Audits
 
-Run all tests:
+### Run All Tests with Coverage Report:
 ```bash
-.venv/bin/pytest -v
+.venv/bin/pytest --cov=src --cov-report=term-missing -v
 ```
 
-Run a specific module:
+### Run a Specific Module:
 ```bash
 .venv/bin/pytest tests/test_workflow.py -v
+```
+
+### Run Ruff Linter & Formatter:
+```bash
+.venv/bin/ruff check .
+.venv/bin/ruff format --check .
 ```

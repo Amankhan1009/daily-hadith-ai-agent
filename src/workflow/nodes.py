@@ -6,18 +6,17 @@ selection, deterministic safety validation, AI reflection generation, message
 formatting, and delivery logging.
 """
 
-from datetime import date
 import logging
 import time
-from typing import Any, Optional
+from datetime import date
+from typing import Any
+
 from sqlalchemy.orm import Session
 
 from src.config import get_settings
-from src.database.models import HadithCandidate
 from src.database.repository import (
     deactivate_subscriber,
     get_active_subscribers,
-    get_candidate_by_source_id,
     get_next_verified_candidate,
     get_undelivered_active_subscribers,
     is_date_delivered,
@@ -49,10 +48,10 @@ class WorkflowNodes:
 
     def __init__(
         self,
-        session: Optional[Session] = None,
-        llm_client: Optional[GroqReflectionClient] = None,
-        validator: Optional[ReflectionValidator] = None,
-        telegram_client: Optional[TelegramClient] = None,
+        session: Session | None = None,
+        llm_client: GroqReflectionClient | None = None,
+        validator: ReflectionValidator | None = None,
+        telegram_client: TelegramClient | None = None,
     ) -> None:
         self._session = session
         self._llm_client = llm_client or GroqReflectionClient()
@@ -64,11 +63,7 @@ class WorkflowNodes:
         Node 1: Check if a delivery was already completed for the scheduled date.
         """
         scheduled_date_str = state.get("scheduled_date")
-        target_date = (
-            date.fromisoformat(scheduled_date_str)
-            if scheduled_date_str
-            else date.today()
-        )
+        target_date = date.fromisoformat(scheduled_date_str) if scheduled_date_str else date.today()
 
         def _execute(session: Session) -> dict[str, Any]:
             already_delivered = is_date_delivered(session, target_date)
@@ -269,16 +264,14 @@ class WorkflowNodes:
             }
 
         scheduled_date_str = state.get("scheduled_date")
-        target_date = (
-            date.fromisoformat(scheduled_date_str)
-            if scheduled_date_str
-            else date.today()
-        )
+        target_date = date.fromisoformat(scheduled_date_str) if scheduled_date_str else date.today()
         candidate_id = state.get("candidate_id")
 
         client = self._telegram_client or TelegramClient()
         if not client.bot_token:
-            logger.info("Telegram bot token not configured in dev/test mode. Skipping network dispatch.")
+            logger.info(
+                "Telegram bot token not configured in dev/test mode. Skipping network dispatch."
+            )
             return {
                 "delivered_count": 0,
                 "subscribers_count": 0,
@@ -291,7 +284,11 @@ class WorkflowNodes:
             settings = get_settings()
 
             # Fallback if no subscribers in DB, but admin TELEGRAM_CHAT_ID is set
-            if not pending_subscribers and not get_active_subscribers(session) and settings.telegram_chat_id:
+            if (
+                not pending_subscribers
+                and not get_active_subscribers(session)
+                and settings.telegram_chat_id
+            ):
                 try:
                     fallback_id = int(settings.telegram_chat_id)
                 except ValueError:
@@ -300,7 +297,9 @@ class WorkflowNodes:
                 try:
                     res = client.send_message(chat_id=fallback_id, text=formatted_message)
                     return {
-                        "telegram_message_id": res.get("message_id") if isinstance(res, dict) else None,
+                        "telegram_message_id": res.get("message_id")
+                        if isinstance(res, dict)
+                        else None,
                         "subscribers_count": 1,
                         "delivered_count": 1,
                         "failed_count": 0,
@@ -316,7 +315,10 @@ class WorkflowNodes:
                     }
 
             if not pending_subscribers:
-                logger.info("All active subscribers already received daily delivery for date %s.", target_date)
+                logger.info(
+                    "All active subscribers already received daily delivery for date %s.",
+                    target_date,
+                )
                 return {
                     "subscribers_count": 0,
                     "delivered_count": 0,
@@ -391,17 +393,12 @@ class WorkflowNodes:
         with get_db_session() as session:
             return _execute(session)
 
-
     def record_delivery_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
         Node 6: Record the delivery outcome in DailyDeliveryLog for idempotency.
         """
         scheduled_date_str = state.get("scheduled_date")
-        target_date = (
-            date.fromisoformat(scheduled_date_str)
-            if scheduled_date_str
-            else date.today()
-        )
+        target_date = date.fromisoformat(scheduled_date_str) if scheduled_date_str else date.today()
         candidate_id = state.get("candidate_id")
         telegram_message_id = state.get("telegram_message_id")
 

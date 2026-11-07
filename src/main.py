@@ -5,12 +5,12 @@ Serves healthchecks, inbound Telegram webhooks, and authenticated Cloud Schedule
 triggers for daily Hadith broadcasts.
 """
 
-from contextlib import asynccontextmanager
 import hmac
 import logging
-from typing import Any, Optional
+from contextlib import asynccontextmanager
+from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import FastAPI, Header, HTTPException, status
 
 from src.config import get_settings
 from src.delivery import webhook_router
@@ -63,8 +63,8 @@ def create_app() -> FastAPI:
 
     @app.post("/api/cron/daily-broadcast", tags=["Cloud Scheduler"])
     def trigger_cron_broadcast(
-        x_cron_secret: Optional[str] = Header(None),
-        authorization: Optional[str] = Header(None),
+        x_cron_secret: str | None = Header(None),
+        authorization: str | None = Header(None),
     ) -> dict[str, Any]:
         """
         Authenticated trigger endpoint for Google Cloud Scheduler or external cron services.

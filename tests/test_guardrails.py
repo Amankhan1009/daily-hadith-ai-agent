@@ -125,4 +125,3 @@ def test_convenience_validate_reflection_helper(sample_hadith):
     result = validate_reflection(valid_text, sample_hadith)
     assert result.is_valid is True
     assert result.status == "PASSED"
-

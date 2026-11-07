@@ -4,17 +4,26 @@ Automated Unit Tests for LangGraph StateGraph Workflow and Routing Logic.
 
 from collections.abc import Generator
 from datetime import date
+from unittest.mock import MagicMock
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from src.database.repository import is_date_delivered, record_delivery_log, save_candidate
+from src.database.repository import (
+    get_or_create_subscriber,
+    get_subscriber_by_chat_id,
+    is_date_delivered,
+    record_delivery_log,
+    save_candidate,
+)
 from src.database.session import Base
+from src.delivery import TelegramBotBlockedError, TelegramClient
 from src.workflow import run_daily_workflow
 
 
 @pytest.fixture
-def db_session() -> Generator[Session, None, None]:
+def db_session() -> Generator[Session]:
     """Provides an isolated in-memory SQLite database session."""
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
@@ -46,9 +55,7 @@ def seed_verified_candidate(db_session: Session):
     )
 
 
-def test_workflow_happy_path_completes_delivery(
-    db_session: Session, seed_verified_candidate
-):
+def test_workflow_happy_path_completes_delivery(db_session: Session, seed_verified_candidate):
     """
     Test 1 (Happy Path):
     Workflow checks idempotency, fetches verified candidate, passes safety gate,
@@ -56,9 +63,7 @@ def test_workflow_happy_path_completes_delivery(
     """
     test_date = date(2026, 11, 5)
 
-    final_state = run_daily_workflow(
-        scheduled_date=test_date, session=db_session
-    )
+    final_state = run_daily_workflow(scheduled_date=test_date, session=db_session)
 
     assert final_state["status"] == "COMPLETED"
     assert final_state["is_idempotent"] is False
@@ -78,9 +83,7 @@ def test_workflow_happy_path_completes_delivery(
     assert is_date_delivered(db_session, test_date) is True
 
 
-def test_workflow_idempotency_skip_route(
-    db_session: Session, seed_verified_candidate
-):
+def test_workflow_idempotency_skip_route(db_session: Session, seed_verified_candidate):
     """
     Test 2 (Idempotency Skip):
     If delivery already occurred on scheduled_date, graph terminates immediately
@@ -89,14 +92,10 @@ def test_workflow_idempotency_skip_route(
     test_date = date(2026, 11, 5)
 
     # Pre-record a successful delivery
-    record_delivery_log(
-        session=db_session, scheduled_date=test_date, status="SUCCESS"
-    )
+    record_delivery_log(session=db_session, scheduled_date=test_date, status="SUCCESS")
     db_session.commit()
 
-    final_state = run_daily_workflow(
-        scheduled_date=test_date, session=db_session
-    )
+    final_state = run_daily_workflow(scheduled_date=test_date, session=db_session)
 
     assert final_state["status"] == "SKIPPED_IDEMPOTENT"
     assert final_state["is_idempotent"] is True
@@ -113,9 +112,7 @@ def test_workflow_aborts_when_no_candidates_available(db_session: Session):
     """
     test_date = date(2026, 11, 5)
 
-    final_state = run_daily_workflow(
-        scheduled_date=test_date, session=db_session
-    )
+    final_state = run_daily_workflow(scheduled_date=test_date, session=db_session)
 
     assert final_state["status"] == "ABORTED_NO_CANDIDATE"
     assert "No verified candidates" in (final_state.get("error_message") or "")
@@ -147,9 +144,7 @@ def test_workflow_safety_gate_rejects_unapproved_collection(db_session: Session)
     )
     db_session.commit()
 
-    final_state = run_daily_workflow(
-        scheduled_date=test_date, session=db_session
-    )
+    final_state = run_daily_workflow(scheduled_date=test_date, session=db_session)
 
     assert final_state["status"] == "ABORTED_VALIDATION_FAILED"
     assert final_state["verification_passed"] is False
@@ -167,6 +162,7 @@ def test_workflow_guardrail_omits_violating_reflection_while_delivering_hadith(
     the guardrail node catches it, strips the reflection, and delivers the authentic Hadith cleanly.
     """
     from unittest.mock import MagicMock
+
     from src.llm import GroqReflectionClient, ReflectionResult
 
     test_date = date(2026, 11, 5)
@@ -191,14 +187,13 @@ def test_workflow_guardrail_omits_violating_reflection_while_delivering_hadith(
     assert is_date_delivered(db_session, test_date) is True
 
 
-def test_workflow_guardrail_allows_clean_reflection(
-    db_session: Session, seed_verified_candidate
-):
+def test_workflow_guardrail_allows_clean_reflection(db_session: Session, seed_verified_candidate):
     """
     Test 6 (Guardrail Clean Reflection Pass):
     Compliant reflection passes guardrail node and is rendered in the message.
     """
     from unittest.mock import MagicMock
+
     from src.llm import GroqReflectionClient, ReflectionResult
 
     test_date = date(2026, 11, 5)
@@ -224,10 +219,6 @@ def test_workflow_guardrail_allows_clean_reflection(
     assert final_state["ai_reflection_status"] == "PASSED_GUARDRAILS"
     assert "💡 <b>Reflection & Practical Context:</b>" in final_state["formatted_message"]
     assert is_date_delivered(db_session, test_date) is True
-
-from unittest.mock import MagicMock
-from src.database.repository import get_or_create_subscriber, get_subscriber_by_chat_id
-from src.delivery import TelegramBotBlockedError, TelegramClient
 
 
 def test_workflow_multi_user_fanout_and_block_deactivation(
