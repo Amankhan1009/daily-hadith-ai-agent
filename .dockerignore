@@ -43,5 +43,6 @@ tmp/
 # Automated Tests & Developer Docs (omitted from runtime image for lean size)
 tests/
 docs/
+assets/
 *.md
 LICENSE

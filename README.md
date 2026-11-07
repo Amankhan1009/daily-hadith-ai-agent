@@ -122,9 +122,10 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **13 — Scheduling & Daily Multi-User Broadcast** | `Verified` | Headless runner CLI, APScheduler (10 AM IST, 1hr misfire grace), Cloud Scheduler cron endpoint |
 | **14 — History & Per-Subscriber Daily Idempotency** | `Verified` | Composite idempotency unique constraints, mid-run recovery queries & per-user delivery logs |
 | **15 — Failure Handling** | `Verified` | Fault tolerance, retry exponential backoff & fail-closed resilience stress tests (19 tests) |
-| **16 — Automated Testing** | `Verified` | Automated test suite (94 tests, 89% coverage), Ruff linting & code formatting audits |
-| **17 — Docker Containerization** | `Verified` | Multi-stage Docker containerization, unprivileged runtime (non-root `appuser`), `.dockerignore` & `/health` probes |
-| **18 — CI/CD Pipeline & GitHub Actions** | `In Progress` | Automated linting, test suite execution, container image builds & pull request gating |
+| **16 — Automated Testing & Code Quality** | `Verified` | Automated test suite (99 tests, 89% coverage), Ruff linting & PEP 8 code formatting |
+| **17 — Docker Containerization & GitHub Actions CI/CD** | `Verified` | Multi-stage Docker containerization (non-root `appuser`, ~160MB), automated test-gated CI/CD publishing to Docker Hub |
+| **18 — Cloud Deployment & Public Production Bot** | `Verified` | Deployed on Render Free Web Service with automated daily 10:00 AM IST scheduler on cron-job.org and live Telegram subscribers |
+| **19 — Production Readiness & System Audit** | `Verified` | 20/20 Definition of Done verified, production runbook, and defensive security audit |
 
 For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 
