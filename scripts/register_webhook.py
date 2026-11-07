@@ -67,7 +67,7 @@ def main() -> int:
         )
         return 1
 
-    adapter = TelegramClient(settings=settings)
+    adapter = TelegramClient(bot_token=settings.telegram_bot_token)
 
     try:
         if args.info:
