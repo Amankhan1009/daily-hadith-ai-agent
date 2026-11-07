@@ -33,8 +33,8 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | 15 | Failure Handling & System Resilience | Verified |
 | 16 | Automated Testing & Code Quality Audit | Verified |
 | 17 | Docker Containerization & GitHub Actions CI/CD | Verified |
-| 18 | Cloud Deployment & Public Production Bot | In Progress |
-| 19 | Production Readiness | Not Started |
+| 18 | Cloud Deployment & Public Production Bot | Verified |
+| 19 | Production Readiness | In Progress |
 | 20 | Future FCM Support (Evaluation) | Not Started |
 
 ---
@@ -409,10 +409,15 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - Application deployed and connected to Neon PostgreSQL.
   - Scheduled run triggers successfully in production environment.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Deployed containerized FastAPI service to Render Free Web Service (`https://daily-hadith-ai-agent.onrender.com`).
+  - Verified live container healthcheck (`GET /health`) returning HTTP 200 with `status: "healthy"`, `environment: "production"`, and `timezone: "Asia/Kolkata"`.
+  - Configured and verified live Telegram inbound webhook pointing to `https://daily-hadith-ai-agent.onrender.com/telegram/webhook` secured with constant-time secret token header validation (`X-Telegram-Bot-Api-Secret-Token`).
+  - Verified end-to-end user interaction on Telegram: user `/start` received, subscriber record `GOKU` (Chat ID `746451674`) successfully registered and persisted in Neon PostgreSQL database (`telegram_subscribers` table), and onboarding Hadith from Sahih Muslim (#1955) delivered instantly.
+  - Configured automated 10:00 AM IST daily broadcast cron trigger on cron-job.org executing `POST /api/cron/daily-broadcast` with authenticated `X-Cron-Secret` header.
 - **Known Blockers:** None.
-- **Next Action:** Prepare deployment manifest and cloud infrastructure setup.
+- **Next Action:** Proceed to Milestone 19 — Production Readiness.
 
 ---
 

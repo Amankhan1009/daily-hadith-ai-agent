@@ -101,13 +101,19 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 18 — Cloud Deployment
-- **Active Task:** Task 18.1 — Cloud Deployment Configuration & Service Blueprint
+- **Active Milestone:** Milestone 19 — Production Readiness & Runbook Verification
+- **Active Task:** Task 19.1 — Final System Audit, DoD Verification, and Portfolio Presentation
 
 ---
 
 ## 7. Completed and Verified Work
-- [x] **Milestone 17 Verified:** Docker Containerization.
+- [x] **Milestone 18 Verified:** Cloud Deployment & Public Production Bot.
+  - Deployed containerized FastAPI service to Render Free Web Service (`https://daily-hadith-ai-agent.onrender.com`).
+  - Verified live container healthcheck (`GET /health`) returning HTTP 200 with `status: "healthy"`, `environment: "production"`, and `timezone: "Asia/Kolkata"`.
+  - Configured and verified live Telegram inbound webhook pointing to `https://daily-hadith-ai-agent.onrender.com/telegram/webhook` secured with constant-time secret token header validation (`X-Telegram-Bot-Api-Secret-Token`).
+  - Verified end-to-end user interaction on Telegram: user `/start` received, subscriber record `GOKU` (Chat ID `746451674`) successfully registered and persisted in Neon PostgreSQL database (`telegram_subscribers` table), and onboarding Hadith from Sahih Muslim (#1955) delivered instantly.
+  - Configured automated 10:00 AM IST daily broadcast cron trigger on cron-job.org executing `POST /api/cron/daily-broadcast` with authenticated `X-Cron-Secret` header.
+- [x] **Milestone 17 Verified:** Docker Containerization & GitHub Actions CI/CD.
   - Implemented multi-stage `Dockerfile` (`python:3.13-slim` builder and runtime stages).
   - Enforced container security: unprivileged non-root user (`appuser:appgroup`, UID 10001), `PYTHONUNBUFFERED=1`, `PYTHONDONTWRITEBYTECODE=1`, zero embedded credentials.
   - Implemented `.dockerignore` excluding `.env*`, `.venv/`, `.git/`, test artifacts, and bytecode.
