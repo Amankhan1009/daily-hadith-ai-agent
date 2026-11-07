@@ -11,9 +11,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.database.models import DailyDeliveryLog, HadithCandidate
-
-from src.database.models import DailyDeliveryLog, HadithCandidate, TelegramSubscriber
+from src.database.models import DailyDeliveryLog, HadithCandidate, SubscriberDeliveryLog, TelegramSubscriber
 
 def get_candidate_by_source_id(session: Session, source_id: str) -> Optional[HadithCandidate]:
     """Retrieve a Hadith candidate by its HadeethEnc record ID."""
@@ -222,3 +220,78 @@ def get_active_subscribers(session: Session) -> list[TelegramSubscriber]:
         .order_by(TelegramSubscriber.id.asc())
     )
     return list(session.scalars(stmt).all())
+
+def get_undelivered_active_subscribers(session: Session, scheduled_date: date) -> list[TelegramSubscriber]:
+    """
+    Retrieve active subscribers who have not yet received a successful delivery on scheduled_date.
+    Guarantees mid-run recovery without sending duplicate notifications.
+    """
+    delivered_subscriber_ids = (
+        select(SubscriberDeliveryLog.subscriber_id)
+        .where(SubscriberDeliveryLog.scheduled_date == scheduled_date)
+        .where(SubscriberDeliveryLog.status == "DELIVERED")
+    )
+
+    stmt = (
+        select(TelegramSubscriber)
+        .where(TelegramSubscriber.is_active == True)  # noqa: E712
+        .where(TelegramSubscriber.id.not_in(delivered_subscriber_ids))
+        .order_by(TelegramSubscriber.id.asc())
+    )
+    return list(session.scalars(stmt).all())
+
+
+def record_subscriber_delivery(
+    session: Session,
+    subscriber_id: int,
+    chat_id: int,
+    scheduled_date: date,
+    candidate_id: Optional[int],
+    status: str,
+    telegram_message_id: Optional[int] = None,
+    error_message: Optional[str] = None,
+) -> SubscriberDeliveryLog:
+    """
+    Record or update an individual subscriber's delivery status for a calendar date.
+    """
+    stmt = (
+        select(SubscriberDeliveryLog)
+        .where(SubscriberDeliveryLog.subscriber_id == subscriber_id)
+        .where(SubscriberDeliveryLog.scheduled_date == scheduled_date)
+    )
+    log = session.scalars(stmt).first()
+    now = datetime.now(timezone.utc)
+
+    if log is None:
+        log = SubscriberDeliveryLog(
+            subscriber_id=subscriber_id,
+            chat_id=chat_id,
+            scheduled_date=scheduled_date,
+            candidate_id=candidate_id,
+            status=status,
+            telegram_message_id=telegram_message_id,
+            error_message=error_message,
+            delivered_at=now if status == "DELIVERED" else None,
+        )
+        session.add(log)
+    else:
+        log.status = status
+        log.candidate_id = candidate_id or log.candidate_id
+        log.telegram_message_id = telegram_message_id or log.telegram_message_id
+        log.error_message = error_message
+        if status == "DELIVERED":
+            log.delivered_at = now
+
+    session.flush()
+    return log
+
+
+def is_subscriber_delivered(session: Session, subscriber_id: int, scheduled_date: date) -> bool:
+    """Check if a specific subscriber was already successfully delivered to on scheduled_date."""
+    stmt = (
+        select(SubscriberDeliveryLog.id)
+        .where(SubscriberDeliveryLog.subscriber_id == subscriber_id)
+        .where(SubscriberDeliveryLog.scheduled_date == scheduled_date)
+        .where(SubscriberDeliveryLog.status == "DELIVERED")
+    )
+    return session.scalars(stmt).first() is not None

@@ -19,8 +19,10 @@ from src.database.repository import (
     get_active_subscribers,
     get_candidate_by_source_id,
     get_next_verified_candidate,
+    get_undelivered_active_subscribers,
     is_date_delivered,
     record_delivery_log,
+    record_subscriber_delivery,
 )
 from src.database.session import get_db_session
 from src.delivery import TelegramBotBlockedError, TelegramClient
@@ -252,8 +254,12 @@ class WorkflowNodes:
 
     def deliver_telegram_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
-        Node 7: Fan out the formatted Hadith notification to all active subscribers.
-        Enforces 25 msg/sec rate limiting and auto-deactivates blocked users (HTTP 403).
+        Node 7: Fan out the formatted Hadith notification to all active, undelivered subscribers.
+        Enforces:
+        - Per-subscriber daily idempotency (skips users already delivered today)
+        - 25 msg/sec rate-limiting throttle
+        - Automatic deactivation and BLOCKED logging for HTTP 403 (bot blocked)
+        - Individual commit per subscriber for mid-run crash recovery
         """
         formatted_message = state.get("formatted_message")
         if not formatted_message:
@@ -261,6 +267,14 @@ class WorkflowNodes:
                 "status": "FAILED",
                 "error_message": "No formatted message available for delivery.",
             }
+
+        scheduled_date_str = state.get("scheduled_date")
+        target_date = (
+            date.fromisoformat(scheduled_date_str)
+            if scheduled_date_str
+            else date.today()
+        )
+        candidate_id = state.get("candidate_id")
 
         client = self._telegram_client or TelegramClient()
         if not client.bot_token:
@@ -270,6 +284,112 @@ class WorkflowNodes:
                 "subscribers_count": 0,
                 "status": "PENDING",
             }
+
+        def _execute(session: Session) -> dict[str, Any]:
+            # Query ONLY subscribers who have NOT yet received today's broadcast
+            pending_subscribers = get_undelivered_active_subscribers(session, target_date)
+            settings = get_settings()
+
+            # Fallback if no subscribers in DB, but admin TELEGRAM_CHAT_ID is set
+            if not pending_subscribers and not get_active_subscribers(session) and settings.telegram_chat_id:
+                try:
+                    fallback_id = int(settings.telegram_chat_id)
+                except ValueError:
+                    fallback_id = settings.telegram_chat_id
+
+                try:
+                    res = client.send_message(chat_id=fallback_id, text=formatted_message)
+                    return {
+                        "telegram_message_id": res.get("message_id") if isinstance(res, dict) else None,
+                        "subscribers_count": 1,
+                        "delivered_count": 1,
+                        "failed_count": 0,
+                        "status": "PENDING",
+                    }
+                except Exception as exc:
+                    logger.error("Failed fallback delivery to admin chat %s: %s", fallback_id, exc)
+                    return {
+                        "subscribers_count": 1,
+                        "delivered_count": 0,
+                        "failed_count": 1,
+                        "status": "PENDING",
+                    }
+
+            if not pending_subscribers:
+                logger.info("All active subscribers already received daily delivery for date %s.", target_date)
+                return {
+                    "subscribers_count": 0,
+                    "delivered_count": 0,
+                    "failed_count": 0,
+                    "status": "PENDING",
+                }
+
+            first_message_id = None
+            delivered_count = 0
+            failed_count = 0
+
+            for sub in pending_subscribers:
+                try:
+                    res = client.send_message(chat_id=sub.chat_id, text=formatted_message)
+                    msg_id = res.get("message_id") if isinstance(res, dict) else None
+                    if first_message_id is None:
+                        first_message_id = msg_id
+
+                    # Record successful delivery immediately for crash recovery
+                    record_subscriber_delivery(
+                        session=session,
+                        subscriber_id=sub.id,
+                        chat_id=sub.chat_id,
+                        scheduled_date=target_date,
+                        candidate_id=candidate_id,
+                        status="DELIVERED",
+                        telegram_message_id=msg_id,
+                    )
+                    session.commit()
+                    delivered_count += 1
+                    time.sleep(0.04)  # 25 msgs/sec compliance
+
+                except TelegramBotBlockedError:
+                    logger.info("Subscriber %s blocked the bot. Deactivating...", sub.chat_id)
+                    deactivate_subscriber(session, sub.chat_id)
+                    record_subscriber_delivery(
+                        session=session,
+                        subscriber_id=sub.id,
+                        chat_id=sub.chat_id,
+                        scheduled_date=target_date,
+                        candidate_id=candidate_id,
+                        status="BLOCKED",
+                        error_message="Forbidden: bot was blocked by the user",
+                    )
+                    session.commit()
+                    failed_count += 1
+
+                except Exception as exc:
+                    logger.error("Failed to deliver daily Hadith to chat %s: %s", sub.chat_id, exc)
+                    record_subscriber_delivery(
+                        session=session,
+                        subscriber_id=sub.id,
+                        chat_id=sub.chat_id,
+                        scheduled_date=target_date,
+                        candidate_id=candidate_id,
+                        status="FAILED",
+                        error_message=str(exc),
+                    )
+                    session.commit()
+                    failed_count += 1
+
+            return {
+                "telegram_message_id": first_message_id,
+                "subscribers_count": len(pending_subscribers),
+                "delivered_count": delivered_count,
+                "failed_count": failed_count,
+                "status": "PENDING",
+            }
+
+        if self._session is not None:
+            return _execute(self._session)
+        with get_db_session() as session:
+            return _execute(session)
 
         def _execute(session: Session) -> dict[str, Any]:
             active_subscribers = get_active_subscribers(session)

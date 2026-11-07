@@ -7,8 +7,7 @@ status, and idempotent daily delivery tracking.
 
 from datetime import date, datetime, timezone
 from typing import Optional
-
-from sqlalchemy import BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.session import Base
@@ -156,3 +155,59 @@ class TelegramSubscriber(Base):
         nullable=False,
         doc="Timestamp of latest command interaction or status change",
     )
+    # Relationships
+    delivery_logs: Mapped[list["SubscriberDeliveryLog"]] = relationship(
+        back_populates="subscriber",
+        cascade="all, delete-orphan",
+    )
+    
+class SubscriberDeliveryLog(Base):
+    """
+    Per-subscriber delivery log enforcing strictly exactly-once delivery per calendar day
+    via a composite unique constraint on (subscriber_id, scheduled_date).
+    """
+
+    __tablename__ = "subscriber_delivery_logs"
+    __table_args__ = (
+        UniqueConstraint("subscriber_id", "scheduled_date", name="uq_subscriber_daily_delivery"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    subscriber_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("telegram_subscribers.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    chat_id: Mapped[int] = mapped_column(
+        BigInteger,
+        index=True,
+        nullable=False,
+        doc="Denormalized Telegram chat ID for direct lookup",
+    )
+    scheduled_date: Mapped[date] = mapped_column(
+        Date,
+        index=True,
+        nullable=False,
+        doc="Calendar delivery date enforcing per-subscriber daily idempotency",
+    )
+    candidate_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("hadith_candidates.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="PENDING",
+        index=True,
+        nullable=False,
+        doc="DELIVERED | FAILED | BLOCKED | SKIPPED",
+    )
+    telegram_message_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    delivered_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    # Relationships
+    subscriber: Mapped["TelegramSubscriber"] = relationship(back_populates="delivery_logs")
+    candidate: Mapped[Optional["HadithCandidate"]] = relationship()

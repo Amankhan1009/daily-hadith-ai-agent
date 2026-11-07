@@ -29,4 +29,8 @@ __all__ = [
     "is_date_delivered",
     "record_delivery_log",
     "save_candidate",
+    "SubscriberDeliveryLog",
+    "get_undelivered_active_subscribers",
+    "record_subscriber_delivery",
+    "is_subscriber_delivered",
 ]

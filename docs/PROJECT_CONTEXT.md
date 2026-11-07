@@ -101,12 +101,19 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 14 — History & Per-Subscriber Daily Idempotency
-- **Active Task:** Task 14.1 — Per-Subscriber Idempotency Schema and Composite Unique Constraints
+- **Active Milestone:** Milestone 15 — Failure Handling
+- **Active Task:** Task 15.1 — Dependency Outage Simulation and Fallback Verifications
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 14 Verified:** History & Per-Subscriber Daily Idempotency.
+  - Implemented `SubscriberDeliveryLog` SQLAlchemy model in `src/database/models.py` with composite unique constraint `uq_subscriber_daily_delivery` on `(subscriber_id, scheduled_date)`.
+  - Added repository methods in `src/database/repository.py`: `record_subscriber_delivery()`, `get_undelivered_active_subscribers()`, and `is_subscriber_delivered()`.
+  - Applied Alembic migration `59d6a20998f2_create_subscriber_delivery_logs.py` directly to Neon PostgreSQL.
+  - Updated `deliver_telegram_node` in `src/workflow/nodes.py` to query only undelivered active subscribers, commit logs per message for mid-run crash recovery, and auto-deactivate blocked users.
+  - Added automated test suite `tests/test_idempotency.py` (3 tests covering constraint violation handling, mid-run crash recovery, and idempotent reruns).
+  - Test suite achieved **75/75 passing tests** (100% pass rate).
 - [x] **Milestone 13 Verified:** Scheduling & Daily Multi-User Broadcast.
   - Implemented headless CLI runner in `src/workflow/daily_runner.py` supporting `--date`, `--dry-run`, structured logging, and system exit codes.
   - Implemented in-process background scheduler in `src/workflow/scheduler.py` configured for `Asia/Kolkata` at 10:00 AM IST with 3600-second (1-hour) misfire recovery and coalesce protection.
@@ -188,10 +195,10 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- **Milestone 14: History & Per-Subscriber Daily Idempotency**
-  - **Task 14.1:** Per-Subscriber Delivery Log Table (`subscriber_delivery_logs`) with `UNIQUE (subscriber_id, scheduled_date)` constraint.
-  - **Task 14.2:** Resilient Mid-Run Recovery Query (skipping already-delivered users on retries).
-  - **Task 14.3:** Alembic Migration & Idempotency Invariant Verification.
+- **Milestone 15: Failure Handling**
+  - **Task 15.1:** Dependency Outage Simulation (HadeethEnc 500/timeout, Groq rate limits, Telegram network drops & 429 backoff).
+  - **Task 15.2:** Fail-Closed Integrity & Transaction Rollback Stress Tests.
+  - **Task 15.3:** Malformed Payload & Boundary Defense Verification.
 
 ---
 
@@ -225,15 +232,15 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 14: Per-Subscriber Delivery Logging & Composite Unique Idempotency Schema.
+Implement and verify Milestone 15 Failure Handling test suite (`tests/test_failure_handling.py`).
 
 ---
 
 ## 13. Latest Verification Evidence
-- **72/72 Automated Tests Passing:** 100% pass rate in 6.3s across all 10 modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
+- **75/75 Automated Tests Passing:** 100% pass rate in 8.89s across all 11 modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
+- **Per-Subscriber Daily Idempotency Verified:** Composite unique constraint `(subscriber_id, scheduled_date)` prevents duplicate sends, mid-run crash recovery skips delivered users, and complete reruns dispatch 0 messages.
+- **Neon DB Migration Applied:** Migration `59d6a20998f2_create_subscriber_delivery_logs.py` applied to live Neon PostgreSQL.
 - **Headless Runner CLI Verified:** `python -m src.workflow.daily_runner` supports `--dry-run`, custom dates, structured execution logging, and exit codes.
-- **Timezone & Misfire Protection Verified:** `APScheduler` configured for `Asia/Kolkata` at 10:00 AM IST with 1-hour misfire grace time and coalesce protection.
-- **FastAPI Unified Endpoints Verified:** Container `/health` status check and authenticated `POST /api/cron/daily-broadcast` for Cloud Scheduler.
 
 ---
 
