@@ -29,7 +29,7 @@ A naive implementation might ask an LLM to *"send a daily Hadith from Sahih al-B
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion [1. Deterministic Ingestion Pipeline]
+    subgraph Ingestion ["1. Deterministic Ingestion Pipeline"]
         API["HadeethEnc API (GET)"] --> Fetch["Candidate Ingestion (EN + AR)"]
         Fetch --> Match["Metadata Cross-Match & Provenance"]
         Match --> Gate{"Passes Deterministic Gate?"}
@@ -37,17 +37,17 @@ flowchart TD
         Gate -- Yes --> DB[("Neon PostgreSQL Candidate Queue")]
     end
 
-    subgraph Webhook [2. Inbound Webhook & Multi-User Router]
+    subgraph Webhook ["2. Inbound Webhook & Multi-User Router"]
         Users["Public Telegram Users"] -->|"/start, /today, /stop, /help"| WH["FastAPI POST /telegram/webhook"]
         WH --> Sec{"Verify Secret Token"}
         Sec -- Invalid --> Reject["403 Forbidden"]
         Sec -- Valid --> Router["Command Router"]
-        Router -->|/start (Idempotent)| SubDB[("Telegram Subscribers")]
-        Router -->|/today| InstantSend["Dispatch Today's Hadith"]
-        Router -->|/stop| Deact["Deactivate (is_active = false)"]
+        Router -->|"/start (Idempotent)"| SubDB[("Telegram Subscribers")]
+        Router -->|"/today"| InstantSend["Dispatch Today's Hadith"]
+        Router -->|"/stop"| Deact["Deactivate (is_active = false)"]
     end
 
-    subgraph Daily [3. Daily Orchestration & Fan-Out Broadcast]
+    subgraph Daily ["3. Daily Orchestration & Fan-Out Broadcast"]
         Sched["Daily Trigger: 10:00 AM IST"] --> LG["LangGraph Daily StateGraph"]
         LG --> Idemp{"Idempotency Check"}
         Idemp -- Already Sent --> Skip["Skip Execution"]
@@ -58,8 +58,8 @@ flowchart TD
         Fallback --> Format
         Format --> Broadcaster["Multi-User Fan-Out Broadcaster"]
         SubDB -->|Active Subscribers| Broadcaster
-        Broadcaster -->|30 msg/sec Throttling| TG["Telegram Bot API"]
-        TG -->|403 Blocked| AutoDeact["Auto-Deactivate Blocked User"]
+        Broadcaster -->|"30 msg/sec Throttling"| TG["Telegram Bot API"]
+        TG -->|"403 Blocked"| AutoDeact["Auto-Deactivate Blocked User"]
         TG -->|Delivered| Record["Record Per-Subscriber Delivery Log"]
     end
 ```

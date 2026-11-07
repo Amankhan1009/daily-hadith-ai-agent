@@ -36,40 +36,40 @@ This is a portfolio-grade demonstration of dependable, fail-closed AI engineerin
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion & Verification [1. Ingestion & Deterministic Verification]
-        A[HadeethEnc API] --> B[Candidate Retrieval EN + AR]
-        B --> C[English & Arabic Metadata Matching]
-        C --> D[Reference & Provenance Regex Grammar]
-        D --> E{Passes Deterministic Gate?}
-        E -- No --> F[Safe Abort & Audit Log]
-        E -- Yes --> G[Neon PostgreSQL Candidate Queue]
+    subgraph Ingestion_Verification ["1. Ingestion & Deterministic Verification"]
+        A["HadeethEnc API"] --> B["Candidate Retrieval EN + AR"]
+        B --> C["English & Arabic Metadata Matching"]
+        C --> D["Reference & Provenance Regex Grammar"]
+        D --> E{"Passes Deterministic Gate?"}
+        E -- No --> F["Safe Abort & Audit Log"]
+        E -- Yes --> G[("Neon PostgreSQL Candidate Queue")]
     end
 
-    subgraph User Interaction [2. Public Multi-User Webhook Engine]
-        TG_User[Public Telegram Users] -->|"/start, /today, /stop, /help"| WH[FastAPI Webhook: POST /telegram/webhook]
-        WH -->|Verify X-Telegram-Bot-Api-Secret-Token| SecGate{Valid Secret?}
-        SecGate -- Invalid --> SecReject[Reject 403 Forbidden]
-        SecGate -- Valid --> CmdRouter[Telegram Command Router]
-        CmdRouter -->|/start (Idempotent)| SubRepo[(Neon DB: TelegramSubscriber)]
-        CmdRouter -->|/stop| DeactSub[Deactivate Subscriber]
-        CmdRouter -->|/today or Onboarding| InstantSend[Dispatch Today's Hadith]
+    subgraph User_Interaction ["2. Public Multi-User Webhook Engine"]
+        TG_User["Public Telegram Users"] -->|"/start, /today, /stop, /help"| WH["FastAPI Webhook: POST /telegram/webhook"]
+        WH -->|"Verify Secret Token"| SecGate{"Valid Secret?"}
+        SecGate -- Invalid --> SecReject["Reject 403 Forbidden"]
+        SecGate -- Valid --> CmdRouter["Telegram Command Router"]
+        CmdRouter -->|"/start (Idempotent)"| SubRepo[("Neon DB: TelegramSubscriber")]
+        CmdRouter -->|"/stop"| DeactSub["Deactivate Subscriber"]
+        CmdRouter -->|"/today or Onboarding"| InstantSend["Dispatch Today's Hadith"]
     end
 
-    subgraph Daily Pipeline [3. LangGraph Orchestration & Daily Broadcast]
-        Scheduler[Daily Scheduler: 10:00 AM IST] --> LG[LangGraph Daily StateGraph]
-        LG --> IdempCheck{Idempotency Check}
-        IdempCheck -- Already Ran --> SkipDaily[Skip Run]
-        IdempCheck -- New Day --> SelectCandidate[Select Candidate Queue Item]
-        SelectCandidate --> GroqLLM[Groq LLM Reflection: gpt-oss-120b]
-        GroqLLM --> GuardGate{Guardrails AI Gate}
-        GuardGate -- Violation --> OmitReflection[Omit Reflection: Fail-Safe]
-        GuardGate -- Valid --> FormatMsg[Format Canonical HTML Payload]
+    subgraph Daily_Pipeline ["3. LangGraph Orchestration & Daily Broadcast"]
+        Scheduler["Daily Scheduler: 10:00 AM IST"] --> LG["LangGraph Daily StateGraph"]
+        LG --> IdempCheck{"Idempotency Check"}
+        IdempCheck -- Already Ran --> SkipDaily["Skip Run"]
+        IdempCheck -- New Day --> SelectCandidate["Select Candidate Queue Item"]
+        SelectCandidate --> GroqLLM["Groq LLM Reflection: gpt-oss-120b"]
+        GroqLLM --> GuardGate{"Guardrails AI Gate"}
+        GuardGate -- Violation --> OmitReflection["Omit Reflection: Fail-Safe"]
+        GuardGate -- Valid --> FormatMsg["Format Canonical HTML Payload"]
         OmitReflection --> FormatMsg
-        FormatMsg --> FanOut[Multi-User Fan-Out Broadcaster]
+        FormatMsg --> FanOut["Multi-User Fan-Out Broadcaster"]
         SubRepo -->|Active Subscribers| FanOut
-        FanOut -->|30 msg/sec Rate Limit Throttling| TG_Dispatch[Telegram Bot API: sendMessage]
-        TG_Dispatch -->|HTTP 403 Blocked| AutoDeact[Auto-Deactivate Blocked User]
-        TG_Dispatch -->|Success / Retry| RecordDelivery[Record Per-Subscriber Delivery Log]
+        FanOut -->|"30 msg/sec Rate Limit Throttling"| TG_Dispatch["Telegram Bot API: sendMessage"]
+        TG_Dispatch -->|"HTTP 403 Blocked"| AutoDeact["Auto-Deactivate Blocked User"]
+        TG_Dispatch -->|"Success / Retry"| RecordDelivery["Record Per-Subscriber Delivery Log"]
     end
 ```
 
