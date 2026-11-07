@@ -14,6 +14,7 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_container.py`](test_container.py)** | `Dockerfile`, `docker-compose.yml`, `src.main` | 5 tests | Multi-stage build structure, unprivileged non-root user (`appuser`), security ignore patterns (.env/.venv/.git), Compose config, and container `/health` probe response. |
 | **[`test_database.py`](test_database.py)** | `src.database` | 8 tests | Candidate persistence, updating records, subscriber lifecycle, idempotent `/start`, active subscriber filtering, unique date constraint. |
 | **[`test_delivery.py`](test_delivery.py)** | `src.delivery` | 9 tests | TelegramClient sendMessage mock, 4096 character limits, HTTP 403 bot blocked handling, HTTP 429 rate limit retries, webhook secret token validation, `/start`, `/stop`, `/help` routing. |
+| **[`test_fcm_evaluation.py`](test_fcm_evaluation.py)** | `src.delivery.fcm` | 5 tests | FCM v1 message structure, target routing (token vs topic), strict 4,096-byte payload constraint enforcement, dry-run simulation, and data deep-link preservation. |
 | **[`test_failure_handling.py`](test_failure_handling.py)** | `src.hadeethenc`, `src.llm`, `src.delivery`, `src.database` | 19 tests | Upstream HadeethEnc 500/timeout/malformed payload fail-closed, Groq keyless omission & rate limit fallback, Telegram transient 500 backoff retries, mixed fan-out subscriber isolation (delivered/blocked/failed), forged webhook 403, database unique date and composite constraints. |
 | **[`test_formatter.py`](test_formatter.py)** | `src.formatter` | 4 tests | Telegram HTML payload formatting, quote preservation, HTML entity escaping, 4096 character limits. |
 | **[`test_guardrails.py`](test_guardrails.py)** | `src.guardrails` | 10 tests | Fatwa prohibitions, unauthorized citations, text leakage detection, length limits, bullet formatting. |
@@ -23,7 +24,7 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
 | **[`test_scheduler.py`](test_scheduler.py)** | `src.workflow`, `src.main` | 4 tests | Daily runner dry-run execution, APScheduler Asia/Kolkata timezone and 1-hour misfire grace time, container health check, authenticated Cloud Scheduler cron trigger. |
 | **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 8 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission, clean reflection pass, multi-user fan-out and HTTP 403 auto-deactivation. |
-| **Total** | **All Modules** | **99 tests** | **100% automated pass rate** |
+| **Total** | **All Modules** | **104 tests** | **100% automated pass rate** |
 
 ---
 

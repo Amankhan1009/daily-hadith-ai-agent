@@ -101,12 +101,17 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 20 — Future FCM Support (Architectural Evaluation)
-- **Active Task:** Task 20.1 — Mobile Push Notification Spike & Multi-Channel Schema Evaluation
+- **Active Milestone:** Completed — All 20 Milestones Verified
+- **Active Task:** Project V1 Handover & Future Mobile Expansion Spike
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 20 Verified:** Future FCM Support (Architectural Evaluation & Technical Spike).
+  - Authored Technical Design Document in `docs/FCM_INTEGRATION_SPIKE.md` evaluating FCM feasibility, dual-payload invariance strategy (<4KB lock screen teaser + unaltered deep link data), database schema evolution (`fcm_device_tokens`), and topic broadcast architecture.
+  - Implemented typed Pydantic models and delivery adapter in `src/delivery/fcm.py` enforcing official Google FCM v1 JSON specification and strict 4,096-byte boundary checks.
+  - Built automated evaluation test suite in `tests/test_fcm_evaluation.py` (5 unit tests covering token delivery, topic routing, 4KB boundary enforcement, and dry-run execution).
+  - Expanded test suite to **104/104 passing tests (100% pass rate in 16.72s)** with **88% total code coverage** across `src/`.
 - [x] **Milestone 19 Verified:** Production Readiness & System Audit.
   - Verified all 20 Definition of Done (DoD) criteria with concrete implementation evidence in `docs/DEFINITION_OF_DONE.md`.
   - Authored comprehensive Production Operational Runbook in `docs/RUNBOOK.md` covering system topology, monitoring, candidate queue backfilling, manual triggers, secret rotation, and disaster recovery.
