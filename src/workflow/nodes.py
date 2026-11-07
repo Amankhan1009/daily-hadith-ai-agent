@@ -391,60 +391,6 @@ class WorkflowNodes:
         with get_db_session() as session:
             return _execute(session)
 
-        def _execute(session: Session) -> dict[str, Any]:
-            active_subscribers = get_active_subscribers(session)
-            settings = get_settings()
-
-            # Target subscribers or fallback to default TELEGRAM_CHAT_ID
-            target_chat_ids = [sub.chat_id for sub in active_subscribers]
-            if not target_chat_ids and settings.telegram_chat_id:
-                try:
-                    target_chat_ids = [int(settings.telegram_chat_id)]
-                except ValueError:
-                    target_chat_ids = [settings.telegram_chat_id]
-
-            if not target_chat_ids:
-                logger.warning("No active subscribers found for daily broadcast.")
-                return {
-                    "subscribers_count": 0,
-                    "delivered_count": 0,
-                    "failed_count": 0,
-                    "status": "PENDING",
-                }
-
-            first_message_id = None
-            delivered_count = 0
-            failed_count = 0
-
-            for chat_id in target_chat_ids:
-                try:
-                    res = client.send_message(chat_id=chat_id, text=formatted_message)
-                    if first_message_id is None and isinstance(res, dict):
-                        first_message_id = res.get("message_id")
-                    delivered_count += 1
-                    time.sleep(0.04)  # Rate limit throttle: 25 msg/sec
-                except TelegramBotBlockedError:
-                    logger.info("Subscriber %s blocked the bot. Marking inactive...", chat_id)
-                    if isinstance(chat_id, int):
-                        deactivate_subscriber(session, chat_id)
-                        session.commit()
-                    failed_count += 1
-                except Exception as exc:
-                    logger.error("Failed to deliver daily Hadith to chat %s: %s", chat_id, exc)
-                    failed_count += 1
-
-            return {
-                "telegram_message_id": first_message_id,
-                "subscribers_count": len(target_chat_ids),
-                "delivered_count": delivered_count,
-                "failed_count": failed_count,
-                "status": "PENDING",
-            }
-
-        if self._session is not None:
-            return _execute(self._session)
-        with get_db_session() as session:
-            return _execute(session)
 
     def record_delivery_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """

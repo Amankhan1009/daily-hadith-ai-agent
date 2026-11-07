@@ -349,10 +349,17 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - System fails closed without corrupting database state or sending garbled messages.
   - Operational errors logged with actionable diagnostic context.
-- **Current Status:** `In Progress`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Created dedicated failure handling test suite in `tests/test_failure_handling.py` (19 comprehensive unit and integration stress tests).
+  - Verified upstream HadeethEnc API outage fail-closed invariants (HTTP 500/503 raises `HadeethEncResponseError`, network timeouts raise `HadeethEncNetworkError`, malformed HTML raises `HadeethEncResponseError`, and category batch ingestion survives partial failures without aborting valid candidates).
+  - Verified Groq LLM degradation resilience (missing key returns `OMITTED`, rate limits or API exceptions return `FAILED`, and theological fatwa/decree violations are cleanly omitted while delivering authentic Hadith text).
+  - Verified Telegram Bot API resilience (HTTP 500 transient backoff retries and succeeds, HTTP 500 exhaustion raises `TelegramDeliveryError`, >4096 character overflow fails closed, and mixed fan-out delivery cleanly isolates delivered, blocked, and failed subscribers).
+  - Verified inbound webhook resilience (constant-time forged secret 403, missing secret 403, unparseable JSON non-crash response, non-message update ignored, unrecognized slash command guidance).
+  - Verified database integrity and idempotency constraints (daily delivery log unique date constraint and subscriber delivery log composite unique constraint).
+  - Full automated test suite achieves **94/94 passing tests (100% pass rate in 16.75s)** across all 12 modules.
 - **Known Blockers:** None.
-- **Next Action:** Implement and execute failure injection tests across external integration points (HadeethEnc, Groq, Telegram, Neon DB).
+- **Next Action:** Proceed to Milestone 16 — Automated Testing & Code Quality.
 
 ---
 
@@ -363,10 +370,10 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 - **Acceptance Criteria:**
   - `pytest` passes 100% of tests.
   - `ruff check` and `ruff format` pass without warnings.
-- **Current Status:** `Not Started`
+- **Current Status:** `In Progress`
 - **Verification Evidence:** None.
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 15.
+- **Next Action:** Run Ruff linter and code formatter checks across all packages.
 
 ---
 

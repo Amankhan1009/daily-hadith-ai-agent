@@ -101,12 +101,20 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 15 — Failure Handling
-- **Active Task:** Task 15.1 — Dependency Outage Simulation and Fallback Verifications
+- **Active Milestone:** Milestone 16 — Automated Testing
+- **Active Task:** Task 16.1 — Code Quality, Ruff Linting and Formatting Verification
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 15 Verified:** Failure Handling & System Resilience.
+  - Built comprehensive stress-test suite in `tests/test_failure_handling.py` (19 isolated unit/integration tests).
+  - Verified upstream HadeethEnc API failure fail-closed invariants (HTTP 500, timeouts, malformed HTML, and partial batch recovery).
+  - Verified Groq LLM degradation fallbacks (missing API key omission, rate limit/exception fallback, and theological fatwa/decree boundary drop).
+  - Verified Telegram Bot API resilience (HTTP 500 retry backoff, HTTP 500 retry exhaustion, character overflow fail-closed, and mixed subscriber fan-out delivery isolation).
+  - Verified inbound webhook resilience (timing-safe forged token 403, missing token 403, malformed JSON recovery, and non-message update ignored).
+  - Cleaned up dead code in `src/workflow/nodes.py`.
+  - Automated test suite achieved **94/94 passing tests (100% pass rate in 16.75s)** across 12 test modules.
 - [x] **Milestone 14 Verified:** History & Per-Subscriber Daily Idempotency.
   - Implemented `SubscriberDeliveryLog` SQLAlchemy model in `src/database/models.py` with composite unique constraint `uq_subscriber_daily_delivery` on `(subscriber_id, scheduled_date)`.
   - Added repository methods in `src/database/repository.py`: `record_subscriber_delivery()`, `get_undelivered_active_subscribers()`, and `is_subscriber_delivered()`.
@@ -195,10 +203,10 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- **Milestone 15: Failure Handling**
-  - **Task 15.1:** Dependency Outage Simulation (HadeethEnc 500/timeout, Groq rate limits, Telegram network drops & 429 backoff).
-  - **Task 15.2:** Fail-Closed Integrity & Transaction Rollback Stress Tests.
-  - **Task 15.3:** Malformed Payload & Boundary Defense Verification.
+- **Milestone 16: Automated Testing & Code Quality**
+  - **Task 16.1:** Run Ruff linter and code formatter checks across all packages (`src/`, `tests/`).
+  - **Task 16.2:** Address any style, docstring, or typing warnings.
+  - **Task 16.3:** Verify 100% test pass rate and clean lint report.
 
 ---
 
@@ -232,15 +240,14 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Implement and verify Milestone 15 Failure Handling test suite (`tests/test_failure_handling.py`).
+Execute Ruff linting and formatting verification (`ruff check .`, `ruff format --check .`).
 
 ---
 
 ## 13. Latest Verification Evidence
-- **75/75 Automated Tests Passing:** 100% pass rate in 8.89s across all 11 modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
-- **Per-Subscriber Daily Idempotency Verified:** Composite unique constraint `(subscriber_id, scheduled_date)` prevents duplicate sends, mid-run crash recovery skips delivered users, and complete reruns dispatch 0 messages.
-- **Neon DB Migration Applied:** Migration `59d6a20998f2_create_subscriber_delivery_logs.py` applied to live Neon PostgreSQL.
-- **Headless Runner CLI Verified:** `python -m src.workflow.daily_runner` supports `--dry-run`, custom dates, structured execution logging, and exit codes.
+- **94/94 Automated Tests Passing:** 100% pass rate in 16.75s across all 12 test modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_failure_handling.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_idempotency.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
+- **Resilience Against External Outages Verified:** Stress-tested 19 failure scenarios across upstream HadeethEnc API down/timeouts, Groq rate limits, Telegram 500 retry backoffs, bot blocking deactivations, and forged webhook rejections.
+- **Dead Code Cleaned Up:** Cleaned up redundant execution block in `src/workflow/nodes.py`.
 
 ---
 
