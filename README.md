@@ -6,7 +6,7 @@ A production-grade, fail-closed AI system and publicly accessible Telegram bot d
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph%201.2-green.svg)](https://github.com/langchain-ai/langgraph)
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/tests-68%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-72%20passed%20(100%25)-brightgreen.svg)](tests/)
 
 ---
 
@@ -115,6 +115,8 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **10 — Guardrails AI** | `Verified` | Content validation & hallucination boundary enforcement |
 | **11 — Final Content Validation** | `Verified` | Assembled notification payloads & HTML escaping checks |
 | **12 — Telegram Integration & Public Subscription Engine** | `Verified` | Public bot webhook, subscriber registration, commands & rate-limited broadcast |
+| **13 — Scheduling & Daily Multi-User Broadcast** | `Verified` | Headless runner CLI, APScheduler (10 AM IST, 1hr misfire grace), Cloud Scheduler cron endpoint |
+| **14 — History & Per-Subscriber Daily Idempotency** | `In Progress` | Composite idempotency unique constraints, execution lock records & per-user delivery logs |
 
 For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 

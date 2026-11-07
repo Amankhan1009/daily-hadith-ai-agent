@@ -42,6 +42,14 @@ class Settings(BaseSettings):
         default="0 10 * * *",
         description="Cron expression for daily execution (10:00 AM default)",
     )
+    enable_in_process_scheduler: bool = Field(
+        default=False,
+        description="Whether to run the in-process APScheduler inside the FastAPI server process",
+    )
+    cron_secret_token: Optional[str] = Field(
+        default=None,
+        description="Secret token verifying incoming Cloud Scheduler requests to /api/cron/daily-broadcast",
+    )
 
     # HadeethEnc Source Integration
     hadeethenc_base_url: str = Field(
@@ -170,6 +178,8 @@ class Settings(BaseSettings):
             "telegram_configured": bool(self.telegram_bot_token),
             "telegram_webhook_configured": bool(self.telegram_webhook_secret),
             "telegram_bot_username": self.telegram_bot_username or "<NOT_SET>",           
+            "enable_in_process_scheduler": self.enable_in_process_scheduler,
+            "cron_secret_configured": bool(self.cron_secret_token),
         }
 
 

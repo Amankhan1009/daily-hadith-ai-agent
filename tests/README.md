@@ -18,8 +18,9 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_hadeethenc.py`](test_hadeethenc.py)** | `src.hadeethenc` | 14 tests | API client mocking, 404/500/timeout handling, Arabic text identity, regex citation extraction, bibliographic rejection. |
 | **[`test_ingestion.py`](test_ingestion.py)** | `src.ingestion` | 4 tests | Verified candidate persistence, rejected audit recording, deduplication idempotency, batch metrics calculation. |
 | **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
+| **[`test_scheduler.py`](test_scheduler.py)** | `src.workflow`, `src.main` | 4 tests | Daily runner dry-run execution, APScheduler Asia/Kolkata timezone and 1-hour misfire grace time, container health check, authenticated Cloud Scheduler cron trigger. |
 | **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 8 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission, clean reflection pass, multi-user fan-out and HTTP 403 auto-deactivation. |
-| **Total** | **All Modules** | **68 tests** | **100% automated pass rate** |
+| **Total** | **All Modules** | **72 tests** | **100% automated pass rate** |
 
 ---
 

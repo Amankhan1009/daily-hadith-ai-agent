@@ -101,12 +101,18 @@ flowchart TD
 ---
 
 ## 6. Current Milestone and Task
-- **Active Milestone:** Milestone 13 — Scheduling & Daily Multi-User Broadcast
-- **Active Task:** Task 13.1 — Daily Multi-User Broadcast Scheduler Architecture (10:00 AM IST)
+- **Active Milestone:** Milestone 14 — History & Per-Subscriber Daily Idempotency
+- **Active Task:** Task 14.1 — Per-Subscriber Idempotency Schema and Composite Unique Constraints
 
 ---
 
 ## 7. Completed and Verified Work
+- [x] **Milestone 13 Verified:** Scheduling & Daily Multi-User Broadcast.
+  - Implemented headless CLI runner in `src/workflow/daily_runner.py` supporting `--date`, `--dry-run`, structured logging, and system exit codes.
+  - Implemented in-process background scheduler in `src/workflow/scheduler.py` configured for `Asia/Kolkata` at 10:00 AM IST with 3600-second (1-hour) misfire recovery and coalesce protection.
+  - Built unified FastAPI server in `src/main.py` mounting container `/health` check, `/telegram/webhook` router, authenticated `POST /api/cron/daily-broadcast` for Cloud Scheduler, and lifespan scheduler management.
+  - Added automated test suite in `tests/test_scheduler.py` covering runner dry-run execution, timezone/misfire configuration, container health checks, and cron endpoint authentication.
+  - Full automated test suite achieves **72/72 passing tests** (100% pass rate).
 - [x] **Milestone 12 Verified:** Telegram Integration & Public Subscription Engine.
   - Implemented `TelegramSubscriber` SQLAlchemy model (`chat_id` BigInteger unique index) and applied migration `547b6992865a_create_telegram_subscribers.py` to Neon PostgreSQL.
   - Implemented `TelegramClient` in `src/delivery/telegram.py` with exponential backoff, rate limiting (25 msg/sec), HTTP 429 `Retry-After` parsing, HTTP 403 `TelegramBotBlockedError` handling, and webhook administration methods.
@@ -182,10 +188,10 @@ flowchart TD
 ---
 
 ## 8. Work in Progress
-- **Milestone 13: Scheduling & Daily Multi-User Broadcast**
-  - **Task 13.1:** Multi-User Daily Broadcast Runner CLI (`src/workflow/daily_runner.py`).
-  - **Task 13.2:** Idempotent Daily Execution Coordination (10:00 AM Asia/Kolkata).
-  - **Task 13.3:** Cloud Scheduler & Cron Integration Specification.
+- **Milestone 14: History & Per-Subscriber Daily Idempotency**
+  - **Task 14.1:** Per-Subscriber Delivery Log Table (`subscriber_delivery_logs`) with `UNIQUE (subscriber_id, scheduled_date)` constraint.
+  - **Task 14.2:** Resilient Mid-Run Recovery Query (skipping already-delivered users on retries).
+  - **Task 14.3:** Alembic Migration & Idempotency Invariant Verification.
 
 ---
 
@@ -219,14 +225,15 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Begin Milestone 13: Multi-User Daily Broadcast Runner CLI and Scheduler Architecture.
+Begin Milestone 14: Per-Subscriber Delivery Logging & Composite Unique Idempotency Schema.
 
 ---
 
 ## 13. Latest Verification Evidence
-- **68/68 Automated Tests Passing:** 100% pass rate in 12.3s across all 9 modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_workflow.py`).
-- **Telegram Public Webhook & Commands Verified:** Timing-safe secret verification (`hmac.compare_digest`), `/start` idempotent registration, `/today` on-demand retrieval, `/stop` opt-out, and `/help` guidance.
-- **Multi-User Fan-Out Verified:** Rate-limited delivery to active subscribers with automatic deactivation of blocked users (HTTP 403).
+- **72/72 Automated Tests Passing:** 100% pass rate in 6.3s across all 10 modules (`tests/test_config.py`, `tests/test_database.py`, `tests/test_delivery.py`, `tests/test_formatter.py`, `tests/test_guardrails.py`, `tests/test_hadeethenc.py`, `tests/test_ingestion.py`, `tests/test_llm.py`, `tests/test_scheduler.py`, `tests/test_workflow.py`).
+- **Headless Runner CLI Verified:** `python -m src.workflow.daily_runner` supports `--dry-run`, custom dates, structured execution logging, and exit codes.
+- **Timezone & Misfire Protection Verified:** `APScheduler` configured for `Asia/Kolkata` at 10:00 AM IST with 1-hour misfire grace time and coalesce protection.
+- **FastAPI Unified Endpoints Verified:** Container `/health` status check and authenticated `POST /api/cron/daily-broadcast` for Cloud Scheduler.
 
 ---
 

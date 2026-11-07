@@ -22,3 +22,6 @@ pytest>=8.0.0
 # Milestone 12: Inbound Webhook & API Server
 fastapi>=0.115.0
 uvicorn>=0.32.0
+
+# Milestone 13: Scheduling & Execution
+apscheduler>=3.10.4

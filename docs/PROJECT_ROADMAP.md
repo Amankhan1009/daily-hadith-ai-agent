@@ -28,8 +28,8 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
 | 10 | Guardrails AI | Verified |
 | 11 | Final Content Validation | Verified |
 | 12 | Telegram Integration & Public Subscription Engine | Verified |
-| 13 | Scheduling & Daily Multi-User Broadcast | In Progress |
-| 14 | History & Per-Subscriber Daily Idempotency | Not Started |
+| 13 | Scheduling & Daily Multi-User Broadcast | Verified |
+| 14 | History & Per-Subscriber Daily Idempotency | In Progress |
 | 15 | Failure Handling | Not Started |
 | 16 | Automated Testing | Not Started |
 | 17 | Docker Containerization | Not Started |
@@ -309,10 +309,15 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Job correctly fires daily according to `Asia/Kolkata` wall-clock time (10:00 AM).
   - Delivers to 100% of active opted-in subscribers without exceeding Telegram rate limits.
   - Misfire grace times and restart scenarios tested and documented.
-- **Current Status:** `Not Started`
-- **Verification Evidence:** None.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented headless CLI runner in `src/workflow/daily_runner.py` supporting `--date`, `--dry-run`, structured logging, and system exit codes.
+  - Implemented in-process background scheduler in `src/workflow/scheduler.py` configured for `Asia/Kolkata` at 10:00 AM IST with 3600-second (1-hour) misfire recovery and coalesce protection.
+  - Built unified FastAPI server in `src/main.py` mounting container `/health` check, `/telegram/webhook` router, authenticated `POST /api/cron/daily-broadcast` for Cloud Scheduler, and lifespan scheduler management.
+  - Added automated test suite in `tests/test_scheduler.py` covering runner dry-run execution, timezone/misfire configuration, container health checks, and cron endpoint authentication.
+  - Full automated test suite achieves **72/72 passing tests** (100% pass rate).
 - **Known Blockers:** None.
-- **Next Action:** Await Milestone 12.
+- **Next Action:** Proceed to Milestone 14 — History & Per-Subscriber Daily Idempotency.
 
 ---
 
