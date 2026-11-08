@@ -197,12 +197,12 @@ def create_app() -> FastAPI:
             <span class="pulse-dot"></span>
             System Active & Live
         </div>
-        <h1>Daily Hadith AI Agent</h1>
+        <h1>Daily Hadith Agent</h1>
         <p class="subtitle">
             A production-grade, fail-closed AI system delivering authentic Hadith from Sahih al-Bukhari & Muslim paired with educational commentary.
         </p>
         <div class="btn-group">
-            <a href="https://t.me/DailyHadithAiBot" target="_blank" class="btn btn-primary">
+            <a href="https://t.me/daily_hadith_aman_bot" target="_blank" class="btn btn-primary">
                 💬 Open in Telegram
             </a>
             <a href="/docs" class="btn btn-secondary">

@@ -107,7 +107,8 @@ def test_root_landing_page_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert "Daily Hadith AI Agent" in response.text
+    assert "Daily Hadith Agent" in response.text
     assert "Open in Telegram" in response.text
+    assert "https://t.me/daily_hadith_aman_bot" in response.text
     assert "/docs" in response.text
     assert "/health" in response.text
