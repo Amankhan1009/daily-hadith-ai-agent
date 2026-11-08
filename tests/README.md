@@ -11,7 +11,7 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | Test Module | Component Tested | Test Count | Key Invariants Verified |
 |---|---|---|---|
 | **[`test_config.py`](test_config.py)** | `src.config` | 6 tests | IANA timezone validation (`Asia/Kolkata`), numeric boundaries, secret masking in logs, env overrides. |
-| **[`test_container.py`](test_container.py)** | `Dockerfile`, `docker-compose.yml`, `src.main` | 5 tests | Multi-stage build structure, unprivileged non-root user (`appuser`), security ignore patterns (.env/.venv/.git), Compose config, and container `/health` probe response. |
+| **[`test_container.py`](test_container.py)** | `Dockerfile`, `docker-compose.yml`, `src.main` | 6 tests | Multi-stage build structure, unprivileged non-root user (`appuser`), security ignore patterns (.env/.venv/.git), Compose config, container `/health` probe response, and root `/` landing page. |
 | **[`test_database.py`](test_database.py)** | `src.database` | 8 tests | Candidate persistence, updating records, subscriber lifecycle, idempotent `/start`, active subscriber filtering, unique date constraint. |
 | **[`test_delivery.py`](test_delivery.py)** | `src.delivery` | 9 tests | TelegramClient sendMessage mock, 4096 character limits, HTTP 403 bot blocked handling, HTTP 429 rate limit retries, webhook secret token validation, `/start`, `/stop`, `/help` routing. |
 | **[`test_fcm_evaluation.py`](test_fcm_evaluation.py)** | `src.delivery.fcm` | 5 tests | FCM v1 message structure, target routing (token vs topic), strict 4,096-byte payload constraint enforcement, dry-run simulation, and data deep-link preservation. |
@@ -24,7 +24,7 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
 | **[`test_scheduler.py`](test_scheduler.py)** | `src.workflow`, `src.main` | 4 tests | Daily runner dry-run execution, APScheduler Asia/Kolkata timezone and 1-hour misfire grace time, container health check, authenticated Cloud Scheduler cron trigger. |
 | **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 8 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission, clean reflection pass, multi-user fan-out and HTTP 403 auto-deactivation. |
-| **Total** | **All Modules** | **104 tests** | **100% automated pass rate** |
+| **Total** | **All Modules** | **105 tests** | **100% automated pass rate** |
 
 ---
 

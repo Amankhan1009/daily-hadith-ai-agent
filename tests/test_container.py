@@ -97,3 +97,17 @@ def test_container_healthcheck_endpoint():
     assert data["service"] == "daily-hadith-ai-agent"
     assert "timezone" in data
     assert "scheduler" in data
+
+
+def test_root_landing_page_endpoint():
+    """Verify FastAPI root (/) endpoint returns 200 OK with HTML landing page."""
+    app = create_app()
+    client = TestClient(app)
+
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Daily Hadith AI Agent" in response.text
+    assert "Open in Telegram" in response.text
+    assert "/docs" in response.text
+    assert "/health" in response.text
