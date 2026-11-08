@@ -91,6 +91,19 @@ def is_date_delivered(session: Session, scheduled_date: date) -> bool:
 is_delivery_recorded = is_date_delivered
 
 
+def get_today_delivered_candidate(session: Session, target_date: date) -> HadithCandidate | None:
+    """
+    Find the Hadith candidate successfully delivered on a given date.
+    """
+    stmt = (
+        select(HadithCandidate)
+        .join(DailyDeliveryLog, DailyDeliveryLog.candidate_id == HadithCandidate.id)
+        .where(DailyDeliveryLog.scheduled_date == target_date)
+        .where(DailyDeliveryLog.status == "SUCCESS")
+    )
+    return session.scalars(stmt).first()
+
+
 def get_next_verified_candidate(session: Session) -> HadithCandidate | None:
     """
     Find the earliest verified candidate that has not yet been delivered.

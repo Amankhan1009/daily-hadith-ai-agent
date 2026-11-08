@@ -7,7 +7,9 @@ and routes commands (/start, /today, /stop, /help).
 
 import hmac
 import logging
+import zoneinfo
 from collections.abc import Generator
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
@@ -18,6 +20,7 @@ from src.database.repository import (
     deactivate_subscriber,
     get_next_verified_candidate,
     get_or_create_subscriber,
+    get_today_delivered_candidate,
 )
 from src.database.session import get_db_session
 from src.delivery.telegram import TelegramBotBlockedError, TelegramClient
@@ -149,7 +152,17 @@ def handle_start_command(
 
 def handle_today_command(session: Session, client: TelegramClient, chat_id: int) -> dict[str, Any]:
     """Handle /today: Fetch and send the current verified Hadith with on-demand reflection."""
-    candidate = get_next_verified_candidate(session)
+    settings = get_settings()
+    tz = zoneinfo.ZoneInfo(settings.timezone)
+    today_date = datetime.now(tz).date()
+
+    # Prefer today's delivered Hadith if already broadcasted
+    candidate = get_today_delivered_candidate(session, today_date)
+
+    # Fallback to next verified candidate if today's broadcast hasn't run yet
+    if candidate is None:
+        candidate = get_next_verified_candidate(session)
+
     if candidate is None:
         fallback_msg = (
             "<b>No Hadith available at this moment.</b>\n\n"

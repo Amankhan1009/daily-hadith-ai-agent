@@ -252,3 +252,79 @@ def test_webhook_routes_help_command(api_client, monkeypatch):
     response = api_client.post("/telegram/webhook", json=payload, headers=headers)
     assert response.status_code == 200
     assert any("Zero Text Modification" in msg["text"] for msg in sent_messages)
+
+
+def test_webhook_routes_today_command_returns_today_delivered_hadith(
+    api_client, test_db_session, monkeypatch
+):
+    """Verify /today prefers today's already delivered Hadith candidate."""
+    import zoneinfo
+    from datetime import datetime
+    from src.database.models import DailyDeliveryLog, HadithCandidate
+
+    settings = get_settings()
+    today_date = datetime.now(zoneinfo.ZoneInfo(settings.timezone)).date()
+
+    cand1 = HadithCandidate(
+        source_id="cand_1",
+        collection="Sahih al-Bukhari",
+        hadith_number="1",
+        english_title="Title 1",
+        english_text="Today delivered hadith text",
+        arabic_text="عربي 1",
+        attribution="Umar",
+        grade="Authentic",
+        source_url="https://example.com/1",
+        verification_status="VERIFIED",
+    )
+    cand2 = HadithCandidate(
+        source_id="cand_2",
+        collection="Sahih Muslim",
+        hadith_number="2",
+        english_title="Title 2",
+        english_text="Tomorrow hadith text",
+        arabic_text="عربي 2",
+        attribution="Abu Hurairah",
+        grade="Authentic",
+        source_url="https://example.com/2",
+        verification_status="VERIFIED",
+    )
+    test_db_session.add_all([cand1, cand2])
+    test_db_session.flush()
+
+    # Log cand1 as successfully delivered today
+    delivery_log = DailyDeliveryLog(
+        scheduled_date=today_date,
+        candidate_id=cand1.id,
+        status="SUCCESS",
+        attempt_count=1,
+    )
+    test_db_session.add(delivery_log)
+    test_db_session.commit()
+
+    sent_messages = []
+
+    def mock_send_message(self, chat_id, text, **kwargs):
+        sent_messages.append({"chat_id": chat_id, "text": text})
+        return {"message_id": 104}
+
+    monkeypatch.setattr(TelegramClient, "send_message", mock_send_message)
+
+    secret = get_settings().telegram_webhook_secret
+    headers = {"X-Telegram-Bot-Api-Secret-Token": secret} if secret else {}
+
+    payload = {
+        "update_id": 103,
+        "message": {
+            "message_id": 4,
+            "chat": {"id": 88888, "type": "private"},
+            "from": {"id": 88888, "username": "newuser"},
+            "text": "/today",
+        },
+    }
+
+    response = api_client.post("/telegram/webhook", json=payload, headers=headers)
+    assert response.status_code == 200
+    assert len(sent_messages) == 1
+    assert "Today delivered hadith text" in sent_messages[0]["text"]
+
