@@ -63,6 +63,7 @@ def run_daily_broadcast(
     final_state = run_daily_workflow(
         scheduled_date=scheduled_date,
         telegram_client=telegram_client,
+        is_dry_run=dry_run,
     )
 
     status = final_state.get("status", "UNKNOWN")

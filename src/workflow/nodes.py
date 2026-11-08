@@ -329,6 +329,7 @@ class WorkflowNodes:
             first_message_id = None
             delivered_count = 0
             failed_count = 0
+            is_dry_run = state.get("is_dry_run", False)
 
             for sub in pending_subscribers:
                 try:
@@ -337,47 +338,50 @@ class WorkflowNodes:
                     if first_message_id is None:
                         first_message_id = msg_id
 
-                    # Record successful delivery immediately for crash recovery
-                    record_subscriber_delivery(
-                        session=session,
-                        subscriber_id=sub.id,
-                        chat_id=sub.chat_id,
-                        scheduled_date=target_date,
-                        candidate_id=candidate_id,
-                        status="DELIVERED",
-                        telegram_message_id=msg_id,
-                    )
-                    session.commit()
+                    # Record successful delivery immediately for crash recovery (skipped in dry-run)
+                    if not is_dry_run:
+                        record_subscriber_delivery(
+                            session=session,
+                            subscriber_id=sub.id,
+                            chat_id=sub.chat_id,
+                            scheduled_date=target_date,
+                            candidate_id=candidate_id,
+                            status="DELIVERED",
+                            telegram_message_id=msg_id,
+                        )
+                        session.commit()
                     delivered_count += 1
                     time.sleep(0.04)  # 25 msgs/sec compliance
 
                 except TelegramBotBlockedError:
                     logger.info("Subscriber %s blocked the bot. Deactivating...", sub.chat_id)
-                    deactivate_subscriber(session, sub.chat_id)
-                    record_subscriber_delivery(
-                        session=session,
-                        subscriber_id=sub.id,
-                        chat_id=sub.chat_id,
-                        scheduled_date=target_date,
-                        candidate_id=candidate_id,
-                        status="BLOCKED",
-                        error_message="Forbidden: bot was blocked by the user",
-                    )
-                    session.commit()
+                    if not is_dry_run:
+                        deactivate_subscriber(session, sub.chat_id)
+                        record_subscriber_delivery(
+                            session=session,
+                            subscriber_id=sub.id,
+                            chat_id=sub.chat_id,
+                            scheduled_date=target_date,
+                            candidate_id=candidate_id,
+                            status="BLOCKED",
+                            error_message="Forbidden: bot was blocked by the user",
+                        )
+                        session.commit()
                     failed_count += 1
 
                 except Exception as exc:
                     logger.error("Failed to deliver daily Hadith to chat %s: %s", sub.chat_id, exc)
-                    record_subscriber_delivery(
-                        session=session,
-                        subscriber_id=sub.id,
-                        chat_id=sub.chat_id,
-                        scheduled_date=target_date,
-                        candidate_id=candidate_id,
-                        status="FAILED",
-                        error_message=str(exc),
-                    )
-                    session.commit()
+                    if not is_dry_run:
+                        record_subscriber_delivery(
+                            session=session,
+                            subscriber_id=sub.id,
+                            chat_id=sub.chat_id,
+                            scheduled_date=target_date,
+                            candidate_id=candidate_id,
+                            status="FAILED",
+                            error_message=str(exc),
+                        )
+                        session.commit()
                     failed_count += 1
 
             return {
@@ -395,8 +399,17 @@ class WorkflowNodes:
 
     def record_delivery_node(self, state: DailyWorkflowState) -> dict[str, Any]:
         """
-        Node 6: Record the delivery outcome in DailyDeliveryLog for idempotency.
+        Node 8: Record the delivery outcome in DailyDeliveryLog for idempotency.
         """
+        if state.get("is_dry_run", False):
+            logger.info(
+                "Dry-run simulation mode enabled: skipping audit persistence to daily_delivery_logs."
+            )
+            return {
+                "status": "COMPLETED",
+                "error_message": None,
+            }
+
         scheduled_date_str = state.get("scheduled_date")
         target_date = date.fromisoformat(scheduled_date_str) if scheduled_date_str else date.today()
         candidate_id = state.get("candidate_id")

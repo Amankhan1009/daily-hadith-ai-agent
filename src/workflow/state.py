@@ -21,6 +21,7 @@ class DailyWorkflowState(TypedDict, total=False):
     # Target Calendar Scheduling
     scheduled_date: str  # YYYY-MM-DD
     is_idempotent: bool  # True if a successful delivery already occurred for this date
+    is_dry_run: bool  # True if running in simulation mode (no database writes or real messages)
 
     # Selected Hadith Candidate Data
     candidate_id: int | None
@@ -63,6 +64,7 @@ def get_current_ist_date() -> str:
 
 def create_initial_state(
     scheduled_date: str | date | None = None,
+    is_dry_run: bool = False,
 ) -> DailyWorkflowState:
     """
     Construct a clean initial state dictionary for a daily pipeline run.
@@ -77,6 +79,7 @@ def create_initial_state(
     return DailyWorkflowState(
         scheduled_date=target_date_str,
         is_idempotent=False,
+        is_dry_run=is_dry_run,
         candidate_id=None,
         source_id=None,
         collection=None,

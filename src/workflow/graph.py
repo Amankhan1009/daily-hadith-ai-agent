@@ -135,6 +135,7 @@ def run_daily_workflow(
     llm_client: GroqReflectionClient | None = None,
     validator: ReflectionValidator | None = None,
     telegram_client: TelegramClient | None = None,
+    is_dry_run: bool = False,
 ) -> DailyWorkflowState:
     """
     Execute a complete run of the Daily Hadith state graph.
@@ -145,6 +146,6 @@ def run_daily_workflow(
         validator=validator,
         telegram_client=telegram_client,
     )
-    initial_state = create_initial_state(scheduled_date=scheduled_date)
+    initial_state = create_initial_state(scheduled_date=scheduled_date, is_dry_run=is_dry_run)
     final_state = graph.invoke(initial_state)
     return final_state
