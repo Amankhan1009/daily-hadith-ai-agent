@@ -4,8 +4,9 @@
 services:
   - type: web
     name: daily-hadith-ai-agent
-    runtime: docker
-    dockerfilePath: ./Dockerfile
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
     plan: free
     region: oregon
     healthCheckPath: /health
