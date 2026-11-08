@@ -230,7 +230,7 @@ def create_app() -> FastAPI:
 </body>
 </html>"""
 
-    @app.get("/health", tags=["System"])
+    @app.api_route("/health", methods=["GET", "POST", "HEAD"], tags=["System"])
     def health_check() -> dict[str, Any]:
         """Container healthcheck endpoint for Docker, Cloud Run, and Render."""
         return {
