@@ -260,6 +260,7 @@ def test_webhook_routes_today_command_returns_today_delivered_hadith(
     """Verify /today prefers today's already delivered Hadith candidate."""
     import zoneinfo
     from datetime import datetime
+
     from src.database.models import DailyDeliveryLog, HadithCandidate
 
     settings = get_settings()
@@ -327,4 +328,3 @@ def test_webhook_routes_today_command_returns_today_delivered_hadith(
     assert response.status_code == 200
     assert len(sent_messages) == 1
     assert "Today delivered hadith text" in sent_messages[0]["text"]
-

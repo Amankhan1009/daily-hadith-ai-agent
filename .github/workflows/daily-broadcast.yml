@@ -21,10 +21,13 @@ jobs:
           sleep 25
 
       - name: Trigger Daily Broadcast
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET_TOKEN }}
         run: |
+          TOKEN="${CRON_SECRET:-5aae48d9ba937e7fb67b8dd4acd54648}"
           echo "Triggering authenticated daily broadcast..."
           RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast \
-            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET_TOKEN || '5aae48d9ba937e7fb67b8dd4acd54648' }}" \
+            -H "X-Cron-Secret: $TOKEN" \
             --max-time 120)
 
           BODY=$(echo "$RESPONSE" | sed '$d')
