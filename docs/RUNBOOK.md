@@ -8,13 +8,13 @@ Operational and maintenance procedures for the **Daily Hadith AI Agent** product
 
 | Component | Production Service | Public URL / Endpoint |
 |---|---|---|
-| **Web Service & Webhook** | Render Free Web Service (Docker) | `https://daily-hadith-ai-agent.onrender.com` |
-| **Health Probe** | FastAPI HTTP GET | `https://daily-hadith-ai-agent.onrender.com/health` |
-| **Telegram Inbound Webhook** | FastAPI HTTP POST | `https://daily-hadith-ai-agent.onrender.com/telegram/webhook` |
-| **Cloud Scheduler Trigger** | Authenticated HTTP POST | `https://daily-hadith-ai-agent.onrender.com/api/cron/daily-broadcast` |
+| **Web Service & Webhook** | Render Free Web Service (Python 3) | `https://daily-hadith-ai-agent-46ie.onrender.com` |
+| **Health Probe** | FastAPI HTTP GET/POST/HEAD | `https://daily-hadith-ai-agent-46ie.onrender.com/health` |
+| **Telegram Inbound Webhook** | FastAPI HTTP POST | `https://daily-hadith-ai-agent-46ie.onrender.com/telegram/webhook` |
+| **Cloud Scheduler Trigger** | Authenticated HTTP POST | `https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast` |
 | **PostgreSQL Database** | Neon Serverless PostgreSQL (SSL) | `ep-calm-cloud-b8sdiz8h-pooler.c-14.us-east-1.aws.neon.tech` |
 | **Container Registry** | Docker Hub (Multi-Stage) | `hub.docker.com/r/amankhan1009/daily-hadith-ai-agent` |
-| **Automated Cron Scheduler** | cron-job.org | Daily at `04:30 UTC` (`10:00 AM IST`) |
+| **Automated Cron Scheduler** | GitHub Actions Workflow | Daily at `04:30 UTC` (`10:00 AM IST`) via `.github/workflows/daily-broadcast.yml` |
 
 ---
 
