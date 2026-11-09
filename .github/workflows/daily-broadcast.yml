@@ -1,0 +1,39 @@
+name: Daily Hadith Automated Broadcast
+
+on:
+  schedule:
+    # 04:30 UTC = 10:00 AM IST (Asia/Kolkata)
+    - cron: '30 4 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  broadcast:
+    name: Execute Daily Hadith Broadcast
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Pre-warm Render Backend
+        run: |
+          echo "Sending pre-warm request to Render backend..."
+          curl -s -L --max-time 60 https://daily-hadith-ai-agent-46ie.onrender.com/health || true
+          echo "Waiting 25 seconds for container readiness..."
+          sleep 25
+
+      - name: Trigger Daily Broadcast
+        run: |
+          echo "Triggering authenticated daily broadcast..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET_TOKEN || '5aae48d9ba937e7fb67b8dd4acd54648' }}" \
+            --max-time 120)
+
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+
+          echo "Response Body: $BODY"
+          echo "HTTP Status: $STATUS"
+
+          if [ "$STATUS" -ne 200 ]; then
+            echo "::error::Daily broadcast failed with HTTP status $STATUS"
+            exit 1
+          fi
