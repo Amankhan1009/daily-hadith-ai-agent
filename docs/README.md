@@ -10,6 +10,7 @@ This directory serves as the durable source of truth for all architectural decis
 
 | Document | Component | Summary |
 |---|---|---|
+| **[`PROJECT_WORKFLOW.md`](PROJECT_WORKFLOW.md)** | **Master Architecture & Guide** | Comprehensive end-to-end system workflow, interview pitch, 4 invariants, 8 LangGraph nodes, cloud design, and interview masterclass. |
 | **[`PROJECT_ROADMAP.md`](PROJECT_ROADMAP.md)** | **Project Management** | The 20-milestone engineering roadmap tracking progress, acceptance criteria, verification evidence, and next actions. |
 | **[`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)** | **Architecture & Continuity** | Living developer handover document capturing architecture decisions (ADRs), stack choices, invariants, and active tasks. |
 | **[`RUNBOOK.md`](RUNBOOK.md)** | **Production Operations** | Comprehensive operational runbook covering live monitoring, CLI tools, manual triggers, secret rotation, and disaster recovery. |

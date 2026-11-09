@@ -2,14 +2,16 @@
 
 A production-grade, fail-closed AI system and publicly accessible Telegram bot delivering verified daily Hadith notifications to subscribers, orchestrated with **LangGraph**, verified deterministically with **Pydantic**, persisted on **Neon PostgreSQL**, and powered by **Groq**.
 
+> 📚 **Deep Dive Architectural Guide:** For an exhaustive, step-by-step technical explanation, interview cheatsheet, and full system diagrams, read **[`docs/PROJECT_WORKFLOW.md`](docs/PROJECT_WORKFLOW.md)**.
+
 [![CI/CD Pipeline](https://github.com/Amankhan1009/daily-hadith-ai-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Amankhan1009/daily-hadith-ai-agent/actions/workflows/ci.yml)
 [![Docker Image](https://img.shields.io/badge/docker%20image-ready-blue?logo=docker)](https://hub.docker.com/r/amankhan1009/daily-hadith-ai-agent)
 [![Python 3.14](https://img.shields.io/badge/python-3.14-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph%201.2-green.svg)](https://github.com/langchain-ai/langgraph)
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/tests-99%20passed%20(100%25)-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-106%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 ---
