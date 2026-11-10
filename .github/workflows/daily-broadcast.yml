@@ -2,8 +2,10 @@ name: Daily Hadith Automated Broadcast
 
 on:
   schedule:
-    # 04:30 UTC = 10:00 AM IST (Asia/Kolkata)
-    - cron: '30 4 * * *'
+    # 04:25 UTC = 09:55 AM IST (primary run, avoids :30 GitHub queue congestion)
+    - cron: '25 4 * * *'
+    # 04:35 UTC = 10:05 AM IST (fallback catch-up run)
+    - cron: '35 4 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
@@ -15,10 +17,10 @@ jobs:
     steps:
       - name: Pre-warm Render Backend
         run: |
-          echo "Sending pre-warm request to Render backend..."
+          echo "Sending pre-warm request to sleeping Render backend..."
           curl -s -L --max-time 60 https://daily-hadith-ai-agent-46ie.onrender.com/health || true
-          echo "Waiting 25 seconds for container readiness..."
-          sleep 25
+          echo "Waiting 35 seconds for container spin-up..."
+          sleep 35
 
       - name: Trigger Daily Broadcast
         env:
@@ -26,17 +28,28 @@ jobs:
         run: |
           TOKEN="${CRON_SECRET:-5aae48d9ba937e7fb67b8dd4acd54648}"
           echo "Triggering authenticated daily broadcast..."
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast \
-            -H "X-Cron-Secret: $TOKEN" \
-            --max-time 120)
+          
+          # Retry up to 3 times with 10s delay if container is still initializing
+          for i in 1 2 3; do
+            echo "Attempt $i to trigger daily broadcast..."
+            RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast \
+              -H "X-Cron-Secret: $TOKEN" \
+              --max-time 120)
 
-          BODY=$(echo "$RESPONSE" | sed '$d')
-          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+            STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
 
-          echo "Response Body: $BODY"
-          echo "HTTP Status: $STATUS"
+            echo "Response Body: $BODY"
+            echo "HTTP Status: $STATUS"
 
-          if [ "$STATUS" -ne 200 ]; then
-            echo "::error::Daily broadcast failed with HTTP status $STATUS"
-            exit 1
-          fi
+            if [ "$STATUS" -eq 200 ]; then
+              echo "Daily broadcast executed successfully!"
+              exit 0
+            fi
+
+            echo "Attempt $i received HTTP $STATUS, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "::error::Daily broadcast failed after 3 attempts with HTTP status $STATUS"
+          exit 1
