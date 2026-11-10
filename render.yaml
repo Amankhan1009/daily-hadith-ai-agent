@@ -17,7 +17,7 @@ services:
       - key: TIMEZONE
         value: Asia/Kolkata
       - key: ENABLE_IN_PROCESS_SCHEDULER
-        value: "false"
+        value: "true"
       - key: DATABASE_URL
         sync: false
       - key: TELEGRAM_BOT_TOKEN
