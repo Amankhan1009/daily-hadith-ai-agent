@@ -23,15 +23,8 @@ jobs:
           sleep 35
 
       - name: Trigger Daily Broadcast
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET_TOKEN }}
         run: |
-          CANDIDATE_TOKEN=$(echo "${CRON_SECRET}" | tr -d '[:space:]"' | tr -d "'")
-          MASTER_TOKEN="5aae48d9ba937e7fb67b8dd4acd54648"
-          
-          # Use sanitized candidate token if non-empty, else use master token
-          TOKEN="${CANDIDATE_TOKEN:-$MASTER_TOKEN}"
-
+          TOKEN="5aae48d9ba937e7fb67b8dd4acd54648"
           echo "Triggering authenticated daily broadcast..."
           
           # Retry up to 3 times
@@ -50,12 +43,6 @@ jobs:
             if [ "$STATUS" -eq 200 ]; then
               echo "Daily broadcast executed successfully!"
               exit 0
-            fi
-
-            # If 403 Forbidden, switch directly to MASTER_TOKEN
-            if [ "$STATUS" -eq 403 ] && [ "$TOKEN" != "$MASTER_TOKEN" ]; then
-              echo "Received 403 with GitHub Secret token. Switching to verified master token..."
-              TOKEN="$MASTER_TOKEN"
             fi
 
             echo "Attempt $i received HTTP $STATUS, retrying in 10s..."
