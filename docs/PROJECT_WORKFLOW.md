@@ -283,7 +283,7 @@ sequenceDiagram
 ### Phase 8: Production Cloud Infrastructure & Scheduling
 - **Web Service Hosting:** Render Cloud Platform (Python 3 Native Web Service, Free Tier).
 - **Public URL:** `https://daily-hadith-ai-agent-46ie.onrender.com`
-- **Scheduler:** GitHub Actions Scheduled Workflow ([`.github/workflows/daily-broadcast.yml`](file:///Users/mdamanalam/Hadith-ai-agent/.github/workflows/daily-broadcast.yml)).
+- **Scheduler:** GitHub Actions Scheduled Workflow ([`.github/workflows/hadith-broadcast.yml`](file:///Users/mdamanalam/Hadith-ai-agent/.github/workflows/hadith-broadcast.yml)).
   - **Dual-Cron Uncrowded Schedule:** Runs daily at **04:25 UTC** (which equals **09:55 AM IST**, avoiding platform-wide congestion at `:30`) with a secondary fallback at **04:35 UTC** (**10:05 AM IST**).
   - **Cold-Start Pre-Warm:** Pings `/health` to wake up the sleeping Render backend from idle suspension.
   - **Container Spin-Up Buffer:** Pauses for 35 seconds to allow the cold Python container to fully boot into RAM.
@@ -300,7 +300,7 @@ sequenceDiagram
 ### Challenge 1: The Render Free-Tier Spin-Down, `cron-job.org` 64KB Limit, and Quota Conservation
 - **Symptom:** The external cron job failed with `Failed (output too large) (929 ms)` or `(276 ms)`.
 - **Root Cause Analysis:** Render free tier spins down services after 15 minutes of inactivity. When a request hits a sleeping service, Render’s edge gateway intercepts the connection and returns a **75 KB HTML splash screen** (*"Starting your service..."*). However, `cron-job.org` free tier enforces a strict **64 KB response limit**. Because 75 KB > 64 KB, `cron-job.org` terminated the connection in under 500ms, aborting container provisioning. Furthermore, pinging Render 24/7 would burn all 750 free monthly hours, starving other personal projects.
-- **Resolution:** Replaced `cron-job.org` with an intelligent **GitHub Actions scheduled workflow** (`.github/workflows/daily-broadcast.yml`):
+- **Resolution:** Replaced `cron-job.org` with an intelligent **GitHub Actions scheduled workflow** (`.github/workflows/hadith-broadcast.yml`):
   1. **Dual-Cron Uncrowded Schedule:** Scheduled at `04:25 UTC` (09:55 AM IST) to bypass GitHub's heavy queue spikes at `:00` and `:30`.
   2. **Zero Response Limits:** Runs standard Ubuntu `curl`, which effortlessly handles the 75 KB spin-up screen.
   3. **35-Second Cold-Start Buffer:** Allows the container ~35 seconds to transition from sleep to ready before triggering the broadcast payload.
@@ -324,7 +324,7 @@ sequenceDiagram
 ### Challenge 5: Cross-Platform Secret Token Synchronization & Fail-Safe Fallbacks
 - **Symptom:** The cloud broadcast trigger failed with `HTTP 403 Forbidden: {"detail":"Forbidden: Invalid cron secret token"}`.
 - **Root Cause Analysis:** When configuring encrypted repository secrets on GitHub, accidental trailing whitespace, newlines (`\n`), or token mismatches caused `hmac.compare_digest` on the FastAPI server to reject the incoming `X-Cron-Secret` header.
-- **Resolution:** In `.github/workflows/daily-broadcast.yml`, implemented automated secret sanitization (`tr -d '[:space:]"'`) and an automated fallback directly to the verified master secret token (`5aae48d9ba937e7fb67b8dd4acd54648`), guaranteeing instant 1-second authentication without manual secret debugging.
+- **Resolution:** In `.github/workflows/hadith-broadcast.yml`, implemented automated secret sanitization (`tr -d '[:space:]"'`) and an automated fallback directly to the verified master secret token (`5aae48d9ba937e7fb67b8dd4acd54648`), guaranteeing instant 1-second authentication without manual secret debugging.
 
 ---
 
@@ -422,7 +422,7 @@ daily-hadith-ai-agent/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                     # Continuous Integration: Ruff linting, formatting, & Pytest suite
-│       └── daily-broadcast.yml        # Cloud Scheduler: 10:00 AM IST daily broadcast trigger & pre-warm
+│       └── hadith-broadcast.yml       # Cloud Scheduler: 10:00 AM IST daily broadcast trigger & pre-warm
 ├── alembic/                           # Database migration definitions
 │   └── versions/                      # Version-controlled schema migrations
 ├── docs/                              # Architectural source of truth

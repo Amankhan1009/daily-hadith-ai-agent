@@ -14,7 +14,7 @@ Operational and maintenance procedures for the **Daily Hadith AI Agent** product
 | **Cloud Scheduler Trigger** | Authenticated HTTP POST | `https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast` |
 | **PostgreSQL Database** | Neon Serverless PostgreSQL (SSL) | `ep-calm-cloud-b8sdiz8h-pooler.c-14.us-east-1.aws.neon.tech` |
 | **Container Registry** | Docker Hub (Multi-Stage) | `hub.docker.com/r/amankhan1009/daily-hadith-ai-agent` |
-| **Automated Cron Scheduler** | GitHub Actions Workflow | Daily at `04:25 UTC` (`09:55 AM IST`) + fallback `04:35 UTC` (`10:05 AM IST`) via `.github/workflows/daily-broadcast.yml` |
+| **Automated Cron Scheduler** | GitHub Actions Workflow | Daily at `04:25 UTC` (`09:55 AM IST`) + fallback `04:35 UTC` (`10:05 AM IST`) via `.github/workflows/hadith-broadcast.yml` |
 
 ---
 

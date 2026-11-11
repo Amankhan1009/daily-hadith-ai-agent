@@ -277,7 +277,7 @@ Operations & automated daily broadcast monitoring (next delivery: Nov 10 at 10:0
 - **88% Total Code Coverage:** Core domain packages reach 94%–100% test coverage.
 - **Production Cloud Deployment Live:** Running natively on Render Python 3 runtime (`https://daily-hadith-ai-agent-46ie.onrender.com`).
 - **Telegram Bot Webhook Live:** `@daily_hadith_aman_bot` actively receiving commands (`/start`, `/today`, `/stop`, `/help`) via signed webhook.
-- **Automated Daily Trigger:** Scheduled via GitHub Actions (`.github/workflows/daily-broadcast.yml`) every morning at 09:55 AM IST (`04:25 UTC`) with fallback at 10:05 AM IST (`04:35 UTC`), featuring a 35s cold-start pre-warm buffer.
+- **Automated Daily Trigger:** Scheduled via GitHub Actions (`.github/workflows/hadith-broadcast.yml`) every morning at 09:55 AM IST (`04:25 UTC`) with fallback at 10:05 AM IST (`04:35 UTC`), featuring a 35s cold-start pre-warm buffer.
 - **Master Documentation Complete:** `docs/PROJECT_WORKFLOW.md` published with complete system architecture and interview cheatsheet.
 - **Zero Ruff Errors:** `ruff check .` returns 0 issues, and `ruff format --check .` confirms 100% formatted.
 
