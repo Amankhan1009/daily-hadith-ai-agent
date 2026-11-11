@@ -12,6 +12,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.orm import Session
 
+from src.config import get_settings
 from src.delivery import TelegramClient
 from src.guardrails import ReflectionValidator
 from src.llm import GroqReflectionClient
@@ -147,5 +148,17 @@ def run_daily_workflow(
         telegram_client=telegram_client,
     )
     initial_state = create_initial_state(scheduled_date=scheduled_date, is_dry_run=is_dry_run)
-    final_state = graph.invoke(initial_state)
+    settings = get_settings()
+    date_str = initial_state.get("scheduled_date") or str(date.today())
+    run_config = {
+        "run_name": f"Daily Broadcast: {date_str}",
+        "tags": ["daily-hadith", settings.app_env, "dry_run" if is_dry_run else "live"],
+        "metadata": {
+            "scheduled_date": date_str,
+            "is_dry_run": is_dry_run,
+            "app_env": settings.app_env,
+            "timezone": settings.timezone,
+        },
+    }
+    final_state = graph.invoke(initial_state, config=run_config)
     return final_state

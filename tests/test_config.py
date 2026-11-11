@@ -79,3 +79,26 @@ def test_environment_override(monkeypatch):
     assert settings.is_production() is True
     assert settings.log_level == "WARNING"
     assert settings.hadeethenc_timeout_seconds == 15.5
+
+
+def test_langsmith_configuration(monkeypatch):
+    """Verify LangSmith settings defaults and environment export on activation."""
+    monkeypatch.setenv("LANGCHAIN_TRACING_V2", "false")
+    monkeypatch.delenv("LANGCHAIN_API_KEY", raising=False)
+    monkeypatch.delenv("LANGCHAIN_PROJECT", raising=False)
+    settings = Settings(_env_file=None)
+    assert settings.langchain_tracing_v2 is False
+    assert settings.langchain_project == "daily-hadith-ai-agent"
+
+    monkeypatch.setenv("LANGCHAIN_TRACING_V2", "true")
+    monkeypatch.setenv("LANGCHAIN_API_KEY", "lsv2_pt_test_key_12345")
+    monkeypatch.setenv("LANGCHAIN_PROJECT", "custom-hadith-project")
+
+    active_settings = Settings(_env_file=None)
+    assert active_settings.langchain_tracing_v2 is True
+    assert active_settings.langchain_api_key == "lsv2_pt_test_key_12345"
+    assert active_settings.langchain_project == "custom-hadith-project"
+
+    summary = active_settings.get_safe_summary()
+    assert summary["langsmith_tracing_enabled"] is True
+    assert summary["langsmith_project"] == "custom-hadith-project"

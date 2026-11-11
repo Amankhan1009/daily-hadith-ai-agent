@@ -12,6 +12,7 @@ httpx>=0.27.0
 
 # Milestone 08: LangGraph AI & Workflow Orchestration
 langgraph>=0.2.0
+langsmith>=0.1.0
 
 # Milestone 09: Groq LLM Inference & Reflections
 groq>=0.9.0

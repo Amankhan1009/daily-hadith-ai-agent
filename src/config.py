@@ -6,7 +6,7 @@ environment-driven configuration with fail-fast validation.
 """
 
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import AliasChoices, Field, field_validator
@@ -113,6 +113,34 @@ class Settings(BaseSettings):
         description="Database connection string (SQLite dev / Neon PG prod)",
     )
 
+    # LangSmith Observability & Tracing
+    langchain_tracing_v2: bool = Field(
+        default=False,
+        description="Enable LangSmith Tracing V2 for LangGraph and LLM calls",
+    )
+    langchain_api_key: str | None = Field(
+        default=None,
+        description="LangSmith API key for cloud tracing",
+    )
+    langchain_project: str = Field(
+        default="daily-hadith-ai-agent",
+        description="LangSmith project name for trace grouping",
+    )
+    langchain_endpoint: str = Field(
+        default="https://api.smith.langchain.com",
+        description="LangSmith API endpoint",
+    )
+
+    def model_post_init(self, __context: Any) -> None:
+        """Export LangSmith environment variables if tracing is enabled."""
+        import os
+
+        if self.langchain_tracing_v2 and self.langchain_api_key:
+            os.environ["LANGCHAIN_TRACING_V2"] = "true"
+            os.environ["LANGCHAIN_API_KEY"] = self.langchain_api_key
+            os.environ["LANGCHAIN_PROJECT"] = self.langchain_project
+            os.environ["LANGCHAIN_ENDPOINT"] = self.langchain_endpoint
+
     @property
     def telegram_webhook_secret_token(self) -> str | None:
         """Alias property for telegram_webhook_secret for backwards compatibility."""
@@ -184,6 +212,8 @@ class Settings(BaseSettings):
             "telegram_bot_username": self.telegram_bot_username or "<NOT_SET>",
             "enable_in_process_scheduler": self.enable_in_process_scheduler,
             "cron_secret_configured": bool(self.cron_secret_token),
+            "langsmith_tracing_enabled": bool(self.langchain_tracing_v2 and self.langchain_api_key),
+            "langsmith_project": self.langchain_project,
         }
 
 
