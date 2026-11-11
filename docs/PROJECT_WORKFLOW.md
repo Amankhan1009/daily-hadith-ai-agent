@@ -231,6 +231,8 @@ sequenceDiagram
 | **Node 7** | `deliver_telegram` | Dispatches message to all active subscribers via `TelegramClient` with rate limiting. |
 | **Node 8** | `record_delivery` | Commits `DailyDeliveryLog(status="SUCCESS")` to the database (bypassed if `is_dry_run=True`). |
 
+> 🔭 **End-to-End LangSmith Observability:** The entire StateGraph run is instrumented via [`src/observability/`](../src/observability/). When `graph.invoke()` executes, it automatically transmits step-by-step latency, state transitions, and node spans directly to **LangSmith Cloud** under project `daily-hadith-ai-agent`.
+
 ---
 
 ### Phase 4: Groq LLM Inference Engine
@@ -341,7 +343,8 @@ sequenceDiagram
 | **Bot Delivery** | Telegram Bot API | Clean markdown/HTML formatting, massive mobile reach, rock-solid webhook support. |
 | **Hosting** | Render Cloud Platform | Free tier web services with custom domain support and native Python runtime. |
 | **CI/CD & Cron** | GitHub Actions | Native git integration, zero cost on public repositories, resilient cron scheduler without payload limits. |
-| **Testing & Quality** | Pytest (106 tests) + Ruff | 88%+ code coverage across `src/`, lightning-fast linting and code formatting. |
+| **Observability & Tracing** | LangSmith Cloud Platform | Distributed tracing across LangGraph StateGraph nodes, Groq token accounting & diagnostic CLI. |
+| **Testing & Quality** | Pytest (112 tests) + Ruff | 88%+ code coverage across `src/`, lightning-fast linting and code formatting. |
 
 ---
 
@@ -428,11 +431,16 @@ daily-hadith-ai-agent/
 ├── docs/                              # Architectural source of truth
 │   ├── PROJECT_WORKFLOW.md            # This document: Comprehensive technical & interview reference
 │   ├── PROJECT_CONTEXT.md             # Developer handover, ADRs, and core stack guidelines
-│   ├── PROJECT_ROADMAP.md             # 20-milestone engineering tracking and completion logs
+│   ├── PROJECT_ROADMAP.md             # 21-milestone engineering tracking and completion logs
+│   ├── OBSERVABILITY.md               # LangSmith cloud tracing, token accounting & telemetry guide
 │   ├── RUNBOOK.md                     # Operational manual: Deployment, health monitoring, secret rotation
 │   └── SECURITY_AUDIT.md              # Threat model, OWASP Top 10 for LLMs, and defensive audit
 ├── src/                               # Application source code
 │   ├── config.py                      # Pydantic v2 Settings, secret masking, timezone validation
+│   ├── observability/                 # Centralized LangSmith telemetry & diagnostics
+│   │   ├── __init__.py                # Clean exports (get_workflow_run_config, record_llm_metrics)
+│   │   ├── tracer.py                  # Standardized LangGraph run metadata & Groq token extraction
+│   │   └── cli.py                     # Recruiter & Developer diagnostics CLI (--verify)
 │   ├── database/                      # Persistence layer
 │   │   ├── models.py                  # SQLAlchemy declarative models (Candidates, Logs, Subscribers)
 │   │   ├── repository.py              # Data Access Object (DAO) queries & idempotency checks

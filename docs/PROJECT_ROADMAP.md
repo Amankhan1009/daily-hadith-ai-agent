@@ -453,4 +453,29 @@ A tracked, production-oriented engineering roadmap for the Daily Hadith AI Agent
   - Built automated evaluation test suite in `tests/test_fcm_evaluation.py` (5 unit tests covering token delivery, topic routing, 4KB boundary enforcement, and dry-run execution).
   - Total automated test suite expanded to **104/104 passing tests (100% pass rate in 16.72s)** with **88% total code coverage** across `src/`.
 - **Known Blockers:** None (Ready for future V2 mobile app rollout).
-- **Next Action:** Project Completed — All 20 Milestones Verified!
+- **Next Action:** Proceed to Milestone 21 — LLMOps & LangSmith Observability.
+
+---
+
+## Milestone 21 — LLMOps & LangSmith Observability
+- **Goal:** Production cloud tracing, token consumption tracking, and state machine observability via LangSmith.
+- **Scope:** Modular observability package (`src/observability/`), LangGraph StateGraph run configuration metadata injection, Groq LLM inference tracing with token usage accounting, developer diagnostics CLI, and comprehensive test isolation.
+- **Dependencies:** Milestone 20.
+- **Acceptance Criteria:**
+  - Decoupled `src/observability/` package with single-responsibility modules (`tracer.py`, `cli.py`).
+  - LangSmith cloud tracing operational on live LangGraph workflows and Groq reflection synthesis.
+  - Token counts (prompt, completion, total) captured on inference spans.
+  - Automated test suite remains 100% offline and isolated via `tests/conftest.py`.
+  - Comprehensive architectural documentation in `docs/OBSERVABILITY.md`.
+- **Current Status:** `Verified`
+- **Verification Evidence:**
+  - Implemented decoupled telemetry package in `src/observability/`:
+    - `src/observability/tracer.py`: Metadata builder (`get_workflow_run_config`), Groq token extractor (`record_llm_metrics`), and fail-safe fallback logic.
+    - `src/observability/cli.py`: Interactive CLI tool (`python -m src.observability.cli --verify`) verifying credentials and dispatching live test traces.
+  - Instrumented LangGraph `graph.invoke()` with standardized session name (`Daily Broadcast: {date}`), tags (`daily-hadith`, environment, live/dry_run), and execution metadata.
+  - Decorated Groq reflection synthesis with `@traceable(name="Groq Reflection Synthesis", run_type="llm")` and verified live token metrics recorded in LangSmith (e.g. 580 total tokens).
+  - Authored comprehensive architectural specification in `docs/OBSERVABILITY.md`.
+  - Added unit test suite in `tests/test_observability.py` and global test isolation fixture in `tests/conftest.py`.
+  - Automated test suite expanded to **112/112 passing tests (100% pass rate in 18s)** with zero Ruff linting or formatting errors across all 79 project files.
+- **Known Blockers:** None.
+- **Next Action:** Project Completed — All 21 Milestones Verified!

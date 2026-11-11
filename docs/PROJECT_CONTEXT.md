@@ -1,7 +1,7 @@
 # Project Context & Developer Handover
 
 > **Durable Source of Truth for Development Continuity**  
-> *Last Updated:* Milestone 20 Verified & Production Deployment Live (106 Tests Passing)
+> *Last Updated:* Milestone 21 Verified — LangSmith Cloud Observability & Production Deployment Live (112 Tests Passing)
 
 ---
 
@@ -255,6 +255,10 @@ flowchart TD
   - Subscribers are tracked in a dedicated `telegram_subscribers` table with idempotent `/start` registration (reactivates if inactive, ignores duplicates).
   - Outbound daily broadcast iterates active subscribers with rate limit throttling (30 messages/second compliance) to prevent Telegram API 429 penalties.
   - Delivery failures due to user blocking (HTTP 403 Forbidden) automatically update the subscriber record to `is_active = False` to prevent repeated futile dispatches.
+- **ADR-006 (Decoupled LLMOps & LangSmith Observability):**
+  - Observability telemetry, LangGraph run tagging, Groq token accounting, and live diagnostics are encapsulated in a dedicated `src/observability/` package.
+  - Tracing calls fail safely as no-ops when unconfigured or offline, protecting unit test speed and ensuring Hadith delivery is never blocked by telemetry outages.
+  - Standardized metadata (`scheduled_date`, `is_dry_run`, `groq_model`, `app_env`) and tags (`daily-hadith`, `production`, `live`) are injected at the root StateGraph invocation and child LLM spans.
 
 ---
 
@@ -273,12 +277,15 @@ Operations & automated daily broadcast monitoring (next delivery: Nov 10 at 10:0
 ---
 
 ## 13. Latest Verification Evidence
-- **106/106 Automated Tests Passing:** 100% pass rate in 18s across all 14 test modules.
+- **112/112 Automated Tests Passing:** 100% pass rate in 18s across all 15 test modules.
 - **88% Total Code Coverage:** Core domain packages reach 94%–100% test coverage.
 - **Production Cloud Deployment Live:** Running natively on Render Python 3 runtime (`https://daily-hadith-ai-agent-46ie.onrender.com`).
 - **Telegram Bot Webhook Live:** `@daily_hadith_aman_bot` actively receiving commands (`/start`, `/today`, `/stop`, `/help`) via signed webhook.
-- **Automated Daily Trigger:** Scheduled via GitHub Actions (`.github/workflows/hadith-broadcast.yml`) every morning at 09:55 AM IST (`04:25 UTC`) with fallback at 10:05 AM IST (`04:35 UTC`), featuring a 35s cold-start pre-warm buffer.
-- **Master Documentation Complete:** `docs/PROJECT_WORKFLOW.md` published with complete system architecture and interview cheatsheet.
+- **Dual Automated Daily Triggers:**
+  - Primary: `cron-job.org` with 09:55 AM IST pre-warm (`HEAD /health`) and 10:00 AM IST execution (`POST /api/cron/daily-broadcast`).
+  - Secondary / Backup: GitHub Actions (`.github/workflows/hadith-broadcast.yml`) with automated fallback and database idempotency guards.
+- **LangSmith Cloud Observability Live:** End-to-end tracing active for LangGraph state machine, Groq token usage accounting, and live verification CLI (`python -m src.observability.cli`).
+- **Master Documentation Complete:** `docs/OBSERVABILITY.md` and `docs/PROJECT_WORKFLOW.md` published.
 - **Zero Ruff Errors:** `ruff check .` returns 0 issues, and `ruff format --check .` confirms 100% formatted.
 
 ---

@@ -14,7 +14,8 @@ Operational and maintenance procedures for the **Daily Hadith AI Agent** product
 | **Cloud Scheduler Trigger** | Authenticated HTTP POST | `https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast` |
 | **PostgreSQL Database** | Neon Serverless PostgreSQL (SSL) | `ep-calm-cloud-b8sdiz8h-pooler.c-14.us-east-1.aws.neon.tech` |
 | **Container Registry** | Docker Hub (Multi-Stage) | `hub.docker.com/r/amankhan1009/daily-hadith-ai-agent` |
-| **Automated Cron Scheduler** | GitHub Actions Workflow | Daily at `04:25 UTC` (`09:55 AM IST`) + fallback `04:35 UTC` (`10:05 AM IST`) via `.github/workflows/hadith-broadcast.yml` |
+| **Observability & Cloud Tracing** | LangSmith Cloud Platform | `https://smith.langchain.com/` (Project: `daily-hadith-ai-agent`) |
+| **Automated Cron Scheduler** | GitHub Actions & cron-job.org | Pre-warm `09:55 AM IST` (HEAD) + Broadcast `10:00 AM IST` (POST) |
 
 ---
 
@@ -52,6 +53,19 @@ To inspect the live webhook configuration directly with Telegram Bot API:
   "max_connections": 40
 }
 ```
+
+### 2.3 LangSmith Observability & Tracing Verification
+To inspect live cloud tracing status and test end-to-end trace dispatch:
+```bash
+.venv/bin/python -m src.observability.cli --verify
+```
+**Expected Output:**
+- `• LangSmith Tracing V2 : ENABLED (Active)`
+- `• Target Project Name  : daily-hadith-ai-agent`
+- `• Inference Status     : GENERATED`
+- `✅ LIVE TRACE DISPATCHED SUCCESSFULLY!`
+
+Traces are immediately available for review at [https://smith.langchain.com/](https://smith.langchain.com/).
 
 ---
 
@@ -126,6 +140,16 @@ curl -X POST https://daily-hadith-ai-agent.onrender.com/api/cron/daily-broadcast
 2. Update `CRON_SECRET_TOKEN` in Render Dashboard.
 3. Update header `X-Cron-Secret` in **cron-job.org** console.
 4. Update local `.env`.
+
+### 4.4 Rotating `LANGCHAIN_API_KEY`
+1. Log in to [LangSmith Settings](https://smith.langchain.com/settings) → **API Keys**.
+2. Click **Create API Key**, copy the `lsv2_pt_...` key.
+3. Update `LANGCHAIN_API_KEY` in Render Dashboard under **Environment**.
+4. Update `LANGCHAIN_API_KEY` in local `.env`.
+5. Run the verification CLI to confirm the new key is active:
+   ```bash
+   .venv/bin/python -m src.observability.cli --verify
+   ```
 
 ---
 
