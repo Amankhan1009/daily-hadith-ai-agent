@@ -9,8 +9,9 @@ A production-grade, fail-closed AI system and publicly accessible Telegram bot d
 [![Python 3.14](https://img.shields.io/badge/python-3.14-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph%201.2-green.svg)](https://github.com/langchain-ai/langgraph)
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
+[![Observability: LangSmith](https://img.shields.io/badge/observability-LangSmith%20Traced-orange.svg)](https://smith.langchain.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/tests-106%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-112%20passed%20(100%25)-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](tests/)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
@@ -128,8 +129,55 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **17 — Docker Containerization & GitHub Actions CI/CD** | `Verified` | Multi-stage Docker containerization (non-root `appuser`, ~160MB), automated test-gated CI/CD publishing to Docker Hub |
 | **18 — Cloud Deployment & Public Production Bot** | `Verified` | Deployed on Render Free Web Service with automated daily 10:00 AM IST scheduler on cron-job.org and live Telegram subscribers |
 | **19 — Production Readiness & System Audit** | `Verified` | 20/20 Definition of Done verified, production runbook, and defensive security audit |
+| **20 — LLMOps & Observability** | `Verified` | LangSmith cloud tracing for LangGraph StateGraph, Groq token accounting & diagnostic CLI |
 
 For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
+
+---
+
+## Production Observability & LLMOps (LangSmith)
+
+Production AI workflows require real-time visibility into agent execution, model latencies, token consumption, and guardrail decisions. The Daily Hadith AI Agent integrates **LangSmith** cloud observability within a decoupled [`src/observability/`](src/observability/) architecture.
+
+```mermaid
+flowchart LR
+    subgraph Execution ["LangGraph StateGraph Execution"]
+        Node1["select_hadith"] --> Node2["generate_reflection"]
+        Node2 --> Node3["validate_guardrails"]
+        Node3 --> Node4["format_message"]
+        Node4 --> Node5["deliver_telegram"]
+        Node5 --> Node6["record_delivery"]
+    end
+
+    subgraph LangSmith ["LangSmith Cloud Observability"]
+        Root["Root Run: Daily Broadcast (Chain)"]
+        LLM["LLM Run: Groq Reflection Synthesis"]
+        Tokens["Metadata: Prompt + Completion Tokens"]
+        Guard["Guardrail Audit: Passed / Rejected"]
+    end
+
+    Node2 -.->|"@traceable"| LLM
+    Node2 -.->|"record_llm_metrics"| Tokens
+    Node3 -.->|"Span Metadata"| Guard
+    Execution -.->|"get_workflow_run_config"| Root
+```
+
+### Telemetry Capabilities
+- **StateGraph DAG Monitoring:** Traces every step of the broadcast pipeline from candidate retrieval to Telegram delivery, capturing granular step-by-step latency.
+- **Inference & Token Accounting:** Tracks exact prompt, completion, and total tokens consumed per Groq inference call (`openai/gpt-oss-120b`).
+- **Guardrail Decision Logging:** Captures pass/rejection verdicts and boundary violation details directly in trace metadata.
+- **Fail-Safe Decoupling:** Tracing hooks operate as zero-overhead no-ops if credentials are not configured, ensuring offline tests and air-gapped runs never fail.
+
+### Running Observability Diagnostics
+Anyone evaluating or auditing the codebase can run the dedicated diagnostics tool to inspect configuration and verify live trace dispatch:
+
+```bash
+# Inspect LangSmith configuration and sample trace metadata
+python -m src.observability.cli
+
+# Run an end-to-end live synthetic trace verification
+python -m src.observability.cli --verify
+```
 
 ---
 

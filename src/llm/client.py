@@ -13,6 +13,7 @@ from langsmith import traceable
 
 from src.config import get_settings
 from src.llm.prompts import build_reflection_prompt
+from src.observability import record_llm_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -90,23 +91,7 @@ class GroqReflectionClient:
             )
 
             # Record token metrics in LangSmith run tree if active
-            if hasattr(response, "usage") and response.usage:
-                try:
-                    from langsmith.run_helpers import get_current_run_tree
-
-                    rt = get_current_run_tree()
-                    if rt:
-                        rt.add_metadata(
-                            {
-                                "ls_provider": "groq",
-                                "ls_model_name": self.model,
-                                "prompt_tokens": response.usage.prompt_tokens,
-                                "completion_tokens": response.usage.completion_tokens,
-                                "total_tokens": response.usage.total_tokens,
-                            }
-                        )
-                except Exception:
-                    pass
+            record_llm_metrics(response=response, model_name=self.model, provider="groq")
 
             raw_text = response.choices[0].message.content or ""
             cleaned = raw_text.strip()
