@@ -23,7 +23,7 @@ Operational and maintenance procedures for the **Daily Hadith AI Agent** product
 
 ### 2.1 Basic Liveness Probe
 ```bash
-curl -i https://daily-hadith-ai-agent.onrender.com/health
+curl -i https://daily-hadith-ai-agent-46ie.onrender.com/health
 ```
 **Expected Response (HTTP 200 OK):**
 ```json
@@ -47,7 +47,7 @@ To inspect the live webhook configuration directly with Telegram Bot API:
 **Expected Output:**
 ```json
 {
-  "url": "https://daily-hadith-ai-agent.onrender.com/telegram/webhook",
+  "url": "https://daily-hadith-ai-agent-46ie.onrender.com/telegram/webhook",
   "has_custom_certificate": false,
   "pending_update_count": 0,
   "max_connections": 40
@@ -128,7 +128,7 @@ curl -X POST https://api.github.com/repos/Amankhan1009/daily-hadith-ai-agent/act
 4. Update local `.env`.
 5. Re-register the webhook with the new token:
    ```bash
-   .venv/bin/python -m scripts.register_webhook --set https://daily-hadith-ai-agent.onrender.com/telegram/webhook
+   .venv/bin/python -m scripts.register_webhook --set https://daily-hadith-ai-agent-46ie.onrender.com/telegram/webhook
    ```
 
 ### 4.2 Rotating `TELEGRAM_WEBHOOK_SECRET_TOKEN`
@@ -140,7 +140,7 @@ curl -X POST https://api.github.com/repos/Amankhan1009/daily-hadith-ai-agent/act
 3. Update local `.env`.
 4. Run the registration CLI to update Telegram with the new secret:
    ```bash
-   .venv/bin/python -m scripts.register_webhook --set https://daily-hadith-ai-agent.onrender.com/telegram/webhook
+   .venv/bin/python -m scripts.register_webhook --set https://daily-hadith-ai-agent-46ie.onrender.com/telegram/webhook
    ```
 
 ### 4.3 Rotating `CRON_SECRET_TOKEN`

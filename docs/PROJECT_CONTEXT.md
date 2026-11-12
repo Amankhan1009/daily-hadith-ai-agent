@@ -118,9 +118,9 @@ flowchart TD
   - Authored defensive security audit report in `docs/SECURITY_AUDIT.md` covering OWASP Top 10 for LLMs, constant-time verification, non-root execution, SQL injection immunity, and HTML escaping.
   - Full automated test suite achieves **99/99 passing tests in 16.73s (100% pass rate)** with **89% total code coverage** and 0 Ruff lint errors across 67 repository files.
 - [x] **Milestone 18 Verified:** Cloud Deployment & Public Production Bot.
-  - Deployed containerized FastAPI service to Render Free Web Service (`https://daily-hadith-ai-agent.onrender.com`).
+  - Deployed containerized FastAPI service to Render Free Web Service (`https://daily-hadith-ai-agent-46ie.onrender.com`).
   - Verified live container healthcheck (`GET /health`) returning HTTP 200 with `status: "healthy"`, `environment: "production"`, and `timezone: "Asia/Kolkata"`.
-  - Configured and verified live Telegram inbound webhook pointing to `https://daily-hadith-ai-agent.onrender.com/telegram/webhook` secured with constant-time secret token header validation (`X-Telegram-Bot-Api-Secret-Token`).
+  - Configured and verified live Telegram inbound webhook pointing to `https://daily-hadith-ai-agent-46ie.onrender.com/telegram/webhook` secured with constant-time secret token header validation (`X-Telegram-Bot-Api-Secret-Token`).
   - Verified end-to-end user interaction on Telegram: user `/start` received, subscriber record `GOKU` (Chat ID `746451674`) successfully registered and persisted in Neon PostgreSQL database (`telegram_subscribers` table), and onboarding Hadith from Sahih Muslim (#1955) delivered instantly.
   - Configured automated 10:00 AM IST daily broadcast cron trigger on cron-job.org executing `POST /api/cron/daily-broadcast` with authenticated `X-Cron-Secret` header.
 - [x] **Milestone 17 Verified:** Docker Containerization & GitHub Actions CI/CD.
