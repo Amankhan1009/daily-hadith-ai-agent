@@ -15,7 +15,7 @@ Operational and maintenance procedures for the **Daily Hadith AI Agent** product
 | **PostgreSQL Database** | Neon Serverless PostgreSQL (SSL) | `ep-calm-cloud-b8sdiz8h-pooler.c-14.us-east-1.aws.neon.tech` |
 | **Container Registry** | Docker Hub (Multi-Stage) | `hub.docker.com/r/amankhan1009/daily-hadith-ai-agent` |
 | **Observability & Cloud Tracing** | LangSmith Cloud Platform | `https://smith.langchain.com/` (Project: `daily-hadith-ai-agent`) |
-| **Automated Cron Scheduler** | GitHub Actions & cron-job.org | Pre-warm `09:55 AM IST` (HEAD) + Broadcast `10:00 AM IST` (POST) |
+| **Automated Cron Scheduler** | cron-job.org + GitHub Actions Dispatch | `cron-job.org` triggers GitHub API `/dispatches` at 10:00 AM IST (1.35s); GitHub runner pre-warms Render (60s) and invokes `/api/cron/daily-broadcast` |
 
 ---
 
@@ -102,8 +102,19 @@ To manually execute or dry-run the daily delivery pipeline:
 ### 3.3 Triggering the Cloud Scheduler Endpoint via HTTP
 To trigger the broadcast remotely via curl (simulating cron-job.org):
 ```bash
-curl -X POST https://daily-hadith-ai-agent.onrender.com/api/cron/daily-broadcast \
+curl -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/daily-broadcast \
   -H "X-Cron-Secret: <YOUR_CRON_SECRET_TOKEN>"
+```
+
+### 3.4 Triggering the GitHub Actions Dispatch via API
+To trigger the automated daily broadcast runner directly via GitHub REST API:
+```bash
+curl -X POST https://api.github.com/repos/Amankhan1009/daily-hadith-ai-agent/actions/workflows/hadith-broadcast.yml/dispatches \
+  -H "Authorization: Bearer <GITHUB_TOKEN>" \
+  -H "Accept: application/vnd.github.v3+json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: cron-job-org" \
+  -d '{"ref":"main"}'
 ```
 
 ---

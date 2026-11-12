@@ -272,7 +272,7 @@ flowchart TD
 ---
 
 ## 12. Exact Next Action
-Operations & automated daily broadcast monitoring (next delivery: Nov 10 at 10:00 AM IST via GitHub Actions scheduler).
+Operations & automated daily broadcast monitoring (next delivery: Nov 13 at 10:00 AM IST; Candidate #12 queued in Neon DB).
 
 ---
 
@@ -281,9 +281,10 @@ Operations & automated daily broadcast monitoring (next delivery: Nov 10 at 10:0
 - **88% Total Code Coverage:** Core domain packages reach 94%–100% test coverage.
 - **Production Cloud Deployment Live:** Running natively on Render Python 3 runtime (`https://daily-hadith-ai-agent-46ie.onrender.com`).
 - **Telegram Bot Webhook Live:** `@daily_hadith_aman_bot` actively receiving commands (`/start`, `/today`, `/stop`, `/help`) via signed webhook.
-- **Dual Automated Daily Triggers:**
-  - Primary: `cron-job.org` with 09:55 AM IST pre-warm (`HEAD /health`) and 10:00 AM IST execution (`POST /api/cron/daily-broadcast`).
-  - Secondary / Backup: GitHub Actions (`.github/workflows/hadith-broadcast.yml`) with automated fallback and database idempotency guards.
+- **Production Scheduling Architecture (Two-Tier Trigger):**
+  - External Trigger: `cron-job.org` invokes GitHub REST API `/dispatches` at 10:00 AM IST (responds in 1.35s, avoiding 30s timeout).
+  - Runner Execution: GitHub Actions runner warms Render with a 60-second timeout, waits 35s, and invokes `POST /api/cron/daily-broadcast`.
+  - Candidate Pool: Ingested 22 fresh verified Hadiths from Category 5 into Neon PostgreSQL; Candidate #12 (*Sahih Muslim #2553*) ready for Nov 13.
 - **LangSmith Cloud Observability Live:** End-to-end tracing active for LangGraph state machine, Groq token usage accounting, and live verification CLI (`python -m src.observability.cli`).
 - **Master Documentation Complete:** `docs/OBSERVABILITY.md` and `docs/PROJECT_WORKFLOW.md` published.
 - **Zero Ruff Errors:** `ruff check .` returns 0 issues, and `ruff format --check .` confirms 100% formatted.
