@@ -1,0 +1,48 @@
+name: Monthly Candidate Pool Replenishment
+
+on:
+  schedule:
+    # Runs on the 1st day of every month at 02:00 UTC (07:30 AM IST)
+    - cron: '0 2 1 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: hadith-replenish
+  cancel-in-progress: false
+
+jobs:
+  replenish:
+    name: Replenish Hadith Candidate Pool
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Pre-warm Render Backend
+        run: |
+          echo "Sending pre-warm probe to Render backend..."
+          curl -s --max-time 120 "https://daily-hadith-ai-agent-46ie.onrender.com/health" || true
+          echo "Waiting 30 seconds for container stabilization..."
+          sleep 30
+
+      - name: Trigger Authenticated Replenish Endpoint
+        env:
+          TOKEN: ${{ secrets.CRON_SECRET_TOKEN }}
+        run: |
+          echo "Triggering authenticated candidate replenishment..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/replenish \
+            -H "X-Cron-Secret: $TOKEN" \
+            --max-time 180)
+
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+
+          echo "Response Body: $BODY"
+          echo "HTTP Status: $STATUS"
+
+          if [ "$STATUS" -eq 200 ]; then
+            echo "Candidate replenishment executed successfully!"
+            exit 0
+          else
+            echo "::error::Candidate replenishment failed with HTTP status $STATUS"
+            exit 1
+          fi

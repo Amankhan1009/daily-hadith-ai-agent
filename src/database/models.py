@@ -57,7 +57,7 @@ class HadithCandidate(Base):
     attribution: Mapped[str] = mapped_column(
         String(256), nullable=False, doc="e.g. Narrated by Al-Bukhari"
     )
-    grade: Mapped[str] = mapped_column(String(64), nullable=False, doc="e.g. Authentic / Sahih")
+    grade: Mapped[str] = mapped_column(String(256), nullable=False, doc="e.g. Authentic / Sahih")
     source_url: Mapped[str] = mapped_column(
         String(512), nullable=False, doc="Canonical HadeethEnc browse URL"
     )
@@ -82,7 +82,7 @@ class HadithCandidate(Base):
         nullable=False,
         doc="PENDING | VERIFIED | REJECTED | DELIVERED",
     )
-    rejection_reason: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    rejection_reason: Mapped[str | None] = mapped_column(String(256), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False

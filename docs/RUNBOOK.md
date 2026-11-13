@@ -71,19 +71,19 @@ Traces are immediately available for review at [https://smith.langchain.com/](ht
 
 ## 3. Standard Operational Procedures (SOPs)
 
-### 3.1 Ingesting & Backfilling Candidate Hadiths
-To pre-load new verified Hadiths into the Neon PostgreSQL candidate queue:
-```bash
-# Ingest category 5 (Virtues and Manners), page 1 (20 items)
-.venv/bin/python -c "
-from src.database.session import get_db_session
-from src.ingestion.service import CandidateIngestionService
+### 3.1 Ingesting & Replenishing Candidate Hadiths
+Candidate replenishment is **100% automated** through two fail-safe mechanisms:
+1. **In-App Post-Broadcast Auto-Replenishment:** Whenever the candidate pool drops below 20, the FastAPI backend automatically triggers a background task (`auto_replenish_background_task`) to fetch fresh verified Hadiths.
+2. **Monthly GitHub Actions Workflow (`hadith-replenish.yml`):** Runs on the 1st of every month at 02:00 UTC to audit and top up the queue via `POST /api/cron/replenish`.
 
-with get_db_session() as session:
-    service = CandidateIngestionService()
-    summary = service.ingest_category_batch(session, category_id=5, page=1, per_page=20)
-    print(f'Batch Ingestion Summary: {summary}')
-"
+To manually trigger candidate replenishment via CLI or HTTP:
+```bash
+# Automated replenishment CLI (checks depth and refills to target buffer)
+.venv/bin/python -m src.ingestion.replenish
+
+# Trigger authenticated replenishment endpoint on Render
+curl -X POST https://daily-hadith-ai-agent-46ie.onrender.com/api/cron/replenish \
+  -H "X-Cron-Secret: <YOUR_CRON_SECRET_TOKEN>"
 ```
 
 ### 3.2 Triggering a Manual Daily Broadcast (CLI)

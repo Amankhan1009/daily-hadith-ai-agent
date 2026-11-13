@@ -206,3 +206,43 @@ def test_ingest_category_batch_workflow(
     assert summary.newly_rejected == 1  # 66541 was rejected
     assert summary.newly_verified == 0
     assert summary.failed_requests == 1  # 9999 raised exception
+
+
+def test_replenish_candidate_pool_skipped_when_sufficient(db_session: Session):
+    """Test replenish_candidate_pool skips when pool count meets min_threshold."""
+    from src.database.models import HadithCandidate
+    from src.ingestion.replenish import replenish_candidate_pool
+
+    # Seed 3 verified candidates
+    for i in range(1, 4):
+        c = HadithCandidate(
+            source_id=f"src_{i}",
+            collection="Sahih al-Bukhari",
+            hadith_number=str(i),
+            english_title=f"Title {i}",
+            english_text=f"Text {i}",
+            arabic_text=f"Arabic {i}",
+            attribution="Bukhari",
+            grade="Authentic",
+            source_url="https://hadeethenc.com",
+            verification_status="VERIFIED",
+        )
+        db_session.add(c)
+    db_session.commit()
+
+    # Threshold of 2: current is 3, should skip
+    res = replenish_candidate_pool(db_session, min_threshold=2, target_buffer=5)
+    assert res["status"] == "SKIPPED_SUFFICIENT"
+    assert res["initial_count"] == 3
+    assert res["newly_verified"] == 0
+
+
+def test_auto_replenish_background_task_fail_safe():
+    """Test that auto_replenish_background_task catches any exceptions gracefully."""
+    from unittest.mock import patch
+
+    from src.ingestion.replenish import auto_replenish_background_task
+
+    with patch("src.ingestion.replenish.get_db_session", side_effect=RuntimeError("DB down")):
+        # Should NOT raise, fail-safe
+        auto_replenish_background_task()

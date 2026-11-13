@@ -10,7 +10,7 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, Header, HTTPException, status
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, status
 from fastapi.responses import HTMLResponse
 
 from src.config import get_settings
@@ -243,6 +243,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/cron/daily-broadcast", tags=["Cloud Scheduler"])
     def trigger_cron_broadcast(
+        background_tasks: BackgroundTasks,
         x_cron_secret: str | None = Header(None),
         authorization: str | None = Header(None),
     ) -> dict[str, Any]:
@@ -265,6 +266,12 @@ def create_app() -> FastAPI:
 
         logger.info("Executing daily broadcast triggered via /api/cron/daily-broadcast")
         final_state = run_daily_broadcast()
+
+        # In the background, auto-replenish candidate pool if running low (< 20)
+        from src.ingestion.replenish import auto_replenish_background_task
+
+        background_tasks.add_task(auto_replenish_background_task)
+
         return {
             "ok": final_state.get("status") in ("COMPLETED", "SKIPPED_IDEMPOTENT"),
             "status": final_state.get("status"),
@@ -272,6 +279,35 @@ def create_app() -> FastAPI:
             "candidate_id": final_state.get("candidate_id"),
             "delivered_count": final_state.get("delivered_count", 0),
         }
+
+    @app.post("/api/cron/replenish", tags=["Cloud Scheduler"])
+    def trigger_cron_replenish(
+        x_cron_secret: str | None = Header(None),
+        authorization: str | None = Header(None),
+    ) -> dict[str, Any]:
+        """
+        Authenticated trigger endpoint for automatic candidate pool replenishment.
+        Checks queue depth and fetches fresh verified Hadiths if below threshold.
+        """
+        configured_secret = settings.cron_secret_token
+        if configured_secret:
+            incoming_token = x_cron_secret
+            if not incoming_token and authorization and authorization.startswith("Bearer "):
+                incoming_token = authorization.split("Bearer ", 1)[1].strip()
+
+            if not incoming_token or not hmac.compare_digest(incoming_token, configured_secret):
+                logger.warning("Rejected unauthorized call to /api/cron/replenish")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Forbidden: Invalid cron secret token",
+                )
+
+        from src.database.session import get_db_session
+        from src.ingestion.replenish import replenish_candidate_pool
+
+        with get_db_session() as session:
+            result = replenish_candidate_pool(session)
+        return result
 
     return app
 

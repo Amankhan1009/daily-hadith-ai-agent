@@ -84,12 +84,12 @@ def ingest_candidate_pair(
         english_title=pair.english.title,
         english_text=pair.english.hadeeth,
         arabic_text=pair.arabic.hadeeth,
-        attribution=pair.english.attribution,
-        grade=pair.english.grade,
-        source_url=pair.canonical_url,
+        attribution=(pair.english.attribution or "")[:255],
+        grade=(pair.english.grade or "")[:255],
+        source_url=pair.canonical_url[:510],
         translation_version=None,
         verification_status=verification_status,
-        rejection_reason=rejection_reason,
+        rejection_reason=(rejection_reason or "")[:255] if rejection_reason else None,
     )
 
     return IngestionResult(
@@ -163,12 +163,13 @@ class CandidateIngestionService:
                 continue
 
             try:
-                pair = self.client.get_candidate_pair(item.id)
-                res = ingest_candidate_pair(session, pair)
-                if res.status == "INGESTED_VERIFIED":
-                    newly_verified += 1
-                elif res.status == "INGESTED_REJECTED":
-                    newly_rejected += 1
+                with session.begin_nested():
+                    pair = self.client.get_candidate_pair(item.id)
+                    res = ingest_candidate_pair(session, pair)
+                    if res.status == "INGESTED_VERIFIED":
+                        newly_verified += 1
+                    elif res.status == "INGESTED_REJECTED":
+                        newly_rejected += 1
             except Exception:
                 failed_requests += 1
 
