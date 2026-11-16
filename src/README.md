@@ -19,6 +19,7 @@ The application is structured into decoupled, domain-driven packages where each 
 | **[`src/guardrails/`](guardrails/)** | Deterministic content validation, theological boundaries, text leakage, and citation verification. | **[`src/guardrails/README.md`](guardrails/README.md)** |
 | **[`src/formatter/`](formatter/)** | Canonical Telegram notification assembly, HTML escaping, and length constraint guards. | **[`src/formatter/README.md`](formatter/README.md)** |
 | **[`src/delivery/`](delivery/)** | Telegram Bot API client adapter, webhook router (`POST /telegram/webhook`), public commands, and multi-user fan-out delivery. | **[`src/delivery/README.md`](delivery/README.md)** |
+| **[`src/security.py`](security.py)** | Enterprise rate limiting engine (`slowapi`), X-Forwarded-For proxy IP extraction, and DDoS defense. | **[`docs/SECURITY_AUDIT.md`](../docs/SECURITY_AUDIT.md)** |
 | **[`src/observability/`](observability/)** | LangSmith cloud tracing, LangGraph run metadata, Groq token accounting, and diagnostics CLI. | **[`docs/OBSERVABILITY.md`](../docs/OBSERVABILITY.md)** |
 
 ---

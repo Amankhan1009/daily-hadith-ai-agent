@@ -23,8 +23,10 @@ The test suite enforces a strict **sub-second execution standard** by utilizing 
 | **[`test_ingestion.py`](test_ingestion.py)** | `src.ingestion` | 4 tests | Verified candidate persistence, rejected audit recording, deduplication idempotency, batch metrics calculation. |
 | **[`test_llm.py`](test_llm.py)** | `src.llm` | 5 tests | Negative constraint prompt rules, omitted key fallback, mock completion, API error resilience. |
 | **[`test_scheduler.py`](test_scheduler.py)** | `src.workflow`, `src.main` | 4 tests | Daily runner dry-run execution, APScheduler Asia/Kolkata timezone and 1-hour misfire grace time, container health check, authenticated Cloud Scheduler cron trigger. |
+| **[`test_observability.py`](test_observability.py)** | `src.observability` | 5 tests | Tracing initialization, Groq token accounting callback, run metadata extraction, and diagnostic verification CLI. |
+| **[`test_security.py`](test_security.py)** | `src.security`, `src.guardrails.moderation` | 11 tests | Multi-hop proxy X-Forwarded-For client IP extraction, SlowAPI rate limiting & 429 enforcement, dynamic rate limit bypass, Llama Guard 3 safety verdicts (safe/unsafe/error), ReflectionValidator integration, and pip-audit CVE verification. |
 | **[`test_workflow.py`](test_workflow.py)** | `src.workflow` | 8 tests | LangGraph StateGraph happy path, idempotency skip routing, queue empty abort, safety abort, guardrail fail-safe omission, clean reflection pass, multi-user fan-out and HTTP 403 auto-deactivation. |
-| **Total** | **All Modules** | **105 tests** | **100% automated pass rate** |
+| **Total** | **All Modules** | **125 tests** | **100% automated pass rate** |
 
 ---
 

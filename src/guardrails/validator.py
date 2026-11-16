@@ -8,6 +8,7 @@ length boundaries, and sacred text invariance on LLM commentary.
 import logging
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from src.guardrails.rules import (
     MAX_REFLECTION_WORDS,
@@ -34,8 +35,12 @@ class GuardrailResult:
 
 class ReflectionValidator:
     """
-    Deterministic validator enforcing safety guardrails on AI-generated reflections.
+    Deterministic validator enforcing safety guardrails on AI-generated reflections,
+    with support for secondary ML safety classification.
     """
+
+    def __init__(self, moderator: Any | None = None) -> None:
+        self.moderator = moderator
 
     def validate(
         self,
@@ -138,6 +143,17 @@ class ReflectionValidator:
             if not leakage_result.is_valid:
                 return leakage_result
 
+        # 7. Secondary ML Moderation Check (Llama Guard 3)
+        if self.moderator is not None:
+            mod_result = self.moderator.moderate(cleaned)
+            if not mod_result.is_safe:
+                return GuardrailResult(
+                    is_valid=False,
+                    status="REJECTED",
+                    error_code="ERR_LLM_SAFETY_VIOLATION",
+                    reason=mod_result.reason or "Violated content safety policies.",
+                )
+
         return GuardrailResult(
             is_valid=True,
             status="PASSED",
@@ -224,6 +240,9 @@ _default_validator = ReflectionValidator()
 def validate_reflection(
     reflection: str | None,
     source_hadith_text: str | None = None,
+    moderator: Any | None = None,
 ) -> GuardrailResult:
-    """Convenience helper to validate a reflection using the default validator."""
+    """Convenience helper to validate a reflection using the default or provided validator."""
+    if moderator is not None:
+        return ReflectionValidator(moderator=moderator).validate(reflection, source_hadith_text)
     return _default_validator.validate(reflection, source_hadith_text)

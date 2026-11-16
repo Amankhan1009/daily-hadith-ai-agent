@@ -59,6 +59,16 @@ To inspect live cloud tracing status and test end-to-end trace dispatch:
 ```bash
 .venv/bin/python -m src.observability.cli --verify
 ```
+
+### 2.4 Dependency Vulnerability Auditing (`pip-audit`)
+To execute an on-demand CVE scan across all production packages:
+```bash
+.venv/bin/pip-audit -r requirements.txt
+```
+**Expected Output:**
+```
+No known vulnerabilities found
+```
 **Expected Output:**
 - `• LangSmith Tracing V2 : ENABLED (Active)`
 - `• Target Project Name  : daily-hadith-ai-agent`
@@ -161,6 +171,17 @@ curl -X POST https://api.github.com/repos/Amankhan1009/daily-hadith-ai-agent/act
    ```bash
    .venv/bin/python -m src.observability.cli --verify
    ```
+
+### 4.5 Rate Limiting & Security Tuning
+1. In-memory IP rate limiting is active by default across public routes (`/`, `/health`, `/telegram/webhook`, `/api/cron/*`).
+2. To modify default thresholds in Render or local environment:
+   - `ENABLE_RATE_LIMITING=true` (or `false` to disable entirely)
+   - `RATE_LIMIT_DEFAULT="120/minute"`
+   - `RATE_LIMIT_HEALTH="60/minute"`
+   - `RATE_LIMIT_CRON="10/minute"`
+3. To enable secondary ML moderation via Groq Llama Guard 3:
+   - `ENABLE_LLAMA_GUARD=true`
+   - `LLAMA_GUARD_MODEL="llama-guard-3-8b"`
 
 ---
 

@@ -25,6 +25,7 @@ from src.database.repository import (
 from src.database.session import get_db_session
 from src.delivery.telegram import TelegramBotBlockedError, TelegramClient
 from src.formatter import format_daily_hadith_message
+from src.security import limiter
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,7 @@ def verify_webhook_secret(secret_token_header: str | None) -> bool:
 
 
 @router.post("/webhook")
+@limiter.limit(get_settings().rate_limit_default)
 async def telegram_webhook(
     request: Request,
     x_telegram_bot_api_secret_token: str | None = Header(None),

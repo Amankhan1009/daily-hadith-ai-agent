@@ -10,11 +10,15 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, status
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from src.config import get_settings
 from src.delivery import webhook_router
+from src.security import limiter
 from src.workflow.daily_runner import run_daily_broadcast
 from src.workflow.scheduler import (
     get_scheduler_status,
@@ -48,11 +52,18 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Register SlowAPI IP Rate Limiter and Middleware
+    limiter.enabled = settings.enable_rate_limiting
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_middleware(SlowAPIMiddleware)
+
     # Mount Telegram inbound webhook router (/telegram/webhook)
     app.include_router(webhook_router)
 
     @app.get("/", response_class=HTMLResponse, tags=["System"])
-    def home() -> str:
+    @limiter.limit(settings.rate_limit_default)
+    def home(request: Request) -> str:
         """Public landing page displaying bot status and navigation links."""
         return """<!DOCTYPE html>
 <html lang="en">
@@ -231,7 +242,8 @@ def create_app() -> FastAPI:
 </html>"""
 
     @app.api_route("/health", methods=["GET", "POST", "HEAD"], tags=["System"])
-    def health_check() -> dict[str, Any]:
+    @limiter.limit(settings.rate_limit_health)
+    def health_check(request: Request) -> dict[str, Any]:
         """Container healthcheck endpoint for Docker, Cloud Run, and Render."""
         return {
             "status": "healthy",
@@ -242,7 +254,9 @@ def create_app() -> FastAPI:
         }
 
     @app.post("/api/cron/daily-broadcast", tags=["Cloud Scheduler"])
+    @limiter.limit(settings.rate_limit_cron)
     def trigger_cron_broadcast(
+        request: Request,
         background_tasks: BackgroundTasks,
         x_cron_secret: str | None = Header(None),
         authorization: str | None = Header(None),
@@ -281,7 +295,9 @@ def create_app() -> FastAPI:
         }
 
     @app.post("/api/cron/replenish", tags=["Cloud Scheduler"])
+    @limiter.limit(settings.rate_limit_cron)
     def trigger_cron_replenish(
+        request: Request,
         x_cron_secret: str | None = Header(None),
         authorization: str | None = Header(None),
     ) -> dict[str, Any]:

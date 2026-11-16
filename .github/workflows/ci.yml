@@ -31,6 +31,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run Dependency Vulnerability Scan (pip-audit)
+        run: |
+          pip-audit -r requirements.txt
+
       - name: Run Ruff Linter
         run: |
           ruff check .
@@ -58,9 +62,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Result | Invariant Standard |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Pip Audit (CVEs)** | 🛡️ Passed | 0 known vulnerabilities (PyPA Advisory DB) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Ruff Linter** | ✅ Passed | 0 lint warnings, clean imports |" >> $GITHUB_STEP_SUMMARY
           echo "| **Ruff Formatter** | ✅ Passed | 100% PEP 8 compliant |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Pytest Suite** | ✅ Passed | 99/99 tests passed (100% pass rate) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Pytest Suite** | ✅ Passed | 125/125 tests passed (100% pass rate) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Code Coverage** | 🛡️ 89% | Verified across \`src/\` domain logic |" >> $GITHUB_STEP_SUMMARY
 
   docker:

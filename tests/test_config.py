@@ -102,3 +102,21 @@ def test_langsmith_configuration(monkeypatch):
     summary = active_settings.get_safe_summary()
     assert summary["langsmith_tracing_enabled"] is True
     assert summary["langsmith_project"] == "custom-hadith-project"
+
+
+def test_security_and_rate_limiting_settings(monkeypatch):
+    """Verify default rate limiting and security guardrail settings."""
+    monkeypatch.delenv("ENABLE_RATE_LIMITING", raising=False)
+    settings = Settings(_env_file=None)
+    assert settings.enable_rate_limiting is True
+    assert settings.rate_limit_default == "120/minute"
+    assert settings.rate_limit_health == "60/minute"
+    assert settings.rate_limit_cron == "10/minute"
+    assert settings.enable_llama_guard is False
+    assert settings.llama_guard_model == "llama-guard-3-8b"
+
+    summary = settings.get_safe_summary()
+    assert summary["enable_rate_limiting"] is True
+    assert summary["rate_limit_default"] == "120/minute"
+    assert summary["enable_llama_guard"] is False
+    assert summary["llama_guard_model"] == "llama-guard-3-8b"

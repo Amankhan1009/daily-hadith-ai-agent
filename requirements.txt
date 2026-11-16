@@ -30,3 +30,7 @@ apscheduler>=3.10.4
 # Milestone 16: Code Quality & Coverage
 ruff>=0.8.0
 pytest-cov>=5.0.0
+
+# Milestone 22: Enterprise Security & Rate Limiting
+slowapi>=0.1.10
+pip-audit>=2.8.0

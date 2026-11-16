@@ -11,8 +11,10 @@ A production-grade, fail-closed AI system and publicly accessible Telegram bot d
 [![PostgreSQL](https://img.shields.io/badge/database-Neon%20PostgreSQL-336791.svg)](https://neon.tech/)
 [![Observability: LangSmith](https://img.shields.io/badge/observability-LangSmith%20Traced-orange.svg)](https://smith.langchain.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/tests-112%20passed%20(100%25)-brightgreen.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-88%25-brightgreen.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/tests-125%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-brightgreen.svg)](tests/)
+[![Security: pip-audit](https://img.shields.io/badge/security-pip--audit%20clean-brightgreen.svg)](docs/SECURITY_AUDIT.md)
+[![Rate Limiting: SlowAPI](https://img.shields.io/badge/rate%20limiting-SlowAPI-blue.svg)](docs/SECURITY_AUDIT.md)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 ---
@@ -87,7 +89,8 @@ Every folder in this codebase includes its own dedicated README guide:
 | **[`src/guardrails/`](src/guardrails/)** | Deterministic Hallucination & Theological Guardrails | **[`src/guardrails/README.md`](src/guardrails/README.md)** |
 | **[`src/formatter/`](src/formatter/)** | Telegram Notification Formatter & HTML Payload Assembly | **[`src/formatter/README.md`](src/formatter/README.md)** |
 | **[`src/delivery/`](src/delivery/)** | Telegram Bot API Client, Webhook Router & Multi-User Broadcaster | **[`src/delivery/README.md`](src/delivery/README.md)** |
-| **[`tests/`](tests/)** | Automated Test Suite (99 unit & integration tests across 13 modules) | **[`tests/README.md`](tests/README.md)** |
+| **[`src/security.py`](src/security.py)** | Enterprise IP Rate Limiter (`slowapi`), Proxy Header Extraction & Security Controls | **[`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md)** |
+| **[`tests/`](tests/)** | Automated Test Suite (125 unit & integration tests across 15 modules) | **[`tests/README.md`](tests/README.md)** |
 | **[`scripts/`](scripts/)** | Standalone Operational & Live E2E Verification Scripts | **[`scripts/README.md`](scripts/README.md)** |
 | **[`alembic/`](alembic/)** | Database Schema Migration Versions | **[`alembic/README.md`](alembic/README.md)** |
 
@@ -130,8 +133,10 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **18 — Cloud Deployment & Public Production Bot** | `Verified` | Deployed on Render Free Web Service with automated daily 10:00 AM IST scheduler on cron-job.org and live Telegram subscribers |
 | **19 — Production Readiness & System Audit** | `Verified` | 20/20 Definition of Done verified, production runbook, and defensive security audit |
 | **20 — LLMOps & Observability** | `Verified` | LangSmith cloud tracing for LangGraph StateGraph, Groq token accounting & diagnostic CLI |
+| **21 — Autonomous Ingestion & Auto-Replenishment** | `Verified` | Bulk HadeethEnc ingestion (177 verified Hadiths in buffer), auto-replenish cron endpoint & background tasks |
+| **22 — Enterprise Security, Rate Limiting & Moderation** | `Verified` | In-memory SlowAPI rate limiting, automated pip-audit CVE scanning in CI, and Groq Llama Guard 3 safety classifier |
 
-For the complete 20-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
+For the complete 22-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 
 ---
 

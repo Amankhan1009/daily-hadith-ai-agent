@@ -131,6 +131,32 @@ class Settings(BaseSettings):
         description="LangSmith API endpoint",
     )
 
+    # Enterprise Security & Rate Limiting (Milestone 22)
+    enable_rate_limiting: bool = Field(
+        default=True,
+        description="Toggle IP rate limiting on public endpoints",
+    )
+    rate_limit_default: str = Field(
+        default="120/minute",
+        description="Default SlowAPI rate limit for general endpoints",
+    )
+    rate_limit_health: str = Field(
+        default="60/minute",
+        description="SlowAPI rate limit for /health and / probes",
+    )
+    rate_limit_cron: str = Field(
+        default="10/minute",
+        description="SlowAPI rate limit for /api/cron/* triggers",
+    )
+    enable_llama_guard: bool = Field(
+        default=False,
+        description="Enable secondary ML moderation layer via Groq Llama Guard 3",
+    )
+    llama_guard_model: str = Field(
+        default="llama-guard-3-8b",
+        description="Target model identifier for Llama Guard safety classification",
+    )
+
     def model_post_init(self, __context: Any) -> None:
         """Export LangSmith environment variables if tracing is enabled."""
         import os
@@ -214,6 +240,10 @@ class Settings(BaseSettings):
             "cron_secret_configured": bool(self.cron_secret_token),
             "langsmith_tracing_enabled": bool(self.langchain_tracing_v2 and self.langchain_api_key),
             "langsmith_project": self.langchain_project,
+            "enable_rate_limiting": self.enable_rate_limiting,
+            "rate_limit_default": self.rate_limit_default,
+            "enable_llama_guard": self.enable_llama_guard,
+            "llama_guard_model": self.llama_guard_model,
         }
 
 
