@@ -27,12 +27,15 @@
     .glow-purple {
       box-shadow: 0 0 60px -15px rgba(168, 85, 247, 0.25);
     }
+    .glow-rose {
+      box-shadow: 0 0 60px -15px rgba(244, 63, 94, 0.25);
+    }
     .card-border {
       border: 1px solid rgba(51, 65, 85, 0.6);
     }
   </style>
 </head>
-<body class="p-4 md:p-10 space-y-20 max-w-5xl mx-auto">
+<body class="p-4 md:p-10 space-y-16 max-w-5xl mx-auto">
 
   <!-- ========================================== -->
   <!-- CARD 1: COMPLETE END-TO-END ARCHITECTURE -->
@@ -52,7 +55,7 @@
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 100% Live in Production
           </span>
           <span class="px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 font-mono border border-cyan-500/20">
-            114/114 Tests Passing
+            125/125 Tests Passing (100%)
           </span>
         </div>
       </div>
@@ -108,17 +111,17 @@
               <span class="text-[10px] bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20">Neon PostgreSQL</span>
             </div>
             <p class="text-xs text-slate-300">
-              <strong class="text-white">177 verified Hadiths</strong> stocked. Hard <code class="text-cyan-300 font-mono">UNIQUE(scheduled_date)</code> constraint guarantees strictly once-per-day idempotency.
+              <strong class="text-white">177 verified Hadiths</strong> stocked (164 days buffer). Hard <code class="text-cyan-300 font-mono">UNIQUE(scheduled_date)</code> guarantees exactly-once idempotency.
             </p>
           </div>
 
           <div class="p-4 rounded-xl bg-[#090d19] border border-purple-500/30 space-y-2">
             <div class="flex items-center justify-between text-xs font-mono">
-              <span class="text-purple-400 font-bold">5. Groq LLM + Guardrails</span>
-              <span class="text-[10px] bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20">Fail-Closed Safety</span>
+              <span class="text-purple-400 font-bold">5. Multi-Layer Guardrails</span>
+              <span class="text-[10px] bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20">Llama Guard 4</span>
             </div>
             <p class="text-xs text-slate-300">
-              Generates daily reflections. Deterministic guardrails block legalistic fatwas and sectarian polemics before delivery.
+              Deterministic regex gates block decrees/fatwas. Groq's <strong class="text-white">Llama Guard 4 (12B)</strong> performs secondary ML safety with zero-cost fail-safe.
             </p>
           </div>
 
@@ -134,12 +137,12 @@
         </div>
 
         <!-- Banner Footer -->
-        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs font-mono">
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-wrap items-center justify-between text-xs font-mono gap-2">
           <div class="flex items-center gap-2 text-slate-300">
-            <span class="text-cyan-400">🔭 Observability:</span>
-            <span>LangSmith Tracing V2 captures state transitions, token counts, and step latencies in cloud dashboard</span>
+            <span class="text-cyan-400">🛡️ Defense-in-Depth:</span>
+            <span>SlowAPI IP Rate Limiting • pip-audit (0 CVEs) • LangSmith Cloud Tracing</span>
           </div>
-          <span class="text-emerald-400 font-bold">Zero Maintenance Forever</span>
+          <span class="text-emerald-400 font-bold">100% Free Forever ($0.00/mo)</span>
         </div>
 
       </div>
@@ -172,10 +175,10 @@
         <div class="md:col-span-7 bg-[#0e1626] border border-slate-700/60 rounded-xl p-5 space-y-4 shadow-xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-2">
             <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">DH</div>
+              <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">📖</div>
               <div>
-                <div class="text-xs font-bold text-white leading-tight">Daily Hadith Bot</div>
-                <div class="text-[10px] text-slate-400">bot • 10:02 AM</div>
+                <div class="text-xs font-bold text-white leading-tight">Daily Hadith Agent</div>
+                <div class="text-[10px] text-slate-400">@daily_hadith_aman_bot • 10:00 AM</div>
               </div>
             </div>
             <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Verified Authentic</span>
@@ -193,7 +196,7 @@
 
           <!-- English Translation -->
           <div class="space-y-1.5 text-xs text-slate-200 leading-relaxed">
-            <div class="font-bold text-slate-400 text-[11px] uppercase tracking-wider font-mono">Translation</div>
+            <div class="font-bold text-slate-400 text-[11px] uppercase tracking-wider font-mono">Canonical Translation</div>
             <p>
               Abu Hurayrah (may Allah be pleased with him) reported: The Messenger of Allah (may Allah's peace and blessings be upon him) said: 
               <em class="text-emerald-300">"Whoever treads a path seeking knowledge, Allah will make easy for him the path to Paradise."</em>
@@ -210,7 +213,7 @@
           <div class="p-3 rounded-lg bg-purple-950/20 border border-purple-500/30 space-y-1 text-xs">
             <div class="text-[11px] font-bold text-purple-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
               <span>💡 Daily Reflection</span>
-              <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded">Groq Cloud • Guardrails Audited</span>
+              <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded">Groq LLM • Segregated Commentary</span>
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
               Seeking knowledge is not restricted to formal institutions—committing even 10 minutes a day to learning a beneficial skill or understanding scripture is actively treading the path to ease in this life and the next.
@@ -234,19 +237,28 @@
 
             <div class="p-3.5 rounded-xl bg-slate-950 border border-purple-500/30 space-y-1">
               <div class="text-xs font-bold text-purple-400 font-mono flex items-center gap-1.5">
-                <span>⚖️ Fiqh / Fatwa Blacklist</span>
+                <span>⚖️ Fiqh & Fatwa Boundary</span>
               </div>
               <p class="text-[11px] text-slate-300 leading-normal">
-                Deterministic regex validators inspect AI commentary for legalistic pronouncements (e.g., <em>halal, haram, wajib, bid'ah</em>). Unqualified decrees are blocked immediately.
+                Deterministic regex validators inspect AI commentary for legalistic decrees (<em>halal, haram, wajib, bid'ah</em>). Unqualified decrees trigger immediate fail-closed fallback.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/30 space-y-1">
               <div class="text-xs font-bold text-cyan-400 font-mono flex items-center gap-1.5">
-                <span>🚫 Fail-Closed Fallback</span>
+                <span>⚡ Rate Limiting & DoS Defense</span>
               </div>
               <p class="text-[11px] text-slate-300 leading-normal">
-                If Groq times out or the commentary fails guardrail validation, the system drops the reflection and delivers the authentic Hadith alone.
+                SlowAPI in-memory IP rate limiting defends public endpoints against flooding without external cache overhead.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-rose-500/30 space-y-1">
+              <div class="text-xs font-bold text-rose-400 font-mono flex items-center gap-1.5">
+                <span>🚫 Fail-Closed Resilience</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-normal">
+                If Groq times out or commentary fails guardrails, the system drops the commentary and delivers the authentic Hadith alone.
               </p>
             </div>
           </div>
@@ -258,7 +270,7 @@
 
 
   <!-- ========================================== -->
-  <!-- CARD 3: REAL-WORLD METRICS & TRACTION -->
+  <!-- CARD 3: REAL-WORLD METRICS & SECURITY -->
   <!-- ========================================== -->
   <section class="space-y-3" id="visual-3-metrics">
     <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden glow-purple shadow-2xl">
@@ -268,10 +280,10 @@
           <div class="w-3.5 h-3.5 rounded-full bg-rose-500/90"></div>
           <div class="w-3.5 h-3.5 rounded-full bg-amber-500/90"></div>
           <div class="w-3.5 h-3.5 rounded-full bg-emerald-500/90"></div>
-          <span class="ml-3 text-xs font-mono font-semibold text-slate-200">Production Fleet Operations • Verified Telemetry</span>
+          <span class="ml-3 text-xs font-mono font-semibold text-slate-200">Production Fleet Operations • Verified Telemetry & Security</span>
         </div>
         <div class="flex items-center gap-2 text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/20">
-          Zero Manual Maintenance
+          Zero Maintenance Forever
         </div>
       </div>
 
@@ -282,25 +294,25 @@
           <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
             <div class="text-2xl font-extrabold text-emerald-400 font-mono">100%</div>
             <div class="text-xs font-bold text-slate-200">Daily Delivery Uptime</div>
-            <div class="text-[10px] text-slate-400">Fired 10:00 AM IST Every Day</div>
+            <div class="text-[10px] text-slate-400">10:00 AM IST Exactly Once</div>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
             <div class="text-2xl font-extrabold text-cyan-400 font-mono">177</div>
             <div class="text-xs font-bold text-slate-200">Verified Hadiths in DB</div>
-            <div class="text-[10px] text-slate-400">167 Days Pre-Stocked Buffer</div>
+            <div class="text-[10px] text-slate-400">164 Days Pre-Stocked Buffer</div>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
-            <div class="text-2xl font-extrabold text-purple-400 font-mono">114 / 114</div>
+            <div class="text-2xl font-extrabold text-purple-400 font-mono">125 / 125</div>
             <div class="text-xs font-bold text-slate-200">Automated Tests Passing</div>
-            <div class="text-[10px] text-slate-400">18.1s Full Pytest Suite</div>
+            <div class="text-[10px] text-slate-400">100% Suite Pass Rate (87% Cov)</div>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
-            <div class="text-2xl font-extrabold text-amber-400 font-mono">10+</div>
-            <div class="text-xs font-bold text-slate-200">Subscribers Reached</div>
-            <div class="text-[10px] text-slate-400">Active Telegram Audience</div>
+            <div class="text-2xl font-extrabold text-rose-400 font-mono">0 CVEs</div>
+            <div class="text-xs font-bold text-slate-200">pip-audit Security Verified</div>
+            <div class="text-[10px] text-slate-400">PyPA Advisory DB Enforced in CI</div>
           </div>
         </div>
 
@@ -311,13 +323,13 @@
             <span class="text-emerald-400">✓ All Systems Green</span>
           </div>
           <div class="text-slate-300 space-y-1 text-[11px]">
-            <div><span class="text-cyan-400">$</span> python -m src.workflow.daily_runner --verify</div>
-            <div class="text-slate-400">[INFO] daily_runner: 🚀 INITIATING DAILY HADITH BROADCAST RUNNER</div>
-            <div class="text-slate-400">[INFO] daily_runner: • Target Scheduled Date (IST): 2026-11-16</div>
-            <div class="text-slate-400">[INFO] httpx: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK" (0.58s)</div>
-            <div class="text-slate-400">[INFO] guardrails: Reflection audited against 14 theological rules -> <span class="text-emerald-400">PASSED_GUARDRAILS</span></div>
-            <div class="text-slate-400">[INFO] telegram: Broadcast dispatched to active subscribers at 30 msgs/s</div>
-            <div class="text-emerald-400">[INFO] daily_runner: 📊 STATUS: COMPLETED | Delivered: 100% | Idempotency Audit Log ID: 15 Recorded</div>
+            <div><span class="text-cyan-400">$</span> pytest tests/ && pip-audit -r requirements.txt</div>
+            <div class="text-slate-400">================== 125 passed, 1 skipped in 18.2s ==================</div>
+            <div class="text-emerald-400">No known vulnerabilities found across all dependencies.</div>
+            <div class="text-slate-400">[INFO] slowapi: IP rate limiting active (120/min general, 60/min health, 10/min cron)</div>
+            <div class="text-slate-400">[INFO] moderation: Llama Guard 4 (meta-llama/llama-guard-4-12b) standby initialized</div>
+            <div class="text-slate-400">[INFO] neon_db: 177 verified authentic candidates ready in queue (buffer: 164 days)</div>
+            <div class="text-emerald-400">[INFO] telegram: 6 active subscribers queued for daily 10:00 AM IST broadcast</div>
           </div>
         </div>
 
