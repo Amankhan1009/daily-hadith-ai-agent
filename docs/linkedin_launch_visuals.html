@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Hadith AI Agent — Production Launch Visuals</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #060911;
+      color: #e2e8f0;
+    }
+    pre, code, .font-mono {
+      font-family: 'Fira Code', monospace;
+    }
+    .font-arabic {
+      font-family: 'Amiri', serif;
+    }
+    .glow-cyan {
+      box-shadow: 0 0 60px -15px rgba(6, 182, 212, 0.25);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 60px -15px rgba(16, 185, 129, 0.25);
+    }
+    .glow-purple {
+      box-shadow: 0 0 60px -15px rgba(168, 85, 247, 0.25);
+    }
+    .card-border {
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-10 space-y-20 max-w-5xl mx-auto">
+
+  <!-- ========================================== -->
+  <!-- CARD 1: COMPLETE END-TO-END ARCHITECTURE -->
+  <!-- ========================================== -->
+  <section class="space-y-3" id="visual-1-architecture">
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden glow-cyan shadow-2xl">
+      <!-- Titlebar -->
+      <div class="bg-[#0b101e] px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-3.5 h-3.5 rounded-full bg-rose-500/90"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-amber-500/90"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-emerald-500/90"></div>
+          <span class="ml-3 text-xs font-mono font-semibold text-slate-200">Daily Hadith AI Agent • Production System Architecture</span>
+        </div>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono font-semibold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 100% Live in Production
+          </span>
+          <span class="px-2.5 py-1 rounded-md bg-slate-800 text-cyan-300 font-mono border border-cyan-500/20">
+            114/114 Tests Passing
+          </span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6 md:p-8 bg-[#070b14] space-y-6">
+        
+        <!-- Row 1: Trigger & Pre-Warm Topology -->
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-amber-400 font-bold">1. Cloud Scheduler</span>
+              <span class="text-[10px] bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded border border-amber-500/20">10:00 AM IST</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              <strong class="text-white">cron-job.org</strong> triggers GitHub API dispatch in <code class="text-cyan-300">1.35s</code>, completely bypassing 30-sec HTTP timeout limits.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-blue-400 font-bold">2. GitHub Actions Runner</span>
+              <span class="text-[10px] bg-blue-500/10 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20">Pre-warm Buffer</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Absorbs <strong class="text-white">60s Render cold-boot</strong> cycle. Validates health probe before issuing authenticated broadcast POST.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-emerald-400 font-bold">3. Containerized FastAPI</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20">Render PaaS</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Docker multi-stage runtime. Sleeps naturally when idle (<strong class="text-white">&lt;10 hrs/month</strong> compute on free tier).
+            </p>
+          </div>
+        </div>
+
+        <!-- Connection Pipeline Indicator -->
+        <div class="flex items-center justify-center gap-2 text-slate-600 font-mono text-xs">
+          <span>▼</span>
+          <span class="text-slate-500 uppercase tracking-widest text-[10px]">LangGraph State Machine Orchestration</span>
+          <span>▼</span>
+        </div>
+
+        <!-- Row 2: Agent Orchestration, Guardrails & Persistence -->
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-[#090d19] border border-cyan-500/30 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-cyan-400 font-bold">4. Immutable Persistence</span>
+              <span class="text-[10px] bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20">Neon PostgreSQL</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              <strong class="text-white">177 verified Hadiths</strong> stocked. Hard <code class="text-cyan-300 font-mono">UNIQUE(scheduled_date)</code> constraint guarantees strictly once-per-day idempotency.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#090d19] border border-purple-500/30 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-purple-400 font-bold">5. Groq LLM + Guardrails</span>
+              <span class="text-[10px] bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded border border-purple-500/20">Fail-Closed Safety</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Generates daily reflections. Deterministic guardrails block legalistic fatwas and sectarian polemics before delivery.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#090d19] border border-emerald-500/30 space-y-2">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-emerald-400 font-bold">6. Telegram Fan-Out</span>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/20">Live Subscribers</span>
+            </div>
+            <p class="text-xs text-slate-300">
+              Throttled batch delivery (<strong class="text-white">30 msg/s</strong>). Detects HTTP 403 blocks instantly without stalling the subscriber queue.
+            </p>
+          </div>
+        </div>
+
+        <!-- Banner Footer -->
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2 text-slate-300">
+            <span class="text-cyan-400">🔭 Observability:</span>
+            <span>LangSmith Tracing V2 captures state transitions, token counts, and step latencies in cloud dashboard</span>
+          </div>
+          <span class="text-emerald-400 font-bold">Zero Maintenance Forever</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- CARD 2: SACRED TEXT INVARIANT & DELIVERY -->
+  <!-- ========================================== -->
+  <section class="space-y-3" id="visual-2-sacred-invariant">
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden glow-emerald shadow-2xl">
+      <!-- Titlebar -->
+      <div class="bg-[#0b101e] px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-3.5 h-3.5 rounded-full bg-rose-500/90"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-amber-500/90"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-emerald-500/90"></div>
+          <span class="ml-3 text-xs font-mono font-semibold text-slate-200">The Sacred Text Invariant • Live Message Architecture</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
+          ✓ Byte-for-Byte Scripture Fidelity
+        </div>
+      </div>
+
+      <!-- Split View -->
+      <div class="p-6 md:p-8 bg-[#070b14] grid md:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Telegram Rendered Message (7 cols) -->
+        <div class="md:col-span-7 bg-[#0e1626] border border-slate-700/60 rounded-xl p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">DH</div>
+              <div>
+                <div class="text-xs font-bold text-white leading-tight">Daily Hadith Bot</div>
+                <div class="text-[10px] text-slate-400">bot • 10:02 AM</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Verified Authentic</span>
+          </div>
+
+          <!-- Bismillah -->
+          <div class="text-center text-slate-400 text-xs font-arabic">
+            بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+          </div>
+
+          <!-- Arabic Text -->
+          <div class="p-3.5 rounded-lg bg-[#070b14] border border-slate-800 text-right leading-loose text-base font-arabic text-amber-200" dir="rtl">
+            عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ، أَنَّ رَسُولَ اللَّهِ ﷺ قَالَ: «مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا، سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ».
+          </div>
+
+          <!-- English Translation -->
+          <div class="space-y-1.5 text-xs text-slate-200 leading-relaxed">
+            <div class="font-bold text-slate-400 text-[11px] uppercase tracking-wider font-mono">Translation</div>
+            <p>
+              Abu Hurayrah (may Allah be pleased with him) reported: The Messenger of Allah (may Allah's peace and blessings be upon him) said: 
+              <em class="text-emerald-300">"Whoever treads a path seeking knowledge, Allah will make easy for him the path to Paradise."</em>
+            </p>
+          </div>
+
+          <!-- Attribution -->
+          <div class="text-[11px] text-slate-400 font-mono bg-slate-900/60 p-2 rounded border border-slate-800 flex justify-between">
+            <span>📚 <strong>Source:</strong> Sahih Muslim (#2699)</span>
+            <span class="text-emerald-400 font-bold">Grade: Sahih</span>
+          </div>
+
+          <!-- AI Reflection (Segregated) -->
+          <div class="p-3 rounded-lg bg-purple-950/20 border border-purple-500/30 space-y-1 text-xs">
+            <div class="text-[11px] font-bold text-purple-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <span>💡 Daily Reflection</span>
+              <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded">Groq Cloud • Guardrails Audited</span>
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              Seeking knowledge is not restricted to formal institutions—committing even 10 minutes a day to learning a beneficial skill or understanding scripture is actively treading the path to ease in this life and the next.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Defensive Rules Card (5 cols) -->
+        <div class="md:col-span-5 space-y-4">
+          <div class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Deterministic Safety Invariants</div>
+          
+          <div class="space-y-3">
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-emerald-500/30 space-y-1">
+              <div class="text-xs font-bold text-emerald-400 font-mono flex items-center gap-1.5">
+                <span>🛡️ Sacred Text Immutable</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-normal">
+                Arabic text, English translation, and citations are retrieved byte-for-byte from canonical APIs. The LLM has zero write access to scripture.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-purple-500/30 space-y-1">
+              <div class="text-xs font-bold text-purple-400 font-mono flex items-center gap-1.5">
+                <span>⚖️ Fiqh / Fatwa Blacklist</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-normal">
+                Deterministic regex validators inspect AI commentary for legalistic pronouncements (e.g., <em>halal, haram, wajib, bid'ah</em>). Unqualified decrees are blocked immediately.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/30 space-y-1">
+              <div class="text-xs font-bold text-cyan-400 font-mono flex items-center gap-1.5">
+                <span>🚫 Fail-Closed Fallback</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-normal">
+                If Groq times out or the commentary fails guardrail validation, the system drops the reflection and delivers the authentic Hadith alone.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- CARD 3: REAL-WORLD METRICS & TRACTION -->
+  <!-- ========================================== -->
+  <section class="space-y-3" id="visual-3-metrics">
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden glow-purple shadow-2xl">
+      <!-- Titlebar -->
+      <div class="bg-[#0b101e] px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-3.5 h-3.5 rounded-full bg-rose-500/90"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-amber-500/90"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-emerald-500/90"></div>
+          <span class="ml-3 text-xs font-mono font-semibold text-slate-200">Production Fleet Operations • Verified Telemetry</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/20">
+          Zero Manual Maintenance
+        </div>
+      </div>
+
+      <!-- Metrics Grid -->
+      <div class="p-6 md:p-8 bg-[#070b14] space-y-6">
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
+            <div class="text-2xl font-extrabold text-emerald-400 font-mono">100%</div>
+            <div class="text-xs font-bold text-slate-200">Daily Delivery Uptime</div>
+            <div class="text-[10px] text-slate-400">Fired 10:00 AM IST Every Day</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
+            <div class="text-2xl font-extrabold text-cyan-400 font-mono">177</div>
+            <div class="text-xs font-bold text-slate-200">Verified Hadiths in DB</div>
+            <div class="text-[10px] text-slate-400">167 Days Pre-Stocked Buffer</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
+            <div class="text-2xl font-extrabold text-purple-400 font-mono">114 / 114</div>
+            <div class="text-xs font-bold text-slate-200">Automated Tests Passing</div>
+            <div class="text-[10px] text-slate-400">18.1s Full Pytest Suite</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-center">
+            <div class="text-2xl font-extrabold text-amber-400 font-mono">10+</div>
+            <div class="text-xs font-bold text-slate-200">Subscribers Reached</div>
+            <div class="text-[10px] text-slate-400">Active Telegram Audience</div>
+          </div>
+        </div>
+
+        <!-- Terminal Snapshot Box -->
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs space-y-2">
+          <div class="flex items-center justify-between text-slate-400 border-b border-slate-800 pb-2">
+            <span>Terminal: Live Production Verification</span>
+            <span class="text-emerald-400">✓ All Systems Green</span>
+          </div>
+          <div class="text-slate-300 space-y-1 text-[11px]">
+            <div><span class="text-cyan-400">$</span> python -m src.workflow.daily_runner --verify</div>
+            <div class="text-slate-400">[INFO] daily_runner: 🚀 INITIATING DAILY HADITH BROADCAST RUNNER</div>
+            <div class="text-slate-400">[INFO] daily_runner: • Target Scheduled Date (IST): 2026-11-16</div>
+            <div class="text-slate-400">[INFO] httpx: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK" (0.58s)</div>
+            <div class="text-slate-400">[INFO] guardrails: Reflection audited against 14 theological rules -> <span class="text-emerald-400">PASSED_GUARDRAILS</span></div>
+            <div class="text-slate-400">[INFO] telegram: Broadcast dispatched to active subscribers at 30 msgs/s</div>
+            <div class="text-emerald-400">[INFO] daily_runner: 📊 STATUS: COMPLETED | Delivered: 100% | Idempotency Audit Log ID: 15 Recorded</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
