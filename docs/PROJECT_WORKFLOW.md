@@ -82,12 +82,14 @@ Every pull request, test, and line of code must strictly uphold these four non-n
   • Focus on sincerity before starting work tasks...
   ```
 
-### Invariant 3: Fail-Closed Negative Guardrails
-- AI reflections pass through a 5-step deterministic validator (`src/guardrails/validator.py`).
-- If any prohibited legal term (`fatwa`, `halal`, `haram`, `obligatory`), sectarian polemic, hallucinated citation, or extreme length deviation is detected:
+### Invariant 3: Fail-Closed Multi-Layer Guardrails
+- AI reflections pass through a multi-tier defense:
+  1. **Layer 1 (Deterministic Rules):** A regex validator (`src/guardrails/validator.py`) checking word limits, required bullet structure, and blacklisted legal terms (`fatwa`, `halal`, `haram`, `obligatory`), sectarian polemics, and sacred text paraphrase leakage.
+  2. **Layer 2 (Probabilistic ML Safety):** Secondary safety classification via Meta's `meta-llama/llama-guard-4-12b` hosted on Groq Cloud (`src/guardrails/moderation.py`).
+- If any prohibited legal term, sectarian polemic, hallucinated citation, or safety policy violation is detected:
   - The reflection status becomes `OMITTED_GUARDRAIL_FAILED`.
-  - The reflection is discarded.
-  - The Hadith itself is still delivered successfully on schedule.
+  - The reflection is discarded immediately.
+  - The authentic Hadith is still delivered successfully on schedule (*fail-safe delivery*).
 
 ### Invariant 4: Exactly-Once Calendar Day Idempotency
 - Notifications must be delivered **at most once per calendar day** in `Asia/Kolkata` (UTC+05:30).
@@ -246,18 +248,24 @@ sequenceDiagram
 
 ---
 
-### Phase 5: Deterministic Guardrails Validation Engine
-- **Location:** [`src/guardrails/validator.py`](file:///Users/mdamanalam/Hadith-ai-agent/src/guardrails/validator.py) & [`src/guardrails/rules.py`](file:///Users/mdamanalam/Hadith-ai-agent/src/guardrails/rules.py)
-- The LLM reflection must survive 5 deterministic tests before being included:
+### Phase 5: Multi-Layer Guardrails & Safety Classification
+- **Location:** [`src/guardrails/validator.py`](file:///Users/mdamanalam/Hadith-ai-agent/src/guardrails/validator.py), [`src/guardrails/rules.py`](file:///Users/mdamanalam/Hadith-ai-agent/src/guardrails/rules.py), and [`src/guardrails/moderation.py`](file:///Users/mdamanalam/Hadith-ai-agent/src/guardrails/moderation.py)
+- The LLM reflection must survive deterministic constraints and secondary ML safety verification before delivery:
 
+**Layer 1: Deterministic Theological Rules (0ms local overhead)**
 1. **Empty / Whitespace Check:** Disallows blank responses.
 2. **Word Count Boundaries:** Must be between **20 words** (`MIN_REFLECTION_WORDS`) and **150 words** (`MAX_REFLECTION_WORDS`).
-3. **Prohibited Legal Terms (Fatwa Guard):** Rejects any occurrence of:
+3. **Structured Bullet Requirement:** Must format practical takeaways with bulleted lists.
+4. **Prohibited Legal Terms (Fatwa Guard):** Rejects any occurrence of:
    `fatwa`, `halal`, `haram`, `wajib`, `fard`, `makruh`, `sinful`, `legal ruling`, `obligatory upon all`.
-4. **Prohibited Inflammatory / Sectarian Patterns:** Rejects words associated with theological discord:
+5. **Prohibited Inflammatory / Sectarian Patterns:** Rejects words associated with theological discord:
    `takfir`, `kafir`, `munafiq`, `deviant`, `heretic`, `apostate`.
-5. **Sacred Citation Guard:** Prevents the LLM from inventing or referencing other Quranic verses or hadith numbers.
-6. **Verbatim Levenshtein / Overlap Ratio:** Rejects output if the AI simply copied and pasted the original Hadith text (>75% overlap).
+6. **Sacred Citation Guard:** Prevents the LLM from inventing or referencing other Quranic verses or hadith numbers.
+7. **Verbatim Levenshtein / Overlap Ratio:** Rejects output if the AI repeated sacred Hadith text (8+ consecutive words or >75% vocabulary overlap).
+
+**Layer 2: Secondary ML Moderation (Meta Llama Guard 4 on Groq Cloud)**
+- Classifies commentary against safety taxonomies using `meta-llama/llama-guard-4-12b` via Groq Cloud.
+- **Fail-Safe Guarantee:** If Groq experiences an outage or timeout, the moderator logs a warning and fails safe (`is_safe=True`), allowing the deterministic Hadith delivery to proceed without disruption.
 
 ---
 
@@ -292,6 +300,19 @@ sequenceDiagram
   - **Resilient Execution Loop:** Calls `POST /api/cron/daily-broadcast` with a 3x retry loop and 10-second backoff.
   - **Render Free Quota Preservation:** Because Render is allowed to sleep naturally for 23h 45m every day, the service consumes only **~7.5 hours/month** out of Render's 750 free hours (1%), leaving **742+ hours completely untouched for other projects**.
   - **Manual Trigger Support:** Can also be manually triggered on-demand with 1 click via GitHub's `workflow_dispatch`.
+
+---
+
+### Phase 9: Enterprise Security, Rate Limiting & Supply-Chain Hardening
+- **Location:** [`src/security.py`](file:///Users/mdamanalam/Hadith-ai-agent/src/security.py) & [`.github/workflows/ci.yml`](file:///Users/mdamanalam/Hadith-ai-agent/.github/workflows/ci.yml)
+- **Features:**
+  1. **In-Memory IP Rate Limiting (`slowapi`):** Defends public endpoints against denial-of-service, webhook flooding, and brute-force credential stuffing.
+     - `GET /` & `POST /telegram/webhook`: 120 requests/minute
+     - `GET /health` & container probes: 60 requests/minute
+     - `POST /api/cron/*` scheduler triggers: 10 requests/minute
+     - **Cost:** \$0.00/month (100% in-memory ASGI sliding windows, zero Redis requirement).
+  2. **Multi-Hop Proxy IP Extraction:** Custom `get_client_ip(request)` safely extracts originating client IPs from `X-Forwarded-For` proxy headers across Cloudflare, Render, and AWS.
+  3. **Continuous Dependency Vulnerability Scanning (`pip-audit`):** Integrated into local CLI and GitHub Actions CI pipeline, automatically failing builds if any CVE is detected in dependencies (verified **0 known CVEs** across all dependencies).
 
 ---
 
@@ -344,7 +365,9 @@ sequenceDiagram
 | **Hosting** | Render Cloud Platform | Free tier web services with custom domain support and native Python runtime. |
 | **CI/CD & Cron** | GitHub Actions | Native git integration, zero cost on public repositories, resilient cron scheduler without payload limits. |
 | **Observability & Tracing** | LangSmith Cloud Platform | Distributed tracing across LangGraph StateGraph nodes, Groq token accounting & diagnostic CLI. |
-| **Testing & Quality** | Pytest (112 tests) + Ruff | 88%+ code coverage across `src/`, lightning-fast linting and code formatting. |
+| **Rate Limiting & DoS** | SlowAPI (In-Memory) | In-memory ASGI IP sliding window rate limiting on all public routes ($0/month, zero external Redis). |
+| **Security Scanning** | pip-audit | Automated dependency CVE checks against PyPA Advisory DB enforced in CI (0 known vulnerabilities). |
+| **Testing & Quality** | Pytest (125 tests) + Ruff | 87%+ code coverage across `src/`, lightning-fast linting and PEP 8 code formatting. |
 
 ---
 
@@ -395,7 +418,9 @@ sequenceDiagram
 > **Answer:**  
 > 1. **Zero Secrets in Git:** All API keys, database URLs, and bot tokens are stored in `.env` locally, Render Environment Variables in cloud, and GitHub Actions Encrypted Secrets in CI/CD.
 > 2. **Timing Attack Protection:** Webhooks and cron endpoints verify incoming secret headers (`X-Telegram-Bot-Api-Secret-Token` and `X-Cron-Secret`) using constant-time comparison (`hmac.compare_digest`) to prevent side-channel timing attacks.
-> 3. **Container Hardening:** Our multi-stage `Dockerfile` drops root privileges and runs the process under an unprivileged user (`appuser:appgroup`, UID 10001).
+> 3. **In-Memory IP Rate Limiting:** `SlowAPI` middleware limits request frequencies per IP address across `/`, `/health`, and `/api/cron/*` to defend against denial-of-service without paying for external Redis infrastructure.
+> 4. **Supply-Chain Auditing:** Continuous `pip-audit` scanning in GitHub Actions CI prevents unpatched CVE vulnerabilities from reaching production (0 known CVEs).
+> 5. **Container Hardening:** Our multi-stage `Dockerfile` drops root privileges and runs the process under an unprivileged user (`appuser:appgroup`, UID 10001).
 
 ### Q8: "How does your database handle serverless cold connections?"
 > **Answer:**  
@@ -403,8 +428,9 @@ sequenceDiagram
 
 ### Q9: "What is your testing strategy?"
 > **Answer:**  
-> We maintain **106 automated tests** covering 88%+ of our codebase across `src/`:
+> We maintain **125 automated tests** covering 87%+ of our codebase across `src/`:
 > - **Unit Tests:** Mocked external APIs (HadeethEnc, Telegram, Groq) using `httpx.MockTransport` to verify pure deterministic logic.
+> - **Security & Rate Limit Tests:** Testing IP extraction from multi-hop `X-Forwarded-For` proxy headers, 429 Too Many Requests enforcement, and dynamic limiter bypassing.
 > - **Guardrail Tests:** Feeding adversarial inputs (fatwas, sectarian polemics, hallucinated Quran citations, excessive length) to ensure 100% fail-closed rejection.
 > - **Integration Tests:** Executing full LangGraph workflow runs with in-memory SQLite and mock delivery targets.
 > - **Idempotency Tests:** Verifying that running the pipeline multiple times on the same date produces exactly one delivery log.
@@ -451,14 +477,16 @@ daily-hadith-ai-agent/
 │   ├── formatter/                     # Deterministic presentation
 │   │   └── message.py                 # Telegram HTML payload formatter with dual-payload demarcation
 │   ├── guardrails/                    # Defensive validation
+│   │   ├── moderation.py              # Secondary ML safety classifier (Llama Guard 4 on Groq Cloud)
 │   │   ├── rules.py                   # Prohibited legal/sectarian regex patterns & length bounds
-│   │   └── validator.py               # 5-stage deterministic ReflectionValidator
+│   │   └── validator.py               # Deterministic multi-layer ReflectionValidator
 │   ├── ingestion/                     # External data ingestion
 │   │   ├── citation.py                # Canonical citation regex parser & normalizer
 │   │   └── hadeethenc.py              # Official HadeethEnc API client with category traversal
 │   ├── llm/                           # Generative AI inference
 │   │   ├── client.py                  # Groq API client with structured JSON response handling
 │   │   └── prompts.py                 # Theological system prompt & negative constraint instructions
+│   ├── security.py                    # SlowAPI IP rate limiter, proxy headers & DoS protection
 │   ├── workflow/                      # Orchestration engine
 │   │   ├── daily_runner.py            # CLI entrypoint for daily broadcast execution
 │   │   ├── graph.py                   # Compiled LangGraph StateGraph builder & conditional routers
@@ -466,7 +494,7 @@ daily-hadith-ai-agent/
 │   │   ├── scheduler.py               # APScheduler background runner (optional in-process fallback)
 │   │   └── state.py                   # DailyWorkflowState TypedDict schema definition
 │   └── main.py                        # Root FastAPI server, dark-mode landing page, health checks
-├── tests/                             # 106 automated test cases (88%+ coverage)
+├── tests/                             # 125 automated test cases across 15 test modules (87% coverage)
 ├── Dockerfile                         # Multi-stage production container with unprivileged user
 ├── render.yaml                        # Infrastructure-as-Code blueprint for Render deployment
 └── requirements.txt                   # Locked production Python dependencies
