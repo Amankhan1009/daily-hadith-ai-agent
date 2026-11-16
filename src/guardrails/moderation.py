@@ -2,7 +2,7 @@
 ML-Based Content Safety and Moderation Engine using Llama Guard.
 
 Provides secondary multi-layer safety classification using Groq Cloud's free-tier
-llama-guard-3-8b model, complementing deterministic theological negative constraints.
+meta-llama/llama-guard-4-12b model, complementing deterministic theological negative constraints.
 """
 
 import logging
@@ -24,12 +24,12 @@ class ModerationResult:
     status: str  # "SAFE" | "UNSAFE" | "SKIPPED" | "ERROR"
     category: str | None = None
     reason: str | None = None
-    model: str = "llama-guard-3-8b"
+    model: str = "meta-llama/llama-guard-4-12b"
 
 
 class LlamaGuardModerator:
     """
-    Moderation client using Groq Cloud's Llama Guard 3 8B.
+    Moderation client using Groq Cloud's Llama Guard 4 12B.
     Performs fast, free safety classification as an auxiliary defense-in-depth layer.
     """
 
@@ -42,7 +42,7 @@ class LlamaGuardModerator:
     ) -> None:
         settings = get_settings()
         self.api_key = api_key or settings.groq_api_key
-        self.model = model or getattr(settings, "llama_guard_model", "llama-guard-3-8b")
+        self.model = model or getattr(settings, "llama_guard_model", "meta-llama/llama-guard-4-12b")
         self.enabled = (
             enabled if enabled is not None else getattr(settings, "enable_llama_guard", False)
         )

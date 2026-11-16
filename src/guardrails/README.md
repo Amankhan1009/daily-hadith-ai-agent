@@ -10,7 +10,7 @@ This package enforces multi-layer deterministic validation and theological guard
 |---|---|---|
 | **[`rules.py`](rules.py)** | Deterministic boundary regex patterns, word limits, and prohibited decree vocabularies | `PROHIBITED_LEGAL_PATTERNS`, `PROHIBITED_CITATION_PATTERNS`, `MAX_REFLECTION_WORDS` |
 | **[`validator.py`](validator.py)** | Pure, testable validation engine verifying structural and domain rules | `ReflectionValidator`, `GuardrailResult`, `validate_reflection` |
-| **[`moderation.py`](moderation.py)** | Secondary ML safety classifier using Groq Cloud's free-tier `llama-guard-3-8b` | `LlamaGuardModerator`, `ModerationResult` |
+| **[`moderation.py`](moderation.py)** | Secondary ML safety classifier using Groq Cloud's free-tier `meta-llama/llama-guard-4-12b` | `LlamaGuardModerator`, `ModerationResult` |
 | **[`__init__.py`](__init__.py)** | Public package interface | Clean package exports |
 
 ---
@@ -60,5 +60,5 @@ flowchart TD
 1. **Zero Theological Decrees:** The model must never formulate binding Islamic jurisprudence (e.g. declaring something explicitly Fard, Haram, or Halal as a decree).
 2. **Zero Citation Fabrication:** The reflection cannot reference volume/page numbers or invent Isnad narrators. Citations belong strictly in the verified metadata header.
 3. **Sacred Text Invariance:** The model cannot copy or re-translate 8+ consecutive words from the original Hadith text.
-4. **Secondary ML Safety Classification:** Optional `LlamaGuardModerator` performs auxiliary policy checks using `llama-guard-3-8b` with automatic fail-safe fallback on service errors.
+4. **Secondary ML Safety Classification:** Optional `LlamaGuardModerator` performs auxiliary policy checks using `meta-llama/llama-guard-4-12b` with automatic fail-safe fallback on service errors.
 5. **Fail-Closed Fallback:** If any rail is violated, the system omits the commentary cleanly (`ai_reflection_status: OMITTED_GUARDRAIL_FAILED`) and delivers the verified Hadith alone.

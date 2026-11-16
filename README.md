@@ -134,7 +134,7 @@ The project is actively developed following a 20-milestone engineering roadmap:
 | **19 — Production Readiness & System Audit** | `Verified` | 20/20 Definition of Done verified, production runbook, and defensive security audit |
 | **20 — LLMOps & Observability** | `Verified` | LangSmith cloud tracing for LangGraph StateGraph, Groq token accounting & diagnostic CLI |
 | **21 — Autonomous Ingestion & Auto-Replenishment** | `Verified` | Bulk HadeethEnc ingestion (177 verified Hadiths in buffer), auto-replenish cron endpoint & background tasks |
-| **22 — Enterprise Security, Rate Limiting & Moderation** | `Verified` | In-memory SlowAPI rate limiting, automated pip-audit CVE scanning in CI, and Groq Llama Guard 3 safety classifier |
+| **22 — Enterprise Security, Rate Limiting & Moderation** | `Verified` | In-memory SlowAPI rate limiting, automated pip-audit CVE scanning in CI, and Groq Llama Guard 4 safety classifier |
 
 For the complete 22-milestone breakdown, see **[`docs/PROJECT_ROADMAP.md`](docs/PROJECT_ROADMAP.md)**.
 

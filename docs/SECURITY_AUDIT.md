@@ -14,7 +14,7 @@ This audit validates that the codebase follows **defense-in-depth**, **least pri
 - Non-root containerization and zero embedded secrets.
 - In-memory IP rate limiting (`slowapi`) defending against DDoS and brute-force abuse at \$0.00/month cost.
 - Continuous supply-chain vulnerability auditing (`pip-audit`) against the PyPA Advisory Database.
-- Multi-layer content moderation combining deterministic regex guardrails with Groq's free-tier `llama-guard-3-8b`.
+- Multi-layer content moderation combining deterministic regex guardrails with Groq's free-tier `meta-llama/llama-guard-4-12b`.
 - Full immunity against SQL injection, HTML injection, and prompt extraction attacks.
 
 ---
@@ -70,10 +70,10 @@ This audit validates that the codebase follows **defense-in-depth**, **least pri
 * **Defense:** Integrated `pip-audit` into GitHub Actions CI pipeline and local developer verification against the official Python Packaging Advisory Database (PyPA) and OSV.
 * **Status:** Verified (0 known vulnerabilities detected across all packages).
 
-### 3.6 Multi-Layer Content Safety & Secondary Moderation (Llama Guard 3)
+### 3.6 Multi-Layer Content Safety & Secondary Moderation (Llama Guard 4)
 * **Defense-in-Depth:**
   1. **Layer 1 (Deterministic Rules):** Millisecond-latency regex negative constraints preventing legal decrees (Fatwas), unauthorized source citations, inflammatory sectarian language, and sacred text paraphrase leakage (`src/guardrails/rules.py` & `src/guardrails/validator.py`).
-  2. **Layer 2 (Probabilistic ML Moderation):** `LlamaGuardModerator` utilizing Meta's `llama-guard-3-8b` hosted on Groq Cloud's free tier (`src/guardrails/moderation.py`).
+  2. **Layer 2 (Probabilistic ML Moderation):** `LlamaGuardModerator` utilizing Meta's `meta-llama/llama-guard-4-12b` hosted on Groq Cloud's free tier (`src/guardrails/moderation.py`).
 * **Fail-Safe Guarantee:** If Groq Cloud is unconfigured, disabled, times out, or throws a 5xx error, the moderator fails safe (`is_safe=True`, `status="ERROR"`), logging an alert while allowing the deterministic pipeline to proceed without interrupting scheduled Hadith broadcasts.
 * **Status:** Verified across `tests/test_security.py` and `tests/test_guardrails.py`.
 

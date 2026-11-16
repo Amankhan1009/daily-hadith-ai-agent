@@ -179,9 +179,9 @@ curl -X POST https://api.github.com/repos/Amankhan1009/daily-hadith-ai-agent/act
    - `RATE_LIMIT_DEFAULT="120/minute"`
    - `RATE_LIMIT_HEALTH="60/minute"`
    - `RATE_LIMIT_CRON="10/minute"`
-3. To enable secondary ML moderation via Groq Llama Guard 3:
+3. To enable secondary ML moderation via Groq Llama Guard:
    - `ENABLE_LLAMA_GUARD=true`
-   - `LLAMA_GUARD_MODEL="llama-guard-3-8b"`
+   - `LLAMA_GUARD_MODEL="meta-llama/llama-guard-4-12b"`
 
 ---
 

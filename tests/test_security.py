@@ -203,7 +203,8 @@ def test_pip_audit_cli_installed_and_callable():
         text=True,
     )
     assert result.returncode == 0
-    assert "pip-audit" in result.stdout
+    combined_output = (result.stdout or "") + (result.stderr or "")
+    assert "pip-audit" in combined_output
 
 
 def test_pip_audit_vulnerability_scan():
@@ -226,7 +227,8 @@ def test_pip_audit_vulnerability_scan():
         capture_output=True,
         text=True,
     )
+    combined_output = (result.stdout or "") + (result.stderr or "")
     assert result.returncode == 0, (
         f"pip-audit found vulnerabilities:\n{result.stdout}\n{result.stderr}"
     )
-    assert "No known vulnerabilities found" in result.stdout
+    assert "No known vulnerabilities found" in combined_output

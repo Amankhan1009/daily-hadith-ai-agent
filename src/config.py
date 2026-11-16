@@ -150,10 +150,10 @@ class Settings(BaseSettings):
     )
     enable_llama_guard: bool = Field(
         default=False,
-        description="Enable secondary ML moderation layer via Groq Llama Guard 3",
+        description="Enable secondary ML moderation layer via Groq Llama Guard (Llama Guard 4)",
     )
     llama_guard_model: str = Field(
-        default="llama-guard-3-8b",
+        default="meta-llama/llama-guard-4-12b",
         description="Target model identifier for Llama Guard safety classification",
     )
 
